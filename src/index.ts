@@ -1,2 +1,1 @@
-export { PieCard } from './components';
-export type { PieCardProps } from './components';
+export { PieCard, type PieCardProps, type PieCardData } from './components';

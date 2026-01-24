@@ -1,0 +1,23 @@
+import { createContext } from 'react'
+import { Centrifuge } from 'centrifuge'
+import { API_SERVER, CENTRIFUGE_SERVER } from '../config/constant'
+
+async function getToken() {
+    const res = await fetch(API_SERVER + 'api/centrifuge/gen_token')
+    if (!res.ok) {
+        if (res.status === 403) {
+            throw new Centrifuge.UnauthorizedError('Backend is not answering')
+        }
+        throw new Error(`Unexpected status code ${res.status}`)
+    }
+    const data = await res.json()
+    return data.token
+}
+
+export const centrifuge =
+    CENTRIFUGE_SERVER &&
+    new Centrifuge(CENTRIFUGE_SERVER || '', {
+        getToken,
+    })
+const CentrifugeIOContext = createContext(centrifuge)
+export default CentrifugeIOContext

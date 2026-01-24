@@ -40,5 +40,17 @@
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "@types/radium": "^0.24.8",
+    "axios": "^1.13.2",
+    "axios-cache-interceptor": "^1.11.4",
+    "centrifuge": "^5.5.3",
+    "clsx": "^2.1.1",
+    "ethers5": "npm:ethers@^5.7.2",
+    "mitt": "^3.0.1",
+    "radium": "^0.26.2",
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.4.0"
   }
 }
