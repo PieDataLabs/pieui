@@ -15,7 +15,12 @@
     "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify",
     "build:types": "tsc --emitDeclarationOnly",
     "dev": "bun run src/index.ts",
-    "prepublishOnly": "bun run build"
+    "prepublishOnly": "bun run build",
+    "typecheck": "tsc --noEmit",
+    "lint": "echo 'Linting not configured yet'",
+    "release:patch": "npm version patch && git push && git push --tags",
+    "release:minor": "npm version minor && git push && git push --tags",
+    "release:major": "npm version major && git push && git push --tags"
   },
   "keywords": [
     "react",

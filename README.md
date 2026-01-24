@@ -81,6 +81,28 @@ The package is built using Bun and outputs:
 - ESM bundle (`dist/index.esm.js`)
 - TypeScript declarations (`dist/index.d.ts`)
 
+## Deployment
+
+This package uses automated CI/CD with GitHub Actions:
+
+- **CI**: Runs tests and builds on every push/PR
+- **CD**: Automatically publishes to npm when you push a version tag
+
+### Quick Release
+
+```bash
+# Patch release (1.0.0 → 1.0.1)
+bun run release:patch
+
+# Minor release (1.0.0 → 1.1.0)
+bun run release:minor
+
+# Major release (1.0.0 → 2.0.0)
+bun run release:major
+```
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
+
 ## License
 
 MIT
