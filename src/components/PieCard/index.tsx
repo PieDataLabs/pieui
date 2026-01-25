@@ -1,24 +1,10 @@
-import { ReactNode, useContext, useEffect } from 'react'
-import { ENABLE_RENDERING_LOG } from '../../config/constant'
-import CentrifugeIOContext from '../../util/centrifuge'
-import SocketIOContext from '../../util/socket'
-import MittContext from '../../util/mitt'
+import { useContext, useEffect } from 'react';
+import { ENABLE_RENDERING_LOG } from '../../config/constant';
+import CentrifugeIOContext from '../../util/centrifuge';
+import SocketIOContext from '../../util/socket';
+import MittContext from '../../util/mitt';
+import {PieCardProps} from './types';
 
-export interface PieCardData {
-    name: string
-    [key: string]: any
-}
-
-export interface PieCardProps {
-    card: string
-    data: PieCardData
-    children: ReactNode
-    useSocketioSupport?: boolean
-    useCentrifugeSupport?: boolean
-    useMittSupport?: boolean
-    centrifugeChannel?: string
-    methods?: Record<string, (data: any) => void>
-}
 
 const PieCard = ({
     card,

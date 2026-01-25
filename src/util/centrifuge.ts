@@ -15,9 +15,10 @@ async function getToken() {
 }
 
 export const centrifuge =
-    CENTRIFUGE_SERVER &&
+    CENTRIFUGE_SERVER ?
     new Centrifuge(CENTRIFUGE_SERVER || '', {
         getToken,
-    })
+    }): null
+
 const CentrifugeIOContext = createContext(centrifuge)
 export default CentrifugeIOContext

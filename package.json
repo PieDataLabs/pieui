@@ -9,12 +9,15 @@
     "dist"
   ],
   "scripts": {
+    "prebuild": "bun run generate:registry",
     "build": "bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:clean": "rm -rf dist",
     "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify",
     "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify",
     "build:types": "tsc --emitDeclarationOnly",
+    "generate:registry": "node scripts/generateComponentRegistry.js",
     "dev": "bun run src/index.ts",
+    "dev:registry": "bun run generate:registry && bun run dev",
     "prepublishOnly": "bun run build",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'Linting not configured yet'",
@@ -37,19 +40,27 @@
   },
   "devDependencies": {
     "@types/bun": "latest",
+    "@types/glob": "^9.0.0",
     "@types/react": "^18.2.0",
     "@types/react-dom": "^18.2.0",
+    "glob": "^13.0.0",
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@tanstack/react-query": "^5.90.20",
     "@types/radium": "^0.24.8",
     "axios": "^1.13.2",
     "axios-cache-interceptor": "^1.11.4",
+    "axios-date-transformer": "^1.2.1",
     "centrifuge": "^5.5.3",
     "clsx": "^2.1.1",
     "ethers5": "npm:ethers@^5.7.2",
     "mitt": "^3.0.1",
+    "nuqs": "^2.8.6",
     "radium": "^0.26.2",
+    "react-jsonr": "^0.4.0",
+    "react-push-notification": "^1.5.4",
+    "react-toastify": "^11.0.5",
     "socket.io-client": "^4.8.3",
     "tailwind-merge": "^3.4.0"
   }
