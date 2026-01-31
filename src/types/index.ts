@@ -1,4 +1,4 @@
-import {Component, ComponentType, ReactNode} from "react";
+import {ComponentType, ReactNode} from "react";
 import { Telegram } from "../util/useWebApp.ts";
 
 export interface UIConfigType {
