@@ -14,13 +14,14 @@
   "scripts": {
     "build": "bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:types && bun run build:cli",
     "build:clean": "rm -rf dist",
-    "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify",
-    "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify",
+    "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify --external react --external react-dom --external react/jsx-runtime",
+    "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify --external react --external react-dom --external react/jsx-runtime",
     "build:types": "tsc --emitDeclarationOnly",
     "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node",
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'Linting not configured yet'"
+    "lint": "echo 'Linting not configured yet'",
+    "pack": "bun pm pack"
   },
   "keywords": [
     "react",
@@ -37,9 +38,9 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",
-    "@types/react": "^18.2.0",
+    "@types/react": ">=18",
     "glob": "^13.0.0",
-    "typescript": "^5.0.0"
+    "typescript": ">=5"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
