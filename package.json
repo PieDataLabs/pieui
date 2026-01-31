@@ -9,21 +9,14 @@
     "dist"
   ],
   "scripts": {
-    "prebuild": "bun run generate:registry",
     "build": "bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:types",
     "build:clean": "rm -rf dist",
     "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify",
     "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify",
     "build:types": "tsc --emitDeclarationOnly",
-    "generate:registry": "node scripts/generateComponentRegistry.js",
     "dev": "bun run src/index.ts",
-    "dev:registry": "bun run generate:registry && bun run dev",
-    "prepublishOnly": "bun run build",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'Linting not configured yet'",
-    "release:patch": "npm version patch && git push && git push --tags",
-    "release:minor": "npm version minor && git push && git push --tags",
-    "release:major": "npm version major && git push && git push --tags"
+    "lint": "echo 'Linting not configured yet'"
   },
   "keywords": [
     "react",
@@ -54,7 +47,6 @@
     "axios-date-transformer": "^1.2.1",
     "centrifuge": "^5.5.3",
     "clsx": "^2.1.1",
-    "ethers5": "npm:ethers@^5.7.2",
     "mitt": "^3.0.1",
     "nuqs": "^2.8.6",
     "radium": "^0.26.2",

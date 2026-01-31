@@ -1,1 +1,2 @@
-export { default as PieCard, type PieCardProps, type PieCardData } from './PieCard';
+export { default as PieCard } from './PieCard';
+export { default as PieRoot } from './PieRoot';

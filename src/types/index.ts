@@ -1,5 +1,4 @@
-import { providers } from 'ethers5'
-import { Telegram } from '../util/useWebApp.ts'
+import {Component, ComponentType, ReactNode} from "react";
 
 export interface UIConfigType {
     card: string
@@ -28,7 +27,29 @@ export type PieEventEmitter = (event: PieEvent) => void
 declare global {
     interface Window {
         sid: string
-        ethereum?: providers.ExternalProvider
-        Telegram: Telegram
     }
+}
+
+
+export interface ComponentMetadata {
+    author?: string
+    version?: string
+    description?: string
+    tags?: string[]
+}
+
+
+export interface PieComponentProps {
+    data: any
+    content?: UIConfigType | Array<UIConfigType>
+    setUiAjaxConfiguration?: SetUiAjaxConfigurationType
+}
+
+export interface ComponentRegistration {
+    name: string
+    component?: ComponentType<PieComponentProps>
+    fallback?: ReactNode
+    loader?: () => Promise<{ default: ComponentType<PieComponentProps> }>
+    metadata?: ComponentMetadata
+    isLazy?: boolean
 }
