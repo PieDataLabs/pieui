@@ -12,7 +12,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:types && bun run build:cli",
+    "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:types && bun run build:cli && bun pm pack",
     "build:clean": "rm -rf dist",
     "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify --external react --external react-dom --external react/jsx-runtime",
     "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify --external react --external react-dom --external react/jsx-runtime",
@@ -21,7 +21,6 @@
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'Linting not configured yet'",
-    "pack": "bun pm pack"
   },
   "keywords": [
     "react",
