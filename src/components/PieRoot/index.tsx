@@ -25,10 +25,11 @@ const axiosInstance = createAxiosDateTransformer({
     baseURL: API_SERVER,
 })
 
-const PieRoot: React.FC<PieRootProps> = ({ fallback, onError }) => {
+const PieRoot: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
     if (!API_SERVER) {
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
+
     const {
         data: uiConfiguration,
         isLoading,
