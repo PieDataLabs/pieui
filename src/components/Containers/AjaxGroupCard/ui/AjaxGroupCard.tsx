@@ -1,20 +1,17 @@
 import {ReactNode, useContext, useEffect, useRef, useState} from 'react'
 import UI from '../../../UI'
-import { AjaxGroupCardData } from '../types'
+import { AjaxGroupCardProps } from '../types'
 import { UIConfigType, UIEventType } from '../../../../types'
 import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
-import FallbackContext from "../../../../util/fallback.tsx";
-import { registerPieComponent } from "../../../../util/registry";
+import FallbackContext from '../../../../util/fallback.tsx'
+import { registerPieComponent } from '../../../../util/registry'
 
 
 const AjaxGroupCard = ({
     data,
     content,
-}: {
-    data: AjaxGroupCardData
-    content: UIConfigType
-}) => {
+}: AjaxGroupCardProps) => {
     const {
         useLoader,
         noReturn,
@@ -95,4 +92,7 @@ const AjaxGroupCard = ({
     )
 }
 
-export default registerPieComponent(AjaxGroupCard)
+export default registerPieComponent({
+    name: 'AjaxGroupCard',
+    component: AjaxGroupCard,
+})

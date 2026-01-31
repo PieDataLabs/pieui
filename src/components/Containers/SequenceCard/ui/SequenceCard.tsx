@@ -1,21 +1,17 @@
-import { PieEvent, SetUiAjaxConfigurationType, UIConfigType } from '../../../../types'
-import { SequenceCardData } from '../types'
+import { UIConfigType } from '../../../../types'
+import {SequenceCardProps} from '../types'
 import PieCard from '../../../PieCard'
 import UI from '../../../UI'
 import Radium from 'radium'
 import { sx2radium } from '../../../../util/sx2radium'
-import { registerPieComponent } from "../../../../util/registry";
+import { registerPieComponent } from '../../../../util/registry'
 
 
 const SequenceCard = ({
     data,
     content,
     setUiAjaxConfiguration,
-}: {
-    data: SequenceCardData
-    content: Array<UIConfigType>
-    setUiAjaxConfiguration?: SetUiAjaxConfigurationType
-}) => {
+}: SequenceCardProps) => {
     const { name, sx } = data
     return (
         <PieCard card={name} data={data}>
@@ -34,4 +30,12 @@ const SequenceCard = ({
     )
 }
 
-export default registerPieComponent(Radium(SequenceCard))
+
+export default registerPieComponent({
+    name: 'SequenceCard',
+    component: Radium(SequenceCard),
+    metadata: {
+        author: "PieData",
+        description: "Simple div with styles joining few components"
+    }
+})

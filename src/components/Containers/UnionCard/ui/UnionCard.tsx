@@ -1,18 +1,15 @@
-import { SetUiAjaxConfigurationType, UIConfigType } from '../../../../types'
-import { UnionCardData } from '../types'
+import { UIConfigType } from '../../../../types'
+import {UnionCardProps} from '../types'
 import PieCard from '../../../PieCard'
 import UI from '../../../UI'
-import { registerPieComponent } from "../../../../util/registry";
+import { registerPieComponent } from '../../../../util/registry'
+
 
 const UnionCard = ({
     data,
     content,
     setUiAjaxConfiguration,
-}: {
-    data: UnionCardData
-    content: Array<UIConfigType>
-    setUiAjaxConfiguration?: SetUiAjaxConfigurationType
-}) => {
+}: UnionCardProps) => {
     const { name } = data
     return (
         <PieCard card={name} data={data}>
@@ -29,4 +26,7 @@ const UnionCard = ({
     )
 }
 
-export default registerPieComponent(UnionCard)
+export default registerPieComponent({
+    name: 'UnionCard',
+    component: UnionCard,
+})

@@ -1,12 +1,14 @@
-import {ComponentMetadata, ComponentRegistration, PieComponentProps} from "../types";
-import {trackLazy} from "./lazy";
-import {ComponentType} from "react";
+import { ComponentMetadata, ComponentRegistration, PieComponentProps } from '../types'
+import { trackLazy } from './lazy'
+import { ComponentType } from 'react'
 
 
-const registry = new Map<string, ComponentRegistration>()
+const registry = new Map<string, ComponentRegistration<any>>()
 
 
-const normalizeRegistration = (registration: ComponentRegistration): ComponentRegistration => {
+const normalizeRegistration = <TProps,>(
+    registration: ComponentRegistration<TProps>
+): ComponentRegistration<TProps> => {
     if (!registration.name) {
         throw new Error('Component registration requires a name')
     }
@@ -15,16 +17,20 @@ const normalizeRegistration = (registration: ComponentRegistration): ComponentRe
         throw new Error(`Component "${registration.name}" requires component or loader`)
     }
 
-    const entry: ComponentRegistration = {
+    const entry: ComponentRegistration<TProps> = {
         name: registration.name,
         component: registration.component,
         loader: registration.loader,
         metadata: registration.metadata,
+        fallback: registration.fallback,
         isLazy: false,
     }
 
     if (!entry.component && entry.loader) {
-        entry.component = trackLazy(entry.loader, registration.name)
+        entry.component = trackLazy(
+            entry.loader,
+            registration.name
+        ) as ComponentType<TProps>
         entry.loader = undefined
         entry.isLazy = true
     }
@@ -32,13 +38,19 @@ const normalizeRegistration = (registration: ComponentRegistration): ComponentRe
     return entry
 }
 
-export function registerPieComponent(registration: ComponentRegistration): ComponentType<PieComponentProps> | undefined {
+
+export function registerPieComponent<TProps>(
+    registration: ComponentRegistration<TProps>
+): ComponentType<TProps> | undefined {
     const entry = normalizeRegistration(registration)
     registry.set(entry.name, entry)
     return entry.component
 }
 
-export const registerMultipleComponents = (components: ComponentRegistration[]) => {
+
+export const registerMultipleComponents = (
+    components: ComponentRegistration<any>[]
+) => {
     components.forEach((component) => registerPieComponent(component))
 }
 
@@ -54,6 +66,9 @@ export const getComponentMeta = (name: string): ComponentMetadata | undefined =>
     return registry.get(name)?.metadata
 }
 
-export const getRegistryEntry = (name: string): ComponentRegistration | undefined => {
+
+export const getRegistryEntry = (
+    name: string
+): ComponentRegistration<any> | undefined => {
     return registry.get(name)
 }
