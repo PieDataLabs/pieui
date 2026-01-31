@@ -25,7 +25,7 @@ const axiosInstance = createAxiosDateTransformer({
     baseURL: API_SERVER,
 })
 
-const PieRoot: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
+const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
     if (!API_SERVER) {
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
@@ -87,5 +87,14 @@ const PieRoot: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
         </QueryClientProvider>
     )
 }
+
+
+
+const PieRoot: React.FC<PieRootProps> = (props) => (
+    <QueryClientProvider client={queryClient}>
+        <PieRootContent {...props} />
+    </QueryClientProvider>
+)
+
 
 export default PieRoot
