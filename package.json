@@ -20,7 +20,7 @@
     "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node",
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
-    "lint": "echo 'Linting not configured yet'",
+    "lint": "echo 'Linting not configured yet'"
   },
   "keywords": [
     "react",
@@ -49,6 +49,7 @@
     "axios-date-transformer": "^1.2.1",
     "centrifuge": "^5.5.3",
     "clsx": "^2.1.1",
+    "html-react-parser": "^5.2.15",
     "mitt": "^3.0.1",
     "nuqs": "^2.8.6",
     "radium": "^0.26.2",

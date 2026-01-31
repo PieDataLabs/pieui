@@ -99,13 +99,7 @@ const writeManifest = (outDir: string, components: ComponentManifestEntry[]) => 
     const resolvedOutDir = path.resolve(process.cwd(), outDir)
     fs.mkdirSync(resolvedOutDir, { recursive: true })
     const manifestPath = path.join(resolvedOutDir, MANIFEST_FILENAME)
-
-    const manifest = {
-        generatedAt: new Date().toISOString(),
-        components,
-    }
-
-    fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2), 'utf8')
+    fs.writeFileSync(manifestPath, JSON.stringify(components, null, 2), 'utf8')
     console.log(`[pieui] Component manifest saved to ${manifestPath}`)
 }
 
