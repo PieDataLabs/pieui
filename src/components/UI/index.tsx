@@ -1,7 +1,7 @@
 import { UIConfigType, SetUiAjaxConfigurationType } from '../../types'
 import { getRegistryEntry } from "../../util/registry.ts";
-import {Suspense, useContext, Component, ReactNode} from "react";
-import FallbackContext from "../../util/fallback.ts";
+import {Suspense, useContext, ReactNode} from "react";
+import FallbackContext from "../../util/fallback";
 
 
 function UI({

@@ -6,14 +6,14 @@ import { StyleRoot } from 'radium'
 
 import type { PieRootProps } from './types'
 
-import MittContext, {emitter} from "../../util/mitt.ts"
-import SocketIOContext, {socket} from "../../util/socket.ts"
-import CentrifugeIOContext, {centrifuge} from "../../util/centrifuge.ts"
-import { queryClient } from "../../util/queryClient.ts"
+import MittContext, {emitter} from "../../util/mitt"
+import SocketIOContext, {socket} from "../../util/socket"
+import CentrifugeIOContext, {centrifuge} from "../../util/centrifuge"
+import { queryClient } from "../../util/queryClient"
 
-import SocketIOInitProvider from "../../providers/SocketIOInitProvider.tsx"
-import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider.tsx"
-import FallbackContext from "../../util/fallback.ts";
+import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
+import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
+import FallbackContext from "../../util/fallback";
 
 
 const PieRoot: React.FC<PieRootProps> = ({ children, fallback }) => {
