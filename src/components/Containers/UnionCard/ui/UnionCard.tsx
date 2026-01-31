@@ -2,6 +2,7 @@ import { SetUiAjaxConfigurationType, UIConfigType } from '../../../../types'
 import { UnionCardData } from '../types'
 import PieCard from '../../../PieCard'
 import UI from '../../../UI'
+import { registerPieComponent } from "../../../../util/registry";
 
 const UnionCard = ({
     data,
@@ -28,4 +29,4 @@ const UnionCard = ({
     )
 }
 
-export default UnionCard
+export default registerPieComponent(UnionCard)

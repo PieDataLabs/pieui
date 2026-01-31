@@ -4,6 +4,7 @@ import PieCard from '../../../PieCard'
 import UI from '../../../UI'
 import Radium from 'radium'
 import { sx2radium } from '../../../../util/sx2radium'
+import { registerPieComponent } from "../../../../util/registry";
 
 
 const SequenceCard = ({
@@ -33,4 +34,4 @@ const SequenceCard = ({
     )
 }
 
-export default Radium(SequenceCard)
+export default registerPieComponent(Radium(SequenceCard))

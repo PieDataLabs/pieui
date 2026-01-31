@@ -5,6 +5,7 @@ import { UIConfigType, UIEventType } from '../../../../types'
 import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
 import FallbackContext from "../../../../util/fallback.tsx";
+import { registerPieComponent } from "../../../../util/registry";
 
 
 const AjaxGroupCard = ({
@@ -94,4 +95,4 @@ const AjaxGroupCard = ({
     )
 }
 
-export default AjaxGroupCard
+export default registerPieComponent(AjaxGroupCard)

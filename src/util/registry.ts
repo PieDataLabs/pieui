@@ -1,5 +1,6 @@
-import {ComponentMetadata, ComponentRegistration} from "../types";
-import {trackLazy} from "./lazy.ts";
+import {ComponentMetadata, ComponentRegistration, PieComponentProps} from "../types";
+import {trackLazy} from "./lazy";
+import {ComponentType} from "react";
 
 
 const registry = new Map<string, ComponentRegistration>()
@@ -31,8 +32,10 @@ const normalizeRegistration = (registration: ComponentRegistration): ComponentRe
     return entry
 }
 
-export function registerPieComponent(registration: ComponentRegistration): void {
-    registry.set(registration.name, normalizeRegistration(registration))
+export function registerPieComponent(registration: ComponentRegistration): ComponentType<PieComponentProps> | undefined {
+    const entry = normalizeRegistration(registration)
+    registry.set(entry.name, entry)
+    return entry.component
 }
 
 export const registerMultipleComponents = (components: ComponentRegistration[]) => {
