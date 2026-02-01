@@ -52,7 +52,8 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",
-    "@types/react": ">=18"
+    "@types/react": ">=18",
+    "typescript-json-schema": "^0.67.1"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
