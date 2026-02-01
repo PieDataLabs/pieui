@@ -238,10 +238,10 @@ const main = async () => {
         }
 
         // Get all unique files that contain components
-        const uniqueFiles = [...new Set(components.map(c => c.file))]
+        const cliSchemaPath = path.join(__dirname, 'cli-schema.d.ts')
+        const uniqueFiles = [cliSchemaPath, ...new Set(components.map(c => c.file))]
 
         console.log('[pieui] Creating TypeScript program for schema generation...')
-        console.log(uniqueFiles)
 
         // Create program with all files
         const program = TJS.getProgramFromFiles(uniqueFiles, {
@@ -263,6 +263,8 @@ const main = async () => {
             ref: false,
             aliasRef: false,
             topRef: false,
+            noExtraProps: true,
+            ignoreErrors: true,
         })
 
         if (!generator) {
@@ -306,14 +308,48 @@ const main = async () => {
             }
         }
 
+        // Try to load existing manifest from pieui library
+        let existingEntries: ComponentManifestEntry[] = []
+
+        // First, try to find pieui's manifest in node_modules
+        const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'pieui', 'dist', MANIFEST_FILENAME)
+
+        if (fs.existsSync(nodeModulesPath)) {
+            try {
+                const existingManifest = fs.readFileSync(nodeModulesPath, 'utf8')
+                existingEntries = JSON.parse(existingManifest)
+                console.log(`[pieui] Loaded ${existingEntries.length} existing components from pieui library at ${nodeModulesPath}`)
+            } catch (error) {
+                console.error(`[pieui] Error reading manifest from ${nodeModulesPath}:`, error)
+            }
+        } else {
+            console.log(`[pieui] No existing pieui manifest found at ${nodeModulesPath}`)
+        }
+
+        // Merge existing and new entries
+        const componentMap = new Map<string, ComponentManifestEntry>()
+
+        // Add existing entries first
+        for (const entry of existingEntries) {
+            componentMap.set(entry.card, entry)
+        }
+
+        // Add/update with new entries
+        for (const entry of entries) {
+            componentMap.set(entry.card, entry)
+        }
+
+        // Convert back to array
+        const mergedEntries = Array.from(componentMap.values())
+
         // Write manifest
         const resolvedOutDir = path.resolve(process.cwd(), outDir)
         fs.mkdirSync(resolvedOutDir, { recursive: true })
         const manifestPath = path.join(resolvedOutDir, MANIFEST_FILENAME)
-        fs.writeFileSync(manifestPath, JSON.stringify(entries, null, 2), 'utf8')
+        fs.writeFileSync(manifestPath, JSON.stringify(mergedEntries, null, 2), 'utf8')
 
         console.log(`[pieui] Component manifest saved to ${manifestPath}`)
-        console.log(`[pieui] Total components: ${entries.length}`)
+        console.log(`[pieui] Total components: ${mergedEntries.length} (${existingEntries.length} from pieui, ${entries.length} new/updated)`)
 
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)

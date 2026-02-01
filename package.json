@@ -25,7 +25,7 @@
     }
   },
   "scripts": {
-    "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:components:esm && bun run build:components:cjs && bun run build:types && bun run build:cli && bun pm pack",
+    "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && bun run build:esm && bun run build:cjs && bun run build:components:esm && bun run build:components:cjs && bun run build:types && bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
     "build:clean": "rm -rf dist",
     "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --minify --external react --external react-dom --external react/jsx-runtime --external highlight.js --external rehype-highlight",
     "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --minify --external react --external react-dom --external react/jsx-runtime --external highlight.js --external rehype-highlight",
