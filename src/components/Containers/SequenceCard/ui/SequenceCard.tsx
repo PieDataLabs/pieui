@@ -31,7 +31,8 @@ const SequenceCard = ({
 }
 
 
-export default registerPieComponent({
+// Register component
+registerPieComponent({
     name: 'SequenceCard',
     component: Radium(SequenceCard),
     metadata: {
@@ -39,3 +40,5 @@ export default registerPieComponent({
         description: "Simple div with styles joining few components"
     }
 })
+
+export default Radium(SequenceCard)

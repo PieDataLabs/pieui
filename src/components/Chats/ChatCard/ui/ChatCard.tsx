@@ -4,6 +4,7 @@ import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
 import MessagesBoard, { MessagesBoardHandle } from './components/MessagesBoard'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import {registerPieComponent} from "../../../../util/registry";
 
 const ChatCard = ({
     data,
@@ -126,5 +127,11 @@ const ChatCard = ({
         </PieCard>
     )
 }
+
+registerPieComponent({
+    name: "ChatCard",
+    component: ChatCard
+})
+
 
 export default ChatCard
