@@ -37,26 +37,29 @@
   "devDependencies": {
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",
-    "@types/react": ">=18",
-    "glob": "^13.0.0",
-    "typescript": ">=5"
+    "@types/react": ">=18"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
     "@types/radium": "^0.24.8",
+    "annyang": "^2.6.1",
     "axios": "^1.13.2",
     "axios-cache-interceptor": "^1.11.4",
     "axios-date-transformer": "^1.2.1",
     "centrifuge": "^5.5.3",
     "clsx": "^2.1.1",
+    "glob": "^13.0.0",
     "html-react-parser": "^5.2.15",
     "mitt": "^3.0.1",
     "nuqs": "^2.8.6",
     "radium": "^0.26.2",
     "react-jsonr": "^0.4.0",
+    "react-markdown": "^10.1.0",
     "react-push-notification": "^1.5.4",
     "react-toastify": "^11.0.5",
+    "rehype-highlight": "^7.0.2",
     "socket.io-client": "^4.8.3",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "typescript": ">=5"
   }
 }

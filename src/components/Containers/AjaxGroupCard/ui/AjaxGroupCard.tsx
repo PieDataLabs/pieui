@@ -4,7 +4,7 @@ import { AjaxGroupCardProps } from '../types'
 import { UIConfigType, UIEventType } from '../../../../types'
 import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
-import FallbackContext from '../../../../util/fallback.tsx'
+import FallbackContext from '../../../../util/fallback'
 import { registerPieComponent } from '../../../../util/registry'
 
 

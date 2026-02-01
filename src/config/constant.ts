@@ -2,6 +2,10 @@ const isBrowser = typeof window !== 'undefined'
 const isNode = typeof process !== 'undefined' && !!process.versions?.node
 const isVite = typeof import.meta !== 'undefined' && !!(import.meta as any).env
 
+
+export const PIEBREAK = "__piedemo__"
+
+
 const nextPublicEnv = {
     PIE_API_SERVER:
         typeof process !== 'undefined' ? process.env.NEXT_PUBLIC_PIE_API_SERVER : undefined,

@@ -53,6 +53,11 @@ export interface PieContainerComponentProps<TData = unknown> {
     setUiAjaxConfiguration?: SetUiAjaxConfigurationType
 }
 
+export interface PieComplexComponentProps<TData = unknown> {
+    data: TData
+    setUiAjaxConfiguration?: SetUiAjaxConfigurationType
+}
+
 export interface PieSimpleComponentProps<TData = unknown> {
     data: TData
 }
