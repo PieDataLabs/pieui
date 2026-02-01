@@ -33,7 +33,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
     const outDirIndex = argv.findIndex((arg) => arg === '--out-dir' || arg === '-o')
     const srcDirIndex = argv.findIndex((arg) => arg === '--src-dir' || arg === '-s')
 
-    let outDir = 'dist'
+    let outDir = 'public'
     let srcDir = 'src'
 
     if (outDirFlag) {
@@ -241,6 +241,7 @@ const main = async () => {
         const uniqueFiles = [...new Set(components.map(c => c.file))]
 
         console.log('[pieui] Creating TypeScript program for schema generation...')
+        console.log(uniqueFiles)
 
         // Create program with all files
         const program = TJS.getProgramFromFiles(uniqueFiles, {

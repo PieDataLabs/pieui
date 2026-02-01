@@ -1,5 +1,5 @@
 import { UIConfigType, SetUiAjaxConfigurationType } from '../../types'
-import { getRegistryEntry } from "../../util/registry.ts";
+import { getRegistryEntry } from "../../util/registry";
 import {Suspense, useContext, ReactNode} from "react";
 import FallbackContext from "../../util/fallback";
 import { ENABLE_RENDERING_LOG } from '../../config/constant';

@@ -18,7 +18,7 @@ import {UIConfigType} from "../../types";
 import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
-import { API_SERVER, ENABLE_RENDERING_LOG } from "../../config/constant.ts";
+import { API_SERVER, ENABLE_RENDERING_LOG } from "../../config/constant";
 
 
 const axiosInstance = createAxiosDateTransformer({

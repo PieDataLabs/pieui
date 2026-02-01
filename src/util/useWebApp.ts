@@ -2,52 +2,8 @@
 
 import { useEffect } from 'react'
 import { PAGE_PROCESSOR } from '../config/constant'
+import {InitData, InitDataUnsafe} from "../types";
 
-export type WebAppUser = {
-    id: string
-    username: string
-    photo_url: string
-}
-
-export type MainButtonType = {
-    show: () => void
-    onClick: (callback: () => void) => void
-    offClick: (callback: () => void) => void
-    setText: (text: string) => void
-    hide: () => void
-}
-
-export type BackButtonType = {
-    show: () => void
-    onClick: (callback: () => void) => void
-    hide: () => void
-}
-
-export type WebAppInitData = {
-    user: WebAppUser
-    start_param?: string
-    chat_type?: 'sender' | 'private' | 'group' | 'supergroup' | 'channel'
-    chat_instance?: string
-    auth_date: number
-    hash: string
-}
-
-export type WebApp = {
-    sendData: (data: string) => void
-    showAlert: (message: string) => void
-    MainButton: MainButtonType
-    BackButton: BackButtonType
-    initDataUnsafe: WebAppInitData
-    initData: string
-    close: () => void
-    openLink: (link: string, option: string) => void
-    platform: 'ios' | 'android' | 'web'
-    expand: () => void
-}
-
-export type Telegram = {
-    WebApp: WebApp
-}
 
 export const useWebApp = () => {
     useEffect(() => {
@@ -67,12 +23,6 @@ export const useWebApp = () => {
     // @ts-ignore
     return window.Telegram.WebApp as WebApp
 }
-
-export type InitDataUnsafe = {
-    user?: WebAppUser
-}
-
-export type InitData = string
 
 export const useInitData = (): readonly [InitDataUnsafe | undefined, InitData | undefined] => {
     const WebApp = useWebApp()

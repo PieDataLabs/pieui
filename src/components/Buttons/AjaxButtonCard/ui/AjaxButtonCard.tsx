@@ -5,7 +5,7 @@ import Radium from 'radium'
 import { getAjaxSubmit } from '../../../../util/ajaxCommonUtils'
 import { useMemo } from 'react'
 import parse from 'html-react-parser'
-import { registerPieComponent } from "../../../../util/registry.ts";
+import { registerPieComponent } from "../../../../util/registry";
 
 
 const AjaxButtonCard = ({
