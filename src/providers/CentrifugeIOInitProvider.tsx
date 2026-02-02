@@ -1,11 +1,14 @@
 import { ReactNode, useContext, useEffect } from 'react'
-import CentrifugeIOContext from '../util/centrifuge.ts'
-import { useIsSupported } from '../util/useIsSupported.ts'
+import CentrifugeIOContext from '../util/centrifuge'
+import { useIsSupported } from '../util/useIsSupported'
+import { getApiServer } from "../util/pieConfig";
 
 
 const CentrifugeIOInitProvider = ({ children }: { children: ReactNode }) => {
     const centrifuge = useContext(CentrifugeIOContext)
-    const isCentrifugeSupported = useIsSupported('centrifuge')
+    const apiServer = getApiServer()
+
+    const isCentrifugeSupported = useIsSupported(apiServer, 'centrifuge')
 
     useEffect(() => {
         if (!centrifuge) {

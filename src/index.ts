@@ -1,6 +1,4 @@
 export { default as UI } from './components/UI'
-export { default as PieBaseRoot } from './components/PieBaseRoot'
-export { default as PieStaticRoot } from './components/PieStaticRoot'
 export { default as PieRoot } from './components/PieRoot'
 export { default as PieTelegramRoot } from './components/PieTelegramRoot'
 export { default as PieCard } from './components/PieCard'
@@ -11,6 +9,7 @@ export type {
     PieSimpleComponentProps,
     PieComplexComponentProps,
     PieContainerComponentProps,
-    PieComplexContainerComponentProps
+    PieComplexContainerComponentProps,
+    PieConfig
 } from './types'
 

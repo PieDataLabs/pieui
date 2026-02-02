@@ -1,8 +1,6 @@
 import { ComponentMetadata, ComponentRegistration, PieComponentProps } from '../types'
 import { trackLazy } from './lazy'
 import { ComponentType } from 'react'
-import { isRenderingLogEnabled } from '../config/constant'
-
 
 const registry = new Map<string, ComponentRegistration<any>>()
 
@@ -44,15 +42,6 @@ export function registerPieComponent<TProps>(
     registration: ComponentRegistration<TProps>
 ): ComponentType<TProps> | undefined {
     const entry = normalizeRegistration(registration)
-
-    if (isRenderingLogEnabled()) {
-        console.log('[Registry] Registering component:', entry.name, {
-            isLazy: entry.isLazy,
-            hasMetadata: !!entry.metadata,
-            hasFallback: !!entry.fallback
-        })
-    }
-
     registry.set(entry.name, entry)
     return entry.component
 }
@@ -81,16 +70,6 @@ export const getRegistryEntry = (
     name: string
 ): ComponentRegistration<any> | undefined => {
     const entry = registry.get(name)
-
-    if (isRenderingLogEnabled()) {
-        if (entry) {
-            console.log('[Registry] Found component:', name)
-        } else {
-            console.warn('[Registry] Component not found:', name)
-            console.log('[Registry] Available components:', Array.from(registry.keys()))
-        }
-    }
-
     return entry
 }
 

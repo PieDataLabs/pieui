@@ -128,3 +128,11 @@ export interface ComponentRegistration<TProps> {
     metadata?: ComponentMetadata
     isLazy?: boolean
 }
+
+
+export interface PieConfig {
+    apiServer: string
+    centrifugeServer?: string
+    enableRenderingLog?: boolean
+    pageProcessor?: string
+}

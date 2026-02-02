@@ -1,7 +1,7 @@
 // Implementation of https://core.telegram.org/bots/webapps#initializing-web-apps as react hook
 
 import { useEffect } from 'react'
-import { getPageProcessor } from '../config/constant'
+import { getPageProcessor } from '../util/pieConfig'
 import {InitData, InitDataUnsafe} from "../types";
 
 

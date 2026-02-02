@@ -1,4 +1,5 @@
 import { ReactNode } from "react";
+import {PieConfig} from "../../../types";
 
 
 export interface PieRootProps {
@@ -8,4 +9,6 @@ export interface PieRootProps {
     },
     fallback?: ReactNode
     onError?: () => void
+    config: PieConfig
+    initializePie: () => void
 }

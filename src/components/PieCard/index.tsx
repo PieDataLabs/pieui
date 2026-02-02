@@ -1,5 +1,5 @@
 import { useContext, useEffect } from 'react';
-import { isRenderingLogEnabled } from '../../config/constant';
+import { isRenderingLogEnabled } from '../../util/pieConfig';
 import CentrifugeIOContext from '../../util/centrifuge';
 import SocketIOContext from '../../util/socket';
 import MittContext from '../../util/mitt';

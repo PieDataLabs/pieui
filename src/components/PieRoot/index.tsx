@@ -8,7 +8,7 @@ import {PieRootProps} from './types'
 
 import MittContext, {emitter} from "../../util/mitt"
 import SocketIOContext, {getSocket} from "../../util/socket"
-import CentrifugeIOContext, {getCentrifuge} from "../../util/centrifuge"
+import CentrifugeIOContext, { getCentrifuge } from "../../util/centrifuge"
 import { queryClient } from "../../util/queryClient"
 
 import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
@@ -18,22 +18,32 @@ import {UIConfigType} from "../../types";
 import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
-import { getApiServer, isRenderingLogEnabled } from "../../config/constant";
 import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
+import {
+    getApiServer,
+    isRenderingLogEnabled,
+    getCentrifugeServer,
+    PieConfigContext
+} from "../../util/pieConfig";
 
 
-const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
+const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
+    const apiServer = getApiServer()
+    const centrifugeServer = getCentrifugeServer()
+
+    initializePie()
+
     const axiosInstance = useMemo(() => createAxiosDateTransformer({
-        baseURL: getApiServer(),
+        baseURL: apiServer,
     }), [])
 
     if (isRenderingLogEnabled()) {
         console.log('[PieRoot] Rendering with location:', location)
-        console.log('[PieRoot] API_SERVER:', getApiServer())
+        console.log('[PieRoot] API_SERVER:', apiServer)
         console.log('[PieRoot] Fallback provided:', !!fallback)
     }
 
-    if (!getApiServer()) {
+    if (!apiServer) {
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
 
@@ -103,8 +113,8 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError })
     return (
         <QueryClientProvider client={queryClient}>
             <MittContext.Provider value={emitter}>
-                <SocketIOContext.Provider value={getSocket()}>
-                    <CentrifugeIOContext.Provider value={getCentrifuge()}>
+                <SocketIOContext.Provider value={getSocket(apiServer)}>
+                    <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
                         <FallbackContext.Provider value={fallback ?? <></>}>
                             <SocketIOInitProvider>
                                 <CentrifugeIOInitProvider>
@@ -124,11 +134,12 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError })
 }
 
 
-
 const PieRoot: React.FC<PieRootProps> = (props) => (
-    <QueryClientProvider client={queryClient}>
-        <PieRootContent {...props} />
-    </QueryClientProvider>
+    <PieConfigContext.Provider value={props.config}>
+        <QueryClientProvider client={queryClient}>
+            <PieRootContent {...props} />
+        </QueryClientProvider>
+    </PieConfigContext.Provider>
 )
 
 

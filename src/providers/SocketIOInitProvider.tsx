@@ -1,12 +1,14 @@
 import { ReactNode, useContext, useEffect } from 'react'
-import SocketIOContext from '../util/socket.ts'
-import { useIsSupported } from '../util/useIsSupported.ts'
+import SocketIOContext from '../util/socket'
+import { useIsSupported } from '../util/useIsSupported'
 import { Socket } from 'socket.io-client'
+import { getApiServer } from "../util/pieConfig";
 
 
 const SocketIOInitProvider = ({ children }: { children: ReactNode }) => {
     const socket: Socket | null = useContext(SocketIOContext)
-    const isSocketIOSupported = useIsSupported('socketIO')
+    const apiServer = getApiServer()
+    const isSocketIOSupported = useIsSupported(apiServer, 'socketIO')
 
     const onPieInitEvent = (event: any) => {
         window.sid = event.sid

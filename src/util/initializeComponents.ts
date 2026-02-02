@@ -1,5 +1,4 @@
 import { registerPieComponent } from './registry'
-import { isRenderingLogEnabled } from '../config/constant'
 
 // Import all components that need registration
 import SequenceCard from '../components/Containers/SequenceCard/ui/SequenceCard'
@@ -26,14 +25,7 @@ let initialized = false
  */
 export function initializePieComponents(): void {
     if (initialized) {
-        if (isRenderingLogEnabled()) {
-            console.log('[PieUI] Components already initialized')
-        }
         return
-    }
-
-    if (isRenderingLogEnabled()) {
-        console.log('[PieUI] Initializing built-in components...')
     }
 
     // Register all built-in components
@@ -82,10 +74,6 @@ export function initializePieComponents(): void {
     })
 
     initialized = true
-
-    if (isRenderingLogEnabled()) {
-        console.log('[PieUI] Built-in components initialized successfully')
-    }
 }
 
 /**

@@ -2,7 +2,7 @@ import { UIConfigType, SetUiAjaxConfigurationType } from '../../types'
 import { getRegistryEntry } from "../../util/registry";
 import {Suspense, useContext, ReactNode} from "react";
 import FallbackContext from "../../util/fallback";
-import { isRenderingLogEnabled } from '../../config/constant';
+import { isRenderingLogEnabled } from '../../util/pieConfig';
 
 
 function UI({

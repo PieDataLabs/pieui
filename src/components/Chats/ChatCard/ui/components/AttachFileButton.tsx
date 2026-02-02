@@ -1,7 +1,7 @@
 import { RefObject } from 'react'
 import AttachFileIcon from './icons/AttachFileIcon'
 import { ChatIconsType } from '../../types'
-import { PIEBREAK } from '../../../../../config/constant'
+
 
 const AttachFileButton = ({
     name,
@@ -27,7 +27,7 @@ const AttachFileButton = ({
             }}
         >
             <input
-                name={name + PIEBREAK + 'file'}
+                name={name + "__pie__" + 'file'}
                 className='hidden'
                 type='file'
                 accept={accept}

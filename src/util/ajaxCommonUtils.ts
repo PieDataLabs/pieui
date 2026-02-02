@@ -1,5 +1,4 @@
-import {getApiServer, isRenderingLogEnabled} from '../config/constant'
-// import axios from 'axios'
+import {getApiServer, isRenderingLogEnabled} from '../util/pieConfig.ts'
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
 import waitForSidAvailable from './waitForSidAvailable.ts'
