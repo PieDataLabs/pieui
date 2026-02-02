@@ -8,6 +8,10 @@ const CentrifugeIOInitProvider = ({ children }: { children: ReactNode }) => {
     const isCentrifugeSupported = useIsSupported('centrifuge')
 
     useEffect(() => {
+        if (!centrifuge) {
+            return
+        }
+
         const onConnectEvent = () => {
             console.log('Centrifuge connected')
         }
@@ -17,14 +21,14 @@ const CentrifugeIOInitProvider = ({ children }: { children: ReactNode }) => {
         }
 
         if (isCentrifugeSupported) {
-            centrifuge?.on('connected', onConnectEvent)
-            centrifuge?.on('disconnected', onDisconnectEvent)
-            centrifuge?.connect()
+            centrifuge.on('connected', onConnectEvent)
+            centrifuge.on('disconnected', onDisconnectEvent)
+            centrifuge.connect()
         }
 
         return () => {
             if (isCentrifugeSupported) {
-                centrifuge?.disconnect()
+                centrifuge.disconnect()
             }
         }
     }, [centrifuge, isCentrifugeSupported])

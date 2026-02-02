@@ -5,7 +5,7 @@ import { Socket } from 'socket.io-client'
 
 
 const SocketIOInitProvider = ({ children }: { children: ReactNode }) => {
-    const socket: Socket = useContext(SocketIOContext)
+    const socket: Socket | null = useContext(SocketIOContext)
     const isSocketIOSupported = useIsSupported('socketIO')
 
     const onPieInitEvent = (event: any) => {
@@ -14,6 +14,9 @@ const SocketIOInitProvider = ({ children }: { children: ReactNode }) => {
     }
 
     useEffect(() => {
+        if (!socket) {
+            return
+        }
         const onConnectEvent = () => {
             console.log('SocketIO connected')
         }

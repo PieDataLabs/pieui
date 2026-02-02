@@ -7,8 +7,8 @@ import { StyleRoot } from 'radium'
 import {PieRootProps} from './types'
 
 import MittContext, {emitter} from "../../util/mitt"
-import SocketIOContext, {socket} from "../../util/socket"
-import CentrifugeIOContext, {centrifuge} from "../../util/centrifuge"
+import SocketIOContext, {getSocket} from "../../util/socket"
+import CentrifugeIOContext, {getCentrifuge} from "../../util/centrifuge"
 import { queryClient } from "../../util/queryClient"
 
 import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
@@ -103,8 +103,8 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError })
     return (
         <QueryClientProvider client={queryClient}>
             <MittContext.Provider value={emitter}>
-                <SocketIOContext.Provider value={socket}>
-                    <CentrifugeIOContext.Provider value={centrifuge}>
+                <SocketIOContext.Provider value={getSocket()}>
+                    <CentrifugeIOContext.Provider value={getCentrifuge()}>
                         <FallbackContext.Provider value={fallback ?? <></>}>
                             <SocketIOInitProvider>
                                 <CentrifugeIOInitProvider>

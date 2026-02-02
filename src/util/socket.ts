@@ -1,8 +1,13 @@
-import { io } from 'socket.io-client'
+import {io, Socket} from 'socket.io-client'
 import { createContext } from 'react'
 import { getApiServer } from '../config/constant'
 
-export const socket = io(getApiServer(), {
+// export const socket = io(getApiServer(), {
+//     autoConnect: false,
+//     transports: ['websocket'],
+// })
+
+export const getSocket = () => io(getApiServer(), {
     autoConnect: false,
     transports: ['websocket'],
 })
@@ -15,6 +20,6 @@ const onPieInitEvent = (event) => {
 socket.on(`pieinit`, onPieInitEvent)
 */
 
-const SocketIOContext = createContext(socket)
+const SocketIOContext = createContext<Socket | null>(null)
 
 export default SocketIOContext

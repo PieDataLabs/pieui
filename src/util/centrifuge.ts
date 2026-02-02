@@ -14,11 +14,17 @@ async function getToken() {
     return data.token
 }
 
-export const centrifuge =
+export const getCentrifuge = () =>
     getCentrifugeServer() ?
-    new Centrifuge(getCentrifugeServer() || '', {
-        getToken,
-    }): null
+        new Centrifuge(getCentrifugeServer() || '', {
+            getToken,
+        }): null
 
-const CentrifugeIOContext = createContext(centrifuge)
+// export const centrifuge =
+//     getCentrifugeServer() ?
+//     new Centrifuge(getCentrifugeServer() || '', {
+//         getToken,
+//     }): null
+
+const CentrifugeIOContext = createContext<Centrifuge | null>(null)
 export default CentrifugeIOContext
