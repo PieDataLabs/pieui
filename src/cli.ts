@@ -13,6 +13,7 @@ type ParsedArgs = {
     command: string
     outDir: string
     srcDir: string
+    append: boolean
 }
 
 type ComponentManifestEntry = {
@@ -32,6 +33,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
     const srcDirFlag = argv.find((arg) => arg.startsWith('--src-dir='))
     const outDirIndex = argv.findIndex((arg) => arg === '--out-dir' || arg === '-o')
     const srcDirIndex = argv.findIndex((arg) => arg === '--src-dir' || arg === '-s')
+    const appendFlag = argv.includes('--append')
 
     let outDir = 'public'
     let srcDir = 'src'
@@ -48,7 +50,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
         srcDir = argv[srcDirIndex + 1]
     }
 
-    return { command, outDir, srcDir }
+    return { command, outDir, srcDir, append: appendFlag }
 }
 
 const printUsage = () => {
@@ -219,11 +221,12 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
 }
 
 const main = async () => {
-    const { command, outDir, srcDir } = parseArgs(process.argv.slice(2))
+    const { command, outDir, srcDir, append } = parseArgs(process.argv.slice(2))
 
     console.log(`[pieui] CLI started with command: "${command}"`)
     console.log(`[pieui] Source directory: ${srcDir}`)
     console.log(`[pieui] Output directory: ${outDir}`)
+    console.log(`[pieui] Append mode: ${append}`)
 
     if (command !== 'postbuild') {
         printUsage()
@@ -308,22 +311,28 @@ const main = async () => {
             }
         }
 
-        // Try to load existing manifest from pieui library
+        // Try to load existing manifest from pieui library if append mode is enabled
         let existingEntries: ComponentManifestEntry[] = []
 
-        // First, try to find pieui's manifest in node_modules
-        const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'pieui', 'dist', MANIFEST_FILENAME)
+        if (append) {
+            console.log('[pieui] Append mode enabled - loading existing pieui components')
 
-        if (fs.existsSync(nodeModulesPath)) {
-            try {
-                const existingManifest = fs.readFileSync(nodeModulesPath, 'utf8')
-                existingEntries = JSON.parse(existingManifest)
-                console.log(`[pieui] Loaded ${existingEntries.length} existing components from pieui library at ${nodeModulesPath}`)
-            } catch (error) {
-                console.error(`[pieui] Error reading manifest from ${nodeModulesPath}:`, error)
+            // First, try to find pieui's manifest in node_modules
+            const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'pieui', 'dist', MANIFEST_FILENAME)
+
+            if (fs.existsSync(nodeModulesPath)) {
+                try {
+                    const existingManifest = fs.readFileSync(nodeModulesPath, 'utf8')
+                    existingEntries = JSON.parse(existingManifest)
+                    console.log(`[pieui] Loaded ${existingEntries.length} existing components from pieui library at ${nodeModulesPath}`)
+                } catch (error) {
+                    console.error(`[pieui] Error reading manifest from ${nodeModulesPath}:`, error)
+                }
+            } else {
+                console.log(`[pieui] No existing pieui manifest found at ${nodeModulesPath}`)
             }
         } else {
-            console.log(`[pieui] No existing pieui manifest found at ${nodeModulesPath}`)
+            console.log('[pieui] Append mode disabled - only including components from current project')
         }
 
         // Merge existing and new entries
