@@ -6,6 +6,7 @@ import { getAjaxSubmit } from '../../../../util/ajaxCommonUtils'
 import { useMemo } from 'react'
 import parse from 'html-react-parser'
 import { registerPieComponent } from "../../../../util/registry";
+import { getApiServer, isRenderingLogEnabled } from '../../../../util/pieConfig';
 
 
 const AjaxButtonCard = ({
@@ -13,9 +14,14 @@ const AjaxButtonCard = ({
     setUiAjaxConfiguration,
 }: AjaxButtonCardProps) => {
     const { name, title, iconUrl, iconPosition, sx, pathname, kwargs, depsNames } = data
+    
+    // Вызываем хуки на верхнем уровне компонента
+    const apiServer = getApiServer() || ''
+    const renderingLogEnabled = isRenderingLogEnabled() || false
+    
     const ajaxSubmit = useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname],
+        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, renderingLogEnabled),
+        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, renderingLogEnabled],
     )
 
     return (

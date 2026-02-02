@@ -1,21 +1,22 @@
-import {getApiServer, isRenderingLogEnabled} from '../util/pieConfig.ts'
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
 import waitForSidAvailable from './waitForSidAvailable.ts'
 
 
 export const getAjaxSubmit = (
-    setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
+    setUiAjaxConfiguration: SetUiAjaxConfigurationType | undefined,
     kwargs: Record<string, any> = {},
     depsNames: Array<string> = [],
-    pathname?: string,
+    pathname: string | undefined,
+    apiServer: string,
+    renderingLogEnabled: boolean,
 ) => {
-    if (isRenderingLogEnabled()) {
+    if (renderingLogEnabled) {
         console.log('Registering AJAX: ', pathname, kwargs, depsNames)
     }
 
     if (!pathname || !setUiAjaxConfiguration) {
-        if (isRenderingLogEnabled()) {
+        if (renderingLogEnabled) {
             console.warn('Registration FAILED: pathname or setUiAjaxConfiguration is missing!')
         }
         return () => {}
@@ -38,7 +39,7 @@ export const getAjaxSubmit = (
             } else {
                 const inputs = document.getElementsByName(depName)
                 if (!inputs.length) {
-                    if (isRenderingLogEnabled()) {
+                    if (renderingLogEnabled) {
                         console.warn(`No input found with name ${depName}`)
                     }
                     continue
@@ -56,7 +57,7 @@ export const getAjaxSubmit = (
             }
         }
 
-        const apiEndpoint = getApiServer() + 'api/ajax_content' + pathname
+        const apiEndpoint = apiServer + '/api/ajax_content' + pathname
 
         setUiAjaxConfiguration(null)
         return await fetch(apiEndpoint, {
@@ -91,7 +92,7 @@ export const getAjaxSubmit = (
                                     currentEvent,
                                 ])
                             } catch (err) {
-                                if (isRenderingLogEnabled()) {
+                                if (renderingLogEnabled) {
                                     console.warn('Failed to parse streamed line:', trimmed)
                                 }
                             }
@@ -105,7 +106,7 @@ export const getAjaxSubmit = (
                                 currentEvent,
                             ])
                         } catch (err) {
-                            if (isRenderingLogEnabled()) {
+                            if (renderingLogEnabled) {
                                 console.warn('Failed to parse final streamed line:', buffer)
                             }
                         }
@@ -118,7 +119,7 @@ export const getAjaxSubmit = (
                 }
             })
             .catch((err) => {
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.error('AJAX request failed:', err)
                 }
                 setUiAjaxConfiguration(null)

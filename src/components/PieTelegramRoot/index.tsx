@@ -1,4 +1,4 @@
-import React, {useMemo} from 'react'
+import React, {useMemo, useEffect, useState} from 'react'
 import { QueryClientProvider, useQuery } from '@tanstack/react-query'
 
 // @ts-ignore
@@ -24,21 +24,40 @@ import {
     getCentrifugeServer,
     PieConfigContext
 } from "../../util/pieConfig";
-import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
+import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
+import {registerPieComponent} from "../../util/registry";
 import {useWebApp} from "../../util/useWebApp.ts";
 
 
-const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
+const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie, components }) => {
     const apiServer = getApiServer()
     const centrifugeServer = getCentrifugeServer()
 
-    initializePie()
+    // Initialize components in useEffect to avoid issues with hooks
+    useEffect(() => {
+        if (!isPieComponentsInitialized()) {
+            initializePieComponents();
+        }
+        
+        if (components && components.length > 0) {
+            components.forEach(({ name, component }) => {
+                registerPieComponent({ name, component });
+            });
+        }
+        
+        if (initializePie) {
+            initializePie();
+        }
+    }, []);
 
     const axiosInstance = useMemo(() => createAxiosDateTransformer({
         baseURL: apiServer,
     }), [])
     
-    if (isRenderingLogEnabled()) {
+    // Вызываем isRenderingLogEnabled() на верхнем уровне компонента
+    const renderingLogEnabled = isRenderingLogEnabled();
+    
+    if (renderingLogEnabled) {
         console.log('[PieRoot] Rendering with location:', location)
         console.log('[PieRoot] API_SERVER:', apiServer)
         console.log('[PieRoot] Fallback provided:', !!fallback)
@@ -48,10 +67,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
 
-    if (!isPieComponentsInitialized()) {
-        throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
-    }
-
+    // Всегда вызываем хуки перед любым ранним выходом
     const webApp = useWebApp()
 
     const {
@@ -67,7 +83,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
                 : ''
             const apiEndpoint = '/api/content' + location.pathname + location.search + initData
 
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
             }
             const response = await axiosInstance.get(apiEndpoint, {
@@ -78,7 +94,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
                 },
                 withCredentials: true,
             })
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log('[PieRoot] Received UI configuration:', response.data)
             }
             return response.data
@@ -92,8 +108,11 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
     })
 
+    // Определяем что рендерить - fallback или UI
+    let content: React.ReactNode = null;
+    
     if (error) {
-        if (isRenderingLogEnabled()) {
+        if (renderingLogEnabled) {
             console.error('[PieRoot] Error fetching UI configuration:', error)
             console.error('[PieRoot] Error details:', {
                 message: error.message,
@@ -102,42 +121,37 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
             })
         }
         onError?.()
-        return fallback
-    }
-
-
-    if (isLoading || !uiConfiguration) {
-        if (isRenderingLogEnabled()) {
+        content = fallback ?? null;
+    } else if (isLoading || !uiConfiguration) {
+        if (renderingLogEnabled) {
             console.log('[PieRoot] Loading state:', { isLoading, hasUiConfiguration: !!uiConfiguration })
         }
-        return fallback
+        content = fallback ?? null;
+    } else {
+        if (renderingLogEnabled) {
+            console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
+            console.log('[PieRoot] Rendering UI with configuration')
+        }
+        content = <UI uiConfig={uiConfiguration} />;
     }
 
-    if (isRenderingLogEnabled()) {
-        console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
-        console.log('[PieRoot] Rendering UI with configuration')
-    }
-
+    // Всегда рендерим провайдеры, чтобы количество хуков было одинаковым
     return (
-        <QueryClientProvider client={queryClient}>
-            <MittContext.Provider value={emitter}>
-                <SocketIOContext.Provider value={getSocket(apiServer)}>
-                    <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
-                        <FallbackContext.Provider value={fallback ?? <></>}>
-                            <SocketIOInitProvider>
-                                <CentrifugeIOInitProvider>
-
-                                    <StyleRoot>
-                                        <UI uiConfig={uiConfiguration} />
-                                    </StyleRoot>
-
-                                </CentrifugeIOInitProvider>
-                            </SocketIOInitProvider>
-                        </FallbackContext.Provider>
-                    </CentrifugeIOContext.Provider>
-                </SocketIOContext.Provider>
-            </MittContext.Provider>
-        </QueryClientProvider>
+        <MittContext.Provider value={emitter}>
+            <SocketIOContext.Provider value={getSocket(apiServer)}>
+                <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
+                    <FallbackContext.Provider value={fallback ?? <></>}>
+                        <SocketIOInitProvider>
+                            <CentrifugeIOInitProvider>
+                                <StyleRoot>
+                                    {content}
+                                </StyleRoot>
+                            </CentrifugeIOInitProvider>
+                        </SocketIOInitProvider>
+                    </FallbackContext.Provider>
+                </CentrifugeIOContext.Provider>
+            </SocketIOContext.Provider>
+        </MittContext.Provider>
     )
 }
 

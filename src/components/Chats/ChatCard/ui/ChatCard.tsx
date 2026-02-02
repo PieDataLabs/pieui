@@ -4,6 +4,7 @@ import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
 import MessagesBoard, { MessagesBoardHandle } from './components/MessagesBoard'
 import { useEffect, useMemo, useRef, useState } from 'react'
+import { getApiServer, isRenderingLogEnabled } from '../../../../util/pieConfig'
 
 const ChatCard = ({
     data,
@@ -36,9 +37,13 @@ const ChatCard = ({
     const messagesRef = useRef<MessagesBoardHandle>(null)
     const [dirty, setDirty] = useState<boolean>(false)
 
+    // Вызываем хуки на верхнем уровне компонента
+    const apiServer = getApiServer() || ''
+    const renderingLogEnabled = isRenderingLogEnabled() || false
+
     const ajaxSubmit = useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname],
+        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, renderingLogEnabled),
+        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, renderingLogEnabled],
     )
 
     useEffect(() => {

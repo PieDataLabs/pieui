@@ -16,8 +16,11 @@ const PieCard = ({
     centrifugeChannel = undefined,
     methods = undefined,
 }: PieCardProps) => {
+    // Вызываем isRenderingLogEnabled на верхнем уровне компонента
+    const renderingLogEnabled = isRenderingLogEnabled()
+    
     // const name = data.name;
-    if (isRenderingLogEnabled()) {
+    if (renderingLogEnabled) {
         console.log('[PieCard] Rendering card:', card)
         console.log('[PieCard] Card data:', data)
         console.log('[PieCard] Component name:', data?.name)
@@ -37,7 +40,7 @@ const PieCard = ({
 
     useEffect(() => {
         if (!socket || !useSocketioSupport || !methods || !data.name) {
-            if (isRenderingLogEnabled() && useSocketioSupport) {
+            if (renderingLogEnabled && useSocketioSupport) {
                 console.log('[PieCard] Socket.IO setup skipped:', {
                     hasSocket: !!socket,
                     useSocketioSupport,
@@ -49,7 +52,7 @@ const PieCard = ({
         }
         Object.entries(methods).forEach(([methodName, methodHandler]) => {
             const eventName = `pie${methodName}_${data.name}`
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log(`[PieCard] Socket.IO registering event: ${eventName}`)
             }
             socket.on(eventName, methodHandler)
@@ -57,17 +60,17 @@ const PieCard = ({
         return () => {
             Object.entries(methods).forEach(([methodName, methodHandler]) => {
                 const eventName = `pie${methodName}_${data.name}`
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.log(`[PieCard] Socket.IO unregistering event: ${eventName}`)
                 }
                 socket.off(eventName, methodHandler)
             })
         }
-    }, [socket, methods, data.name])
+    }, [socket, methods, data.name, renderingLogEnabled])
 
     useEffect(() => {
         if (!centrifuge || !useCentrifugeSupport || !centrifugeChannel || !methods || !data.name) {
-            if (isRenderingLogEnabled() && useCentrifugeSupport) {
+            if (renderingLogEnabled && useCentrifugeSupport) {
                 console.log('[PieCard] Centrifuge setup skipped:', {
                     hasCentrifuge: !!centrifuge,
                     useCentrifugeSupport,
@@ -81,12 +84,12 @@ const PieCard = ({
 
         const subscriptions = Object.entries(methods).map(([methodName, methodHandler]) => {
             const channelName = `pie${methodName}_${data.name}_${centrifugeChannel}`
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log(`[PieCard] Centrifuge subscribing to channel: ${channelName}`)
             }
             const subscription = centrifuge.newSubscription(channelName)
             subscription.on('publication', (ctx) => {
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.log(`[PieCard] Centrifuge received data on ${channelName}:`, ctx.data)
                 }
                 methodHandler(ctx.data)
@@ -97,18 +100,18 @@ const PieCard = ({
 
         return () => {
             subscriptions.forEach((subscription) => {
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.log(`[PieCard] Centrifuge unsubscribing from channel`)
                 }
                 subscription.unsubscribe()
                 centrifuge.removeSubscription(subscription)
             })
         }
-    }, [centrifuge, centrifugeChannel, methods, data.name])
+    }, [centrifuge, centrifugeChannel, methods, data.name, renderingLogEnabled])
 
     useEffect(() => {
         if (!mitt || !useMittSupport || !methods || !data.name) {
-            if (isRenderingLogEnabled() && useMittSupport) {
+            if (renderingLogEnabled && useMittSupport) {
                 console.log('[PieCard] Mitt setup skipped:', {
                     hasMitt: !!mitt,
                     useMittSupport,
@@ -121,7 +124,7 @@ const PieCard = ({
 
         Object.entries(methods).forEach(([methodName, methodHandler]) => {
             const eventName = `pie${methodName}_${data.name}`
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log(`[PieCard] Mitt registering event: ${eventName}`)
             }
             mitt.on(eventName, methodHandler)
@@ -130,15 +133,15 @@ const PieCard = ({
         return () => {
             Object.entries(methods).forEach(([methodName, methodHandler]) => {
                 const eventName = `pie${methodName}_${data.name}`
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.log(`[PieCard] Mitt unregistering event: ${eventName}`)
                 }
                 mitt.off(eventName, methodHandler)
             })
         }
-    }, [mitt, methods, data.name])
+    }, [mitt, methods, data.name, renderingLogEnabled])
 
-    if (isRenderingLogEnabled()) {
+    if (renderingLogEnabled) {
         console.log('[PieCard] Rendering complete, returning children')
     }
 
