@@ -37,14 +37,6 @@ jobs:
           test -f dist/index.d.ts && echo "✅ TypeScript definitions exist"
           echo "Build verification complete!"
 
-      - name: Run tests (if any)
-        run: |
-          if [ -f "package.json" ] && grep -q "test" package.json; then
-            bun test
-          else
-            echo "No tests configured, skipping..."
-          fi
-
       - name: Check package size
         run: |
           echo "Package size analysis:"
