@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useReducer } from 'react'
+import {useLayoutEffect, useReducer, useRef} from 'react'
 
 export function useImage(url: string, crossOrigin?: string, referrerPolicy?: string) {
     type State = {
@@ -24,9 +24,9 @@ export function useImage(url: string, crossOrigin?: string, referrerPolicy?: str
     })
 
     // keep track of old props to trigger changes
-    const oldUrl = React.useRef<string | undefined>()
-    const oldCrossOrigin = React.useRef<string | undefined>()
-    const oldReferrerPolicy = React.useRef<string | undefined>()
+    const oldUrl = useRef<string | undefined>(undefined)
+    const oldCrossOrigin = useRef<string | undefined>(undefined)
+    const oldReferrerPolicy = useRef<string | undefined>(undefined)
     if (
         oldUrl.current !== url ||
         oldCrossOrigin.current !== crossOrigin ||
