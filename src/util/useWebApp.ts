@@ -1,7 +1,7 @@
 // Implementation of https://core.telegram.org/bots/webapps#initializing-web-apps as react hook
 
 import { useEffect } from 'react'
-import { PAGE_PROCESSOR } from '../config/constant'
+import { getPageProcessor } from '../config/constant'
 import {InitData, InitDataUnsafe} from "../types";
 
 
@@ -11,7 +11,7 @@ export const useWebApp = () => {
         // @ts-ignore
         window.Telegram.WebApp.ready()
         if (
-            PAGE_PROCESSOR === 'telegram_expanded' &&
+            getPageProcessor() === 'telegram_expanded' &&
             (window.Telegram.WebApp.platform === 'ios' ||
                 window.Telegram.WebApp.platform === 'android')
         ) {

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, {useMemo} from 'react'
 import { QueryClientProvider, useQuery } from '@tanstack/react-query'
 
 // @ts-ignore
@@ -18,23 +18,23 @@ import {UIConfigType} from "../../types";
 import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
-import { API_SERVER, ENABLE_RENDERING_LOG } from "../../config/constant";
+import {getApiServer, isRenderingLogEnabled} from "../../config/constant";
 import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 import {useWebApp} from "../../util/useWebApp.ts";
 
 
-const axiosInstance = createAxiosDateTransformer({
-    baseURL: API_SERVER,
-})
-
 const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError }) => {
-    if (ENABLE_RENDERING_LOG) {
+    const axiosInstance = useMemo(() => createAxiosDateTransformer({
+        baseURL: getApiServer(),
+    }), [])
+    
+    if (isRenderingLogEnabled()) {
         console.log('[PieRoot] Rendering with location:', location)
-        console.log('[PieRoot] API_SERVER:', API_SERVER)
+        console.log('[PieRoot] API_SERVER:', getApiServer())
         console.log('[PieRoot] Fallback provided:', !!fallback)
     }
 
-    if (!API_SERVER) {
+    if (!getApiServer()) {
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
 
@@ -57,7 +57,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
                 : ''
             const apiEndpoint = '/api/content' + location.pathname + location.search + initData
 
-            if (ENABLE_RENDERING_LOG) {
+            if (isRenderingLogEnabled()) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
             }
             const response = await axiosInstance.get(apiEndpoint, {
@@ -68,7 +68,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
                 },
                 withCredentials: true,
             })
-            if (ENABLE_RENDERING_LOG) {
+            if (isRenderingLogEnabled()) {
                 console.log('[PieRoot] Received UI configuration:', response.data)
             }
             return response.data
@@ -83,7 +83,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
     })
 
     if (error) {
-        if (ENABLE_RENDERING_LOG) {
+        if (isRenderingLogEnabled()) {
             console.error('[PieRoot] Error fetching UI configuration:', error)
             console.error('[PieRoot] Error details:', {
                 message: error.message,
@@ -97,13 +97,13 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
 
 
     if (isLoading || !uiConfiguration) {
-        if (ENABLE_RENDERING_LOG) {
+        if (isRenderingLogEnabled()) {
             console.log('[PieRoot] Loading state:', { isLoading, hasUiConfiguration: !!uiConfiguration })
         }
         return fallback
     }
 
-    if (ENABLE_RENDERING_LOG) {
+    if (isRenderingLogEnabled()) {
         console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
         console.log('[PieRoot] Rendering UI with configuration')
     }

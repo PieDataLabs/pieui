@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { API_SERVER } from '../config/constant'
+import { getApiServer } from '../config/constant'
 
 export function useIsSupported(name: string): boolean | null {
     const [isSupported, setIsSupported] = useState<boolean | null>(null)
@@ -7,7 +7,7 @@ export function useIsSupported(name: string): boolean | null {
     useEffect(() => {
         if (!supportIsRequested) {
             setSupportIsRequested(true)
-            fetch(API_SERVER + `api/support/${name}`, { method: 'GET' })
+            fetch(getApiServer() + `api/support/${name}`, { method: 'GET' })
                 .then((res) => res.json())
                 .then((res) => {
                     setIsSupported(res)

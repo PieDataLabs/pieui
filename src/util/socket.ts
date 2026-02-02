@@ -1,8 +1,8 @@
 import { io } from 'socket.io-client'
 import { createContext } from 'react'
-import { API_SERVER } from '../config/constant'
+import { getApiServer } from '../config/constant'
 
-export const socket = io(API_SERVER, {
+export const socket = io(getApiServer(), {
     autoConnect: false,
     transports: ['websocket'],
 })

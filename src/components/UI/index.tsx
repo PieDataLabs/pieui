@@ -2,7 +2,7 @@ import { UIConfigType, SetUiAjaxConfigurationType } from '../../types'
 import { getRegistryEntry } from "../../util/registry";
 import {Suspense, useContext, ReactNode} from "react";
 import FallbackContext from "../../util/fallback";
-import { ENABLE_RENDERING_LOG } from '../../config/constant';
+import { isRenderingLogEnabled } from '../../config/constant';
 
 
 function UI({
@@ -14,7 +14,7 @@ function UI({
 }) {
     const Fallback: ReactNode = useContext(FallbackContext)
 
-    if (ENABLE_RENDERING_LOG) {
+    if (isRenderingLogEnabled()) {
         console.log('[UI] Rendering component:', uiConfig.card)
         console.log('[UI] Component data:', uiConfig.data)
         console.log('[UI] Component content:', uiConfig.content)
@@ -23,14 +23,14 @@ function UI({
 
     const entry = getRegistryEntry(uiConfig.card)
     if (!entry?.component) {
-        if (ENABLE_RENDERING_LOG) {
+        if (isRenderingLogEnabled()) {
             console.warn(`[UI] Component not found in registry: ${uiConfig.card}`)
             console.log('[UI] Returning fallback component')
         }
         return Fallback
     }
 
-    if (ENABLE_RENDERING_LOG) {
+    if (isRenderingLogEnabled()) {
         console.log('[UI] Found component in registry:', {
             name: entry.name,
             isLazy: entry.isLazy,
@@ -49,7 +49,7 @@ function UI({
     )
 
     if (entry.isLazy) {
-        if (ENABLE_RENDERING_LOG) {
+        if (isRenderingLogEnabled()) {
             console.log('[UI] Rendering lazy component with Suspense:', entry.name)
         }
         return (
@@ -59,7 +59,7 @@ function UI({
         )
     }
 
-    if (ENABLE_RENDERING_LOG) {
+    if (isRenderingLogEnabled()) {
         console.log('[UI] Rendering component directly:', entry.name)
     }
 
