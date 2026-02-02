@@ -49,12 +49,6 @@ jobs:
           echo "version=$VERSION" >> $GITHUB_OUTPUT
           echo "Publishing version: $VERSION"
 
-      - name: Update package.json version
-        run: |
-          VERSION=${{ steps.version.outputs.version }}
-          bun --version
-          npm version $VERSION --no-git-tag-version
-
       - name: Publish to npm
         run: npm publish --access public --provenance
         env:
