@@ -36,14 +36,4 @@ const AjaxButtonCard = ({
     )
 }
 
-
-registerPieComponent({
-    name: 'AjaxButtonCard',
-    component: Radium(AjaxButtonCard),
-    metadata: {
-        author: "PieData",
-    }
-})
-
-
 export default AjaxButtonCard

@@ -92,9 +92,4 @@ const AjaxGroupCard = ({
     )
 }
 
-registerPieComponent({
-    name: 'AjaxGroupCard',
-    component: AjaxGroupCard,
-})
-
 export default AjaxGroupCard

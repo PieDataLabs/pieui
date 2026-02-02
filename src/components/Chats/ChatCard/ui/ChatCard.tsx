@@ -128,10 +128,4 @@ const ChatCard = ({
     )
 }
 
-registerPieComponent({
-    name: "ChatCard",
-    component: ChatCard
-})
-
-
 export default ChatCard

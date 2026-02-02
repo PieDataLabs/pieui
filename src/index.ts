@@ -4,6 +4,7 @@ export { default as PieStaticRoot } from './components/PieStaticRoot'
 export { default as PieRoot } from './components/PieRoot'
 export { default as PieCard } from './components/PieCard'
 export { registerPieComponent } from './util/registry'
+export { initializePieComponents } from './util/initializeComponents'
 
 export type {
     PieSimpleComponentProps,

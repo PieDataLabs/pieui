@@ -26,9 +26,4 @@ const UnionCard = ({
     )
 }
 
-registerPieComponent({
-    name: 'UnionCard',
-    component: UnionCard,
-})
-
 export default UnionCard

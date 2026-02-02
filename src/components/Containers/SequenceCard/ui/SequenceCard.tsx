@@ -31,14 +31,4 @@ const SequenceCard = ({
 }
 
 
-// Register component
-registerPieComponent({
-    name: 'SequenceCard',
-    component: Radium(SequenceCard),
-    metadata: {
-        author: "PieData",
-        description: "Simple div with styles joining few components"
-    }
-})
-
 export default Radium(SequenceCard)
