@@ -277,7 +277,9 @@ const initCommand = () => {
 
     // Create registry.ts
     const registryPath = path.join(pieComponentsDir, 'registry.ts')
-    const registryContent = `import { registerPieComponent, initializePieComponents, isPieComponentsInitialized } from "pieui";
+    const registryContent = `
+"use client"
+import { registerPieComponent, initializePieComponents, isPieComponentsInitialized } from "pieui";
 
 // Import your custom components here
 // Example:
