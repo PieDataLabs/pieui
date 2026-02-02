@@ -283,17 +283,18 @@ const initCommand = () => {
 // Example:
 // import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";
 
-// Initialize PieUI built-in components first
+// Initialize and register components
 if (!isPieComponentsInitialized()) {
+    // Initialize PieUI built-in components
     initializePieComponents();
-}
 
-// Register your custom components here
-// Example:
-// registerPieComponent({
-//     name: 'MyCustomCard',
-//     component: MyCustomCard,
-// });
+    // Register your custom components here
+    // Example:
+    // registerPieComponent({
+    //     name: 'MyCustomCard',
+    //     component: MyCustomCard,
+    // });
+}
 `
 
     if (!fs.existsSync(registryPath)) {
@@ -332,6 +333,13 @@ const addCommand = (componentName: string, componentType: ComponentType = 'compl
     }
 
     const componentDir = path.join(pieComponentsDir, componentName)
+
+    // Check if component already exists
+    if (fs.existsSync(componentDir)) {
+        console.error(`[pieui] Error: Component ${componentName} already exists`)
+        console.error(`[pieui] Directory exists at: ${componentDir}`)
+        process.exit(1)
+    }
 
     // Create component directory structure
     fs.mkdirSync(path.join(componentDir, 'ui'), { recursive: true })
@@ -484,6 +492,26 @@ export default ${componentName}
     const registryPath = path.join(pieComponentsDir, 'registry.ts')
     let registryContent = fs.readFileSync(registryPath, 'utf8')
 
+    // Check if component is already registered
+    const componentRegex = new RegExp(`registerPieComponent\\s*\\(\\s*\\{[^}]*name:\\s*['"\`]${componentName}['"\`]`, 's')
+    if (componentRegex.test(registryContent)) {
+        console.error(`[pieui] Error: Component ${componentName} is already registered in registry.ts`)
+        console.error('[pieui] Aborting to prevent duplicate registration')
+        // Clean up created files
+        fs.rmSync(componentDir, { recursive: true, force: true })
+        process.exit(1)
+    }
+
+    // Check if import already exists
+    const importRegex = new RegExp(`import\\s+${componentName}\\s+from`)
+    if (importRegex.test(registryContent)) {
+        console.error(`[pieui] Error: Import for ${componentName} already exists in registry.ts`)
+        console.error('[pieui] Aborting to prevent duplicate import')
+        // Clean up created files
+        fs.rmSync(componentDir, { recursive: true, force: true })
+        process.exit(1)
+    }
+
     // Add import
     const importLine = `import ${componentName} from "./${componentName}/ui/${componentName}";`
 
@@ -499,14 +527,21 @@ export default ${componentName}
         registryContent = registryContent.slice(0, pieuiImportEnd) + '\n\n' + importLine + registryContent.slice(pieuiImportEnd)
     }
 
-    // Add registration
-    const registerLine = `registerPieComponent({
-    name: '${componentName}',
-    component: ${componentName},
-});`
+    // Add registration inside the if block
+    const registerLine = `    registerPieComponent({
+        name: '${componentName}',
+        component: ${componentName},
+    });`
 
-    // Insert at the end of the file
-    registryContent = registryContent.trimEnd() + '\n\n' + registerLine + '\n'
+    // Find the closing brace of the if block
+    const ifBlockEnd = registryContent.lastIndexOf('\n}')
+    if (ifBlockEnd !== -1) {
+        // Insert before the closing brace
+        registryContent = registryContent.slice(0, ifBlockEnd) + '\n\n' + registerLine + registryContent.slice(ifBlockEnd)
+    } else {
+        // Fallback: add at the end
+        registryContent = registryContent.trimEnd() + '\n\n' + registerLine + '\n}'
+    }
 
     fs.writeFileSync(registryPath, registryContent, 'utf8')
 
