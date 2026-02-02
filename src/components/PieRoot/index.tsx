@@ -19,6 +19,7 @@ import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
 import { API_SERVER, ENABLE_RENDERING_LOG } from "../../config/constant";
+import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 
 
 const axiosInstance = createAxiosDateTransformer({
@@ -34,6 +35,10 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError })
 
     if (!API_SERVER) {
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
+    }
+
+    if (!isPieComponentsInitialized()) {
+        throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
     }
 
     const {

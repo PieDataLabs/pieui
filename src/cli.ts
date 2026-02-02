@@ -9,11 +9,15 @@ import * as TJS from 'typescript-json-schema'
 const MANIFEST_FILENAME = 'pieui.components.json'
 const REGISTER_FUNCTION = 'registerPieComponent'
 
+type ComponentType = 'simple' | 'complex' | 'simple-container' | 'complex-container'
+
 type ParsedArgs = {
     command: string
     outDir: string
     srcDir: string
     append: boolean
+    componentName?: string
+    componentType?: ComponentType
 }
 
 type ComponentManifestEntry = {
@@ -37,6 +41,21 @@ const parseArgs = (argv: string[]): ParsedArgs => {
 
     let outDir = 'public'
     let srcDir = 'src'
+    let componentType: ComponentType | undefined
+    let componentName: string | undefined
+
+    if (command === 'add' && argv[1]) {
+        // Check if first argument is a component type
+        const validTypes: ComponentType[] = ['simple', 'complex', 'simple-container', 'complex-container']
+        if (validTypes.includes(argv[1] as ComponentType)) {
+            componentType = argv[1] as ComponentType
+            componentName = argv[2]
+        } else {
+            // Default to complex-container if no type specified
+            componentType = 'complex-container'
+            componentName = argv[1]
+        }
+    }
 
     if (outDirFlag) {
         outDir = outDirFlag.split('=')[1] || outDir
@@ -50,12 +69,35 @@ const parseArgs = (argv: string[]): ParsedArgs => {
         srcDir = argv[srcDirIndex + 1]
     }
 
-    return { command, outDir, srcDir, append: appendFlag }
+    return { command, outDir, srcDir, append: appendFlag, componentName, componentType }
 }
 
 const printUsage = () => {
-    console.log('Usage: pieui postbuild [--out-dir <dir>] [--src-dir <dir>]')
-    console.log('Scans for registerPieComponent calls and generates JSON Schema for data props.')
+    console.log('Usage: pieui <command> [options]')
+    console.log('')
+    console.log('Commands:')
+    console.log('  init                                    Initialize piecomponents directory with registry.ts')
+    console.log('  add [type] <ComponentName>              Create a new component in piecomponents directory')
+    console.log('  postbuild                               Scan for components and generate manifest')
+    console.log('')
+    console.log('Component types for add command:')
+    console.log('  simple                  Simple component (only data prop)')
+    console.log('  complex                 Complex component (data + children props)')
+    console.log('  simple-container        Container with single content (data + content)')
+    console.log('  complex-container       Container with array content (data + content[])')
+    console.log('                         (default if type not specified)')
+    console.log('')
+    console.log('Options for postbuild:')
+    console.log('  --out-dir <dir>, -o <dir>    Output directory (default: public)')
+    console.log('  --src-dir <dir>, -s <dir>    Source directory (default: src)')
+    console.log('  --append                      Include built-in pieui components in the manifest')
+    console.log('')
+    console.log('Examples:')
+    console.log('  pieui init')
+    console.log('  pieui add MyCustomCard                        # Creates complex-container by default')
+    console.log('  pieui add simple MySimpleCard                 # Creates simple component')
+    console.log('  pieui add complex-container MyContainerCard   # Creates complex container')
+    console.log('  pieui postbuild --append --out-dir dist')
 }
 
 const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
@@ -220,17 +262,306 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
     return components
 }
 
+const initCommand = () => {
+    console.log('[pieui] Initializing piecomponents directory...')
+
+    const pieComponentsDir = path.join(process.cwd(), 'piecomponents')
+
+    // Create piecomponents directory
+    if (!fs.existsSync(pieComponentsDir)) {
+        fs.mkdirSync(pieComponentsDir, { recursive: true })
+        console.log('[pieui] Created piecomponents directory')
+    } else {
+        console.log('[pieui] piecomponents directory already exists')
+    }
+
+    // Create registry.ts
+    const registryPath = path.join(pieComponentsDir, 'registry.ts')
+    const registryContent = `import { registerPieComponent, initializePieComponents, isPieComponentsInitialized } from "pieui";
+
+// Import your custom components here
+// Example:
+// import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";
+
+// Initialize PieUI built-in components first
+if (!isPieComponentsInitialized()) {
+    initializePieComponents();
+}
+
+// Register your custom components here
+// Example:
+// registerPieComponent({
+//     name: 'MyCustomCard',
+//     component: MyCustomCard,
+// });
+`
+
+    if (!fs.existsSync(registryPath)) {
+        fs.writeFileSync(registryPath, registryContent, 'utf8')
+        console.log('[pieui] Created registry.ts')
+    } else {
+        console.log('[pieui] registry.ts already exists')
+    }
+
+    console.log('[pieui] Initialization complete!')
+    console.log('[pieui] Next steps:')
+    console.log('  1. Import { registerCustomComponents } from "./piecomponents/registry" in your app')
+    console.log('  2. Call registerCustomComponents() before using PieRoot')
+    console.log('  3. Use "pieui add <ComponentName>" to create new components')
+}
+
+const addCommand = (componentName: string, componentType: ComponentType = 'complex-container') => {
+    if (!componentName) {
+        console.error('[pieui] Error: Component name is required')
+        console.log('Usage: pieui add [type] <ComponentName>')
+        process.exit(1)
+    }
+
+    // Validate component name
+    if (!/^[A-Z][a-zA-Z0-9]+$/.test(componentName)) {
+        console.error('[pieui] Error: Component name must start with uppercase letter and contain only letters and numbers')
+        process.exit(1)
+    }
+
+    console.log(`[pieui] Creating ${componentType} component: ${componentName}`)
+
+    const pieComponentsDir = path.join(process.cwd(), 'piecomponents')
+    if (!fs.existsSync(pieComponentsDir)) {
+        console.error('[pieui] Error: piecomponents directory not found. Run "pieui init" first.')
+        process.exit(1)
+    }
+
+    const componentDir = path.join(pieComponentsDir, componentName)
+
+    // Create component directory structure
+    fs.mkdirSync(path.join(componentDir, 'ui'), { recursive: true })
+    fs.mkdirSync(path.join(componentDir, 'types'), { recursive: true })
+
+    // Create index.ts
+    const indexContent = `export { default } from './ui/${componentName}'
+`
+    fs.writeFileSync(path.join(componentDir, 'index.ts'), indexContent, 'utf8')
+
+    // Create types/index.ts based on component type
+    let baseInterface: string
+    switch (componentType) {
+        case 'simple':
+            baseInterface = 'PieSimpleComponentProps'
+            break
+        case 'complex':
+            baseInterface = 'PieComplexComponentProps'
+            break
+        case 'simple-container':
+            baseInterface = 'PieContainerComponentProps'
+            break
+        case 'complex-container':
+        default:
+            baseInterface = 'PieComplexContainerComponentProps'
+            break
+    }
+
+    const typesContent = `import { ${baseInterface} } from 'pieui'
+
+export interface ${componentName}Data {
+    name: string
+    // Add your component-specific props here
+}
+
+export interface ${componentName}Props extends ${baseInterface}<${componentName}Data> {}
+`
+    fs.writeFileSync(path.join(componentDir, 'types', 'index.ts'), typesContent, 'utf8')
+
+    // Create ui/ComponentName.tsx based on component type
+    let componentContent: string
+
+    if (componentType === 'simple') {
+        componentContent = `import React from 'react'
+import { PieCard } from 'pieui'
+import { ${componentName}Props } from '../types'
+
+const ${componentName}: React.FC<${componentName}Props> = ({ data }) => {
+    const { name } = data
+
+    return (
+        <PieCard card='${componentName}' data={data}>
+            <div>
+                <h2>${componentName}</h2>
+                {/* Add your component logic here */}
+            </div>
+        </PieCard>
+    )
+}
+
+export default ${componentName}
+`
+    } else if (componentType === 'complex') {
+        componentContent = `import React from 'react'
+import { PieCard } from 'pieui'
+import { ${componentName}Props } from '../types'
+
+const ${componentName}: React.FC<${componentName}Props> = ({ data, children }) => {
+    const { name } = data
+
+    return (
+        <PieCard card='${componentName}' data={data}>
+            <div>
+                <h2>${componentName}</h2>
+                {/* Add your component logic here */}
+                {children}
+            </div>
+        </PieCard>
+    )
+}
+
+export default ${componentName}
+`
+    } else if (componentType === 'simple-container') {
+        componentContent = `import React from 'react'
+import { PieCard, UI } from 'pieui'
+import { ${componentName}Props } from '../types'
+
+const ${componentName}: React.FC<${componentName}Props> = ({
+    data,
+    content,
+    setUiAjaxConfiguration,
+}) => {
+    const { name } = data
+
+    return (
+        <PieCard card='${componentName}' data={data}>
+            <div>
+                <h2>${componentName}</h2>
+                {/* Add your component logic here */}
+                {content && (
+                    <UI
+                        uiConfig={content}
+                        setUiAjaxConfiguration={setUiAjaxConfiguration}
+                    />
+                )}
+            </div>
+        </PieCard>
+    )
+}
+
+export default ${componentName}
+`
+    } else { // complex-container
+        componentContent = `import React from 'react'
+import { PieCard, UI } from 'pieui'
+import { ${componentName}Props } from '../types'
+
+const ${componentName}: React.FC<${componentName}Props> = ({
+    data,
+    content,
+    setUiAjaxConfiguration,
+}) => {
+    const { name } = data
+
+    return (
+        <PieCard card='${componentName}' data={data}>
+            <div>
+                <h2>${componentName}</h2>
+                {/* Add your component logic here */}
+                {content && Array.isArray(content) && content.map((child, index) => (
+                    <UI
+                        key={\`child-\${index}\`}
+                        uiConfig={child}
+                        setUiAjaxConfiguration={setUiAjaxConfiguration}
+                    />
+                ))}
+            </div>
+        </PieCard>
+    )
+}
+
+export default ${componentName}
+`
+    }
+
+    fs.writeFileSync(path.join(componentDir, 'ui', `${componentName}.tsx`), componentContent, 'utf8')
+
+    // Update registry.ts
+    const registryPath = path.join(pieComponentsDir, 'registry.ts')
+    let registryContent = fs.readFileSync(registryPath, 'utf8')
+
+    // Add import
+    const importLine = `import ${componentName} from "./${componentName}/ui/${componentName}";`
+
+    // Find the position to insert the import (after other component imports)
+    const lastImportMatch = registryContent.match(/import .* from "\.\/.*\/ui\/.*";/g)
+    if (lastImportMatch) {
+        const lastImport = lastImportMatch[lastImportMatch.length - 1]
+        const insertPos = registryContent.lastIndexOf(lastImport) + lastImport.length
+        registryContent = registryContent.slice(0, insertPos) + '\n' + importLine + registryContent.slice(insertPos)
+    } else {
+        // Insert after the pieui import
+        const pieuiImportEnd = registryContent.indexOf('";') + 2
+        registryContent = registryContent.slice(0, pieuiImportEnd) + '\n\n' + importLine + registryContent.slice(pieuiImportEnd)
+    }
+
+    // Add registration
+    const registerLine = `registerPieComponent({
+    name: '${componentName}',
+    component: ${componentName},
+});`
+
+    // Insert at the end of the file
+    registryContent = registryContent.trimEnd() + '\n\n' + registerLine + '\n'
+
+    fs.writeFileSync(registryPath, registryContent, 'utf8')
+
+    console.log(`[pieui] Component ${componentName} (${componentType}) created successfully!`)
+    console.log(`[pieui] Files created:`)
+    console.log(`  - piecomponents/${componentName}/index.ts`)
+    console.log(`  - piecomponents/${componentName}/types/index.ts`)
+    console.log(`  - piecomponents/${componentName}/ui/${componentName}.tsx`)
+    console.log(`[pieui] Updated registry.ts with new component`)
+    console.log('')
+    console.log(`[pieui] Component type: ${componentType}`)
+    switch (componentType) {
+        case 'simple':
+            console.log('  - Props: data only')
+            break
+        case 'complex':
+            console.log('  - Props: data + children (React nodes)')
+            break
+        case 'simple-container':
+            console.log('  - Props: data + content (single UIConfig)')
+            break
+        case 'complex-container':
+            console.log('  - Props: data + content (array of UIConfig)')
+            break
+    }
+}
+
 const main = async () => {
-    const { command, outDir, srcDir, append } = parseArgs(process.argv.slice(2))
+    const { command, outDir, srcDir, append, componentName, componentType } = parseArgs(process.argv.slice(2))
 
     console.log(`[pieui] CLI started with command: "${command}"`)
-    console.log(`[pieui] Source directory: ${srcDir}`)
-    console.log(`[pieui] Output directory: ${outDir}`)
-    console.log(`[pieui] Append mode: ${append}`)
 
-    if (command !== 'postbuild') {
-        printUsage()
-        process.exit(1)
+    switch (command) {
+        case 'init':
+            initCommand()
+            return
+
+        case 'add':
+            if (!componentName) {
+                console.error('[pieui] Error: Component name is required for add command')
+                printUsage()
+                process.exit(1)
+            }
+            addCommand(componentName, componentType)
+            return
+
+        case 'postbuild':
+            console.log(`[pieui] Source directory: ${srcDir}`)
+            console.log(`[pieui] Output directory: ${outDir}`)
+            console.log(`[pieui] Append mode: ${append}`)
+            break
+
+        default:
+            printUsage()
+            process.exit(1)
     }
 
     try {

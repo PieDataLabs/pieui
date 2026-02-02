@@ -15,9 +15,14 @@ import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
 import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
 import FallbackContext from "../../util/fallback";
 import UI from "../UI";
+import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 
 
 const PieStaticRoot: React.FC<PieStaticRootProps> = ({ uiConfig, fallback }) => {
+    if (!isPieComponentsInitialized()) {
+        throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
+    }
+
     return (
         <QueryClientProvider client={queryClient}>
             <MittContext.Provider value={emitter}>

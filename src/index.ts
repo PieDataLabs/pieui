@@ -8,6 +8,8 @@ export { initializePieComponents, isPieComponentsInitialized } from './util/init
 
 export type {
     PieSimpleComponentProps,
-    PieComplexContainerComponentProps,
-    PieContainerComponentProps } from './types'
+    PieComplexComponentProps,
+    PieContainerComponentProps,
+    PieComplexContainerComponentProps
+} from './types'
 
