@@ -47,7 +47,7 @@ const ChatCardInput = forwardRef<
         },
         ref,
     ) => {
-        const fileInputRef = useRef<HTMLInputElement>(null)
+        const fileInputRef = useRef<HTMLInputElement | null>(null)
         const [selectedFile, setSelectedFile] = useState<File | null>(null)
         const [value, setValue] = useState<string>(defaultValue)
         const [options, setOptions] = useState<Option[]>(defaultOptions)
