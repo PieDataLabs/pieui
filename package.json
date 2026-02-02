@@ -41,6 +41,12 @@
     "release:patch": "npm version patch && git push && git push --tags",
     "release:minor": "npm version minor && git push && git push --tags",
     "release:major": "npm version major && git push && git push --tags",
+    "release:prerelease": "npm version prerelease --preid=beta && git push && git push --tags",
+    "release:dry-run": "npm publish --dry-run",
+    "publish:npm": "npm publish",
+    "publish:beta": "npm publish --tag beta",
+    "unrelease": "git tag -d v$(node -p \"require('./package.json').version\") && git push origin :refs/tags/v$(node -p \"require('./package.json').version\")",
+    "version:current": "node -p \"require('./package.json').version\""
   },
   "keywords": [
     "react",
