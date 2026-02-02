@@ -24,9 +24,9 @@ export function useImage(url: string, crossOrigin?: string, referrerPolicy?: str
     })
 
     // keep track of old props to trigger changes
-    const oldUrl = React.useRef<string>()
-    const oldCrossOrigin = React.useRef<string>()
-    const oldReferrerPolicy = React.useRef<string>()
+    const oldUrl = React.useRef<string | undefined>()
+    const oldCrossOrigin = React.useRef<string | undefined>()
+    const oldReferrerPolicy = React.useRef<string | undefined>()
     if (
         oldUrl.current !== url ||
         oldCrossOrigin.current !== crossOrigin ||
