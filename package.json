@@ -63,12 +63,14 @@
   "author": "",
   "license": "MIT",
   "peerDependencies": {
-    "react": ">=18"
+    "react": "19.2.4",
+    "react-dom": "19.2.4"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "@types/glob": "^9.0.0",
-    "@types/react": ">=18",
+    "@types/react": "19.2.3",
+    "eslint-plugin-no-browser-globals": "^1.0.1",
     "typescript-json-schema": "^0.67.1"
   },
   "dependencies": {

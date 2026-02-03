@@ -41,7 +41,8 @@ export function useImage(url: string, crossOrigin?: string, referrerPolicy?: str
     }
 
     useLayoutEffect(() => {
-        if (!url) return
+        if (!url || typeof document === 'undefined') return
+
         const img = document.createElement('img')
 
         const onload = () => dispatch({ type: 'LOAD', payload: img })

@@ -11,8 +11,10 @@ const SocketIOInitProvider = ({ children }: { children: ReactNode }) => {
     const isSocketIOSupported = useIsSupported(apiServer, 'socketIO')
 
     const onPieInitEvent = (event: any) => {
-        window.sid = event.sid
-        console.log(`SocketIO initialized: ${window.sid}`)
+        if (typeof window !== 'undefined') {
+            window.sid = event.sid
+            console.log(`SocketIO initialized: ${window.sid}`)
+        }
     }
 
     useEffect(() => {

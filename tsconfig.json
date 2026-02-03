@@ -22,6 +22,8 @@
 
     // Best practices
     "strict": true,
+    "types": ["react", "node"], // типы для React + Node (SSR)
+
     "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,

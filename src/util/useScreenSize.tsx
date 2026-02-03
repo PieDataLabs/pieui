@@ -2,11 +2,16 @@ import { useState, useEffect } from 'react'
 
 const useScreenSize = () => {
     const [screenSize, setScreenSize] = useState({
-        width: 0,
-        height: 0,
+        width: typeof window !== 'undefined' ? window.innerWidth : 0,
+        height: typeof window !== 'undefined' ? window.innerHeight : 0,
     })
 
     useEffect(() => {
+        // Skip if running on server
+        if (typeof window === 'undefined') {
+            return
+        }
+
         const updateSize = () => {
             setScreenSize({
                 width: window.innerWidth,

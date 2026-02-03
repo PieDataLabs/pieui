@@ -16,7 +16,7 @@ export default function ResizableTextarea(
     const handleKeyDown: KeyboardEventHandler<HTMLTextAreaElement> = (e) => {
         if (e.key === 'Enter' && e.shiftKey) {
             setCanResize(true)
-            if (textareaRef.current) {
+            if (textareaRef.current && typeof window !== 'undefined') {
                 const style = window.getComputedStyle(textareaRef.current)
                 const lineHeight = parseFloat(style.lineHeight)
                 textareaRef.current.style.height =
@@ -25,7 +25,7 @@ export default function ResizableTextarea(
         }
         if (e.key === 'Backspace') {
             setCanResize(true)
-            if (textareaRef.current) {
+            if (textareaRef.current && typeof window !== 'undefined') {
                 const style = window.getComputedStyle(textareaRef.current)
                 const lineHeight = parseFloat(style.lineHeight)
                 if (textareaRef.current.scrollHeight > lineHeight) {

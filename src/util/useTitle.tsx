@@ -2,12 +2,15 @@ import { useEffect } from 'react'
 
 export function useTitle(title: string) {
     useEffect(() => {
-        if (title !== null && title !== undefined) {
-            const prevTitle = document.title
-            document.title = title
-            return () => {
-                document.title = prevTitle
-            }
+        // Skip if running on server or title is not provided
+        if (typeof document === 'undefined' || title === null || title === undefined) {
+            return
+        }
+
+        const prevTitle = document.title
+        document.title = title
+        return () => {
+            document.title = prevTitle
         }
     }, [title])
 }

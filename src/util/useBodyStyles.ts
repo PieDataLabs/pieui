@@ -5,7 +5,7 @@ type StyleValue = string | null;
 
 export function useBodyStyles(styles: Partial<Record<CSSStyleDeclarationKey, StyleValue>>) {
     useEffect(() => {
-        if (!styles) return () => {};
+        if (!styles || typeof document === 'undefined') return () => {};
 
         const original: Partial<Record<CSSStyleDeclarationKey, StyleValue>> = {};
 
@@ -18,6 +18,8 @@ export function useBodyStyles(styles: Partial<Record<CSSStyleDeclarationKey, Sty
         }
 
         return () => {
+            if (typeof document === 'undefined') return;
+
             for (const [key, value] of Object.entries(original)) {
                 if (value !== null && value !== undefined) {
                     (document.body.style as any)[key] = value;
