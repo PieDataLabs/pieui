@@ -30,6 +30,7 @@ import {
 const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
     const apiServer = getApiServer()
     const centrifugeServer = getCentrifugeServer()
+    const renderingLogEnabled = isRenderingLogEnabled()
 
     initializePie()
 
@@ -37,7 +38,7 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
         baseURL: apiServer,
     }), [])
 
-    if (isRenderingLogEnabled()) {
+    if (renderingLogEnabled) {
         console.log('[PieRoot] Rendering with location:', location)
         console.log('[PieRoot] API_SERVER:', apiServer)
         console.log('[PieRoot] Fallback provided:', !!fallback)
@@ -59,7 +60,7 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
         queryKey: ['uiConfig', location.pathname + location.search],
         queryFn: async () => {
             const apiEndpoint = '/api/content' + location.pathname + location.search
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
             }
             const response = await axiosInstance.get(apiEndpoint, {
@@ -70,7 +71,7 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
                 },
                 withCredentials: true,
             })
-            if (isRenderingLogEnabled()) {
+            if (renderingLogEnabled) {
                 console.log('[PieRoot] Received UI configuration:', response.data)
             }
             return response.data
@@ -85,7 +86,7 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
     })
 
     if (error) {
-        if (isRenderingLogEnabled()) {
+        if (renderingLogEnabled) {
             console.error('[PieRoot] Error fetching UI configuration:', error)
             console.error('[PieRoot] Error details:', {
                 message: error.message,
@@ -99,37 +100,35 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
 
 
     if (isLoading || !uiConfiguration) {
-        if (isRenderingLogEnabled()) {
+        if (renderingLogEnabled) {
             console.log('[PieRoot] Loading state:', { isLoading, hasUiConfiguration: !!uiConfiguration })
         }
         return fallback
     }
 
-    if (isRenderingLogEnabled()) {
+    if (renderingLogEnabled) {
         console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
         console.log('[PieRoot] Rendering UI with configuration')
     }
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <MittContext.Provider value={emitter}>
-                <SocketIOContext.Provider value={getSocket(apiServer)}>
-                    <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
-                        <FallbackContext.Provider value={fallback ?? <></>}>
-                            <SocketIOInitProvider>
-                                <CentrifugeIOInitProvider>
+        <MittContext.Provider value={emitter}>
+            <SocketIOContext.Provider value={getSocket(apiServer)}>
+                <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
+                    <FallbackContext.Provider value={fallback ?? <></>}>
+                        <SocketIOInitProvider>
+                            <CentrifugeIOInitProvider>
 
-                                    <StyleRoot>
-                                        <UI uiConfig={uiConfiguration} />
-                                    </StyleRoot>
+                                <StyleRoot>
+                                    <UI uiConfig={uiConfiguration} />
+                                </StyleRoot>
 
-                                </CentrifugeIOInitProvider>
-                            </SocketIOInitProvider>
-                        </FallbackContext.Provider>
-                    </CentrifugeIOContext.Provider>
-                </SocketIOContext.Provider>
-            </MittContext.Provider>
-        </QueryClientProvider>
+                            </CentrifugeIOInitProvider>
+                        </SocketIOInitProvider>
+                    </FallbackContext.Provider>
+                </CentrifugeIOContext.Provider>
+            </SocketIOContext.Provider>
+        </MittContext.Provider>
     )
 }
 
