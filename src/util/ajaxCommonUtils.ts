@@ -1,7 +1,7 @@
-import {getApiServer, isRenderingLogEnabled} from '../util/pieConfig.ts'
+import {getApiServer, isRenderingLogEnabled} from './pieConfig.ts'
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
-import waitForSidAvailable from './waitForSidAvailable.ts'
+import waitForSidAvailable from './waitForSidAvailable'
 
 
 export const getAjaxSubmit = (
@@ -10,18 +10,27 @@ export const getAjaxSubmit = (
     depsNames: Array<string> = [],
     pathname?: string,
 ) => {
-    if (isRenderingLogEnabled()) {
+    const renderingLogEnabled = isRenderingLogEnabled()
+
+    if (renderingLogEnabled) {
         console.log('Registering AJAX: ', pathname, kwargs, depsNames)
     }
 
     if (!pathname || !setUiAjaxConfiguration) {
-        if (isRenderingLogEnabled()) {
+        if (renderingLogEnabled) {
             console.warn('Registration FAILED: pathname or setUiAjaxConfiguration is missing!')
         }
         return () => {}
     }
 
     return async (extraKwargs: Record<string, any> = {}) => {
+        if (typeof window === 'undefined' || typeof document === 'undefined') {
+            if (renderingLogEnabled) {
+                console.warn('getAjaxSubmit called on server, skipping DOM-dependent logic')
+            }
+            return
+        }
+
         if (depsNames.includes('sid')) {
             await waitForSidAvailable()
         }
@@ -38,7 +47,7 @@ export const getAjaxSubmit = (
             } else {
                 const inputs = document.getElementsByName(depName)
                 if (!inputs.length) {
-                    if (isRenderingLogEnabled()) {
+                    if (renderingLogEnabled) {
                         console.warn(`No input found with name ${depName}`)
                     }
                     continue
@@ -91,7 +100,7 @@ export const getAjaxSubmit = (
                                     currentEvent,
                                 ])
                             } catch (err) {
-                                if (isRenderingLogEnabled()) {
+                                if (renderingLogEnabled) {
                                     console.warn('Failed to parse streamed line:', trimmed)
                                 }
                             }
@@ -105,7 +114,7 @@ export const getAjaxSubmit = (
                                 currentEvent,
                             ])
                         } catch (err) {
-                            if (isRenderingLogEnabled()) {
+                            if (renderingLogEnabled) {
                                 console.warn('Failed to parse final streamed line:', buffer)
                             }
                         }
@@ -118,7 +127,7 @@ export const getAjaxSubmit = (
                 }
             })
             .catch((err) => {
-                if (isRenderingLogEnabled()) {
+                if (renderingLogEnabled) {
                     console.error('AJAX request failed:', err)
                 }
                 setUiAjaxConfiguration(null)

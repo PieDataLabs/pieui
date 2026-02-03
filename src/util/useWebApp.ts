@@ -1,31 +1,32 @@
-// Implementation of https://core.telegram.org/bots/webapps#initializing-web-apps as react hook
+import { useEffect, useState } from 'react'
+import {getPageProcessor} from './pieConfig'
+import { InitData, InitDataUnsafe, WebApp } from '../types'
 
-import { useEffect } from 'react'
-import { getPageProcessor } from '../util/pieConfig'
-import {InitData, InitDataUnsafe} from "../types";
+export const useWebApp = (): WebApp | null => {
+    const [webApp, setWebApp] = useState<WebApp | null>(null)
+    const pageProcessor = getPageProcessor()
 
-
-export const useWebApp = () => {
     useEffect(() => {
-        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-        // @ts-ignore
-        window.Telegram.WebApp.ready()
-        if (
-            getPageProcessor() === 'telegram_expanded' &&
-            (window.Telegram.WebApp.platform === 'ios' ||
-                window.Telegram.WebApp.platform === 'android')
-        ) {
-            window.Telegram.WebApp.expand()
-        }
-    })
+        if (typeof window === 'undefined') return
 
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    return window.Telegram.WebApp as WebApp
+        const wApp = window.Telegram.WebApp
+        wApp.ready()
+
+        if (
+            pageProcessor === 'telegram_expanded' &&
+            (wApp.platform === 'ios' || wApp.platform === 'android')
+        ) {
+            wApp.expand()
+        }
+
+        setWebApp(wApp)
+    }, [])
+
+    return webApp
 }
 
 export const useInitData = (): readonly [InitDataUnsafe | undefined, InitData | undefined] => {
-    const WebApp = useWebApp()
+    const webApp = useWebApp()
 
-    return [WebApp?.initDataUnsafe, WebApp?.initData] as const
+    return [webApp?.initDataUnsafe, webApp?.initData] as const
 }

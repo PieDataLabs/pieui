@@ -1,6 +1,6 @@
-import { ComponentMetadata, ComponentRegistration, PieComponentProps } from '../types'
-import { trackLazy } from './lazy'
-import { ComponentType } from 'react'
+import {ComponentMetadata, ComponentRegistration} from '../types'
+import {trackLazy} from './lazy'
+import {ComponentType} from 'react'
 
 const registry = new Map<string, ComponentRegistration<any>>()
 
@@ -69,8 +69,7 @@ export const getComponentMeta = (name: string): ComponentMetadata | undefined =>
 export const getRegistryEntry = (
     name: string
 ): ComponentRegistration<any> | undefined => {
-    const entry = registry.get(name)
-    return entry
+    return registry.get(name)
 }
 
 export const getAllRegisteredComponents = (): string[] => {

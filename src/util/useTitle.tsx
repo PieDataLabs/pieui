@@ -9,5 +9,5 @@ export function useTitle(title: string) {
                 document.title = prevTitle
             }
         }
-    })
+    }, [title])
 }

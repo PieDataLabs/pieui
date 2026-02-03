@@ -36,6 +36,7 @@ export type WebApp = {
     BackButton: BackButtonType
     initDataUnsafe: WebAppInitData
     initData: string
+    ready: () => void
     close: () => void
     openLink: (link: string, option: string) => void
     platform: 'ios' | 'android' | 'web'

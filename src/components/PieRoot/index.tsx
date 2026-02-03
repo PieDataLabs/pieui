@@ -1,8 +1,7 @@
-import React, {useMemo} from 'react'
+import {useEffect, useMemo} from 'react'
 import { QueryClientProvider, useQuery } from '@tanstack/react-query'
 
-// @ts-ignore
-import { StyleRoot } from 'radium'
+import Radium from "radium";
 
 import {PieRootProps} from './types'
 
@@ -18,7 +17,7 @@ import {UIConfigType} from "../../types";
 import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
-import {isPieComponentsInitialized} from "../../util/initializeComponents.ts";
+import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 import {
     getApiServer,
     isRenderingLogEnabled,
@@ -27,12 +26,18 @@ import {
 } from "../../util/pieConfig";
 
 
-const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
+const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootProps) => {
     const apiServer = getApiServer()
     const centrifugeServer = getCentrifugeServer()
     const renderingLogEnabled = isRenderingLogEnabled()
 
-    initializePie()
+    useEffect(() => {
+        if (isPieComponentsInitialized()) {
+            return
+        }
+        initializePieComponents()
+        initializePie()
+    }, [])
 
     const axiosInstance = useMemo(() => createAxiosDateTransformer({
         baseURL: apiServer,
@@ -48,17 +53,20 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
         throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
     }
 
-    if (!isPieComponentsInitialized()) {
-        throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
-    }
+    // if (!isPieComponentsInitialized()) {
+    //     throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
+    // }
 
     const {
         data: uiConfiguration,
         isLoading,
         error,
     } = useQuery<UIConfigType, AxiosError>({
-        queryKey: ['uiConfig', location.pathname + location.search],
+        queryKey: ['uiConfig', location.pathname + location.search, isPieComponentsInitialized()],
         queryFn: async () => {
+            if (!isPieComponentsInitialized()) {
+                return
+            }
             const apiEndpoint = '/api/content' + location.pathname + location.search
             if (renderingLogEnabled) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
@@ -119,9 +127,9 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
 
-                                <StyleRoot>
+                                <Radium.StyleRoot>
                                     <UI uiConfig={uiConfiguration} />
-                                </StyleRoot>
+                                </Radium.StyleRoot>
 
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>
@@ -133,7 +141,7 @@ const PieRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, i
 }
 
 
-const PieRoot: React.FC<PieRootProps> = (props) => (
+const PieRoot = (props: PieRootProps) => (
     <PieConfigContext.Provider value={props.config}>
         <QueryClientProvider client={queryClient}>
             <PieRootContent {...props} />

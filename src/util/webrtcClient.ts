@@ -9,6 +9,8 @@ interface WebRTCClientOptions {
     audioOutputDeviceId?: string
 }
 
+const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined'
+
 export class WebRTCClient {
     private peerConnection: RTCPeerConnection | null = null
     private mediaStream: MediaStream | null = null
@@ -41,6 +43,7 @@ export class WebRTCClient {
     // Method to change audio output device
     setAudioOutputDevice(deviceId: string) {
         this.currentOutputDeviceId = deviceId
+        if (!isBrowser) return
 
         // Apply to any current audio elements
         if (this.options.onAudioStream) {
@@ -51,6 +54,11 @@ export class WebRTCClient {
     }
 
     async connect() {
+        if (!isBrowser) {
+            console.warn('WebRTCClient: connect() called on server, skipping')
+            return
+        }
+
         try {
             this.peerConnection = new RTCPeerConnection()
 
@@ -149,7 +157,7 @@ export class WebRTCClient {
     }
 
     private setupAudioAnalysis() {
-        if (!this.mediaStream) return
+        if (!isBrowser || !this.mediaStream || !this.options.onAudioLevel) return
 
         try {
             this.audioContext = new AudioContext()
@@ -199,6 +207,8 @@ export class WebRTCClient {
     }
 
     private stopAnalysis() {
+        if (!isBrowser) return
+
         if (this.animationFrameId !== null) {
             cancelAnimationFrame(this.animationFrameId)
             this.animationFrameId = null
@@ -214,6 +224,8 @@ export class WebRTCClient {
     }
 
     disconnect() {
+        if (!isBrowser) return
+
         this.stopAnalysis()
 
         if (this.mediaStream) {
