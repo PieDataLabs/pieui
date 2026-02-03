@@ -13,7 +13,7 @@
     "pieui": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist", "src"
   ],
   "sideEffects": false,
   "exports": {
