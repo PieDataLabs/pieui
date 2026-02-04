@@ -1,16 +1,13 @@
-"use client"
-
 import {useEffect, useMemo} from 'react'
-import { QueryClientProvider, useQuery } from '@tanstack/react-query'
+import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
 
-import Radium from "radium";
+// import Radium from "radium";
 
 import {PieRootProps} from './types'
 
 import MittContext, {emitter} from "../../util/mitt"
 import SocketIOContext, {getSocket} from "../../util/socket"
 import CentrifugeIOContext, { getCentrifuge } from "../../util/centrifuge"
-import { queryClient } from "../../util/queryClient"
 
 import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
 import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
@@ -129,9 +126,7 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
 
-                                <Radium.StyleRoot>
-                                    <UI uiConfig={uiConfiguration} />
-                                </Radium.StyleRoot>
+                                <UI uiConfig={uiConfiguration} />
 
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>
@@ -143,13 +138,16 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
 }
 
 
-const PieRoot = (props: PieRootProps) => (
-    <PieConfigContext.Provider value={props.config}>
-        <QueryClientProvider client={queryClient}>
-            <PieRootContent {...props} />
-        </QueryClientProvider>
-    </PieConfigContext.Provider>
-)
+const PieRoot = (props: PieRootProps) => {
+    const queryClient = new QueryClient()
+    return (
+        <PieConfigContext.Provider value={props.config}>
+            <QueryClientProvider client={queryClient}>
+                <PieRootContent {...props} />
+            </QueryClientProvider>
+        </PieConfigContext.Provider>
+    )
+}
 
 
 export default PieRoot

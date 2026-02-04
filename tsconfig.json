@@ -42,6 +42,7 @@
   "exclude": [
     "node_modules",
     "dist",
-    "src/cli-schema.d.ts"
+    "src/cli-schema.d.ts",
+    "src/cli.ts"
   ]
 }

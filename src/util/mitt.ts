@@ -1,5 +1,3 @@
-"use client"
-
 import mitt from 'mitt'
 import { createContext } from 'react'
 

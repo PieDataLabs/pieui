@@ -1,14 +1,11 @@
-"use client"
-
 import React, {useEffect, useMemo} from 'react'
-import { QueryClientProvider, useQuery } from '@tanstack/react-query'
+import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
 
 import {PieRootProps} from '../PieRoot/types'
 
 import MittContext, {emitter} from "../../util/mitt"
 import SocketIOContext, {getSocket} from "../../util/socket"
 import CentrifugeIOContext, {getCentrifuge} from "../../util/centrifuge"
-import { queryClient } from "../../util/queryClient"
 
 import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
 import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
@@ -25,7 +22,6 @@ import {
 } from "../../util/pieConfig";
 import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 import {useWebApp} from "../../util/useWebApp.ts";
-import Radium from "radium";
 
 
 const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
@@ -127,37 +123,36 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
     }
 
     return (
-        <QueryClientProvider client={queryClient}>
-            <MittContext.Provider value={emitter}>
-                <SocketIOContext.Provider value={getSocket(apiServer)}>
-                    <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
-                        <FallbackContext.Provider value={fallback ?? <></>}>
-                            <SocketIOInitProvider>
-                                <CentrifugeIOInitProvider>
+        <MittContext.Provider value={emitter}>
+            <SocketIOContext.Provider value={getSocket(apiServer)}>
+                <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
+                    <FallbackContext.Provider value={fallback ?? <></>}>
+                        <SocketIOInitProvider>
+                            <CentrifugeIOInitProvider>
 
-                                    <Radium.StyleRoot>
-                                        <UI uiConfig={uiConfiguration} />
-                                    </Radium.StyleRoot>
+                                <UI uiConfig={uiConfiguration} />
 
-                                </CentrifugeIOInitProvider>
-                            </SocketIOInitProvider>
-                        </FallbackContext.Provider>
-                    </CentrifugeIOContext.Provider>
-                </SocketIOContext.Provider>
-            </MittContext.Provider>
-        </QueryClientProvider>
+                            </CentrifugeIOInitProvider>
+                        </SocketIOInitProvider>
+                    </FallbackContext.Provider>
+                </CentrifugeIOContext.Provider>
+            </SocketIOContext.Provider>
+        </MittContext.Provider>
     )
 }
 
 
 
-const PieTelegramRoot: React.FC<PieRootProps> = (props) => (
-    <PieConfigContext.Provider value={props.config}>
-        <QueryClientProvider client={queryClient}>
-            <PieTelegramRootContent {...props} />
-        </QueryClientProvider>
-    </PieConfigContext.Provider>
-)
+const PieTelegramRoot: React.FC<PieRootProps> = (props) => {
+    const queryClient = new QueryClient()
+    return (
+        <PieConfigContext.Provider value={props.config}>
+            <QueryClientProvider client={queryClient}>
+                <PieTelegramRootContent {...props} />
+            </QueryClientProvider>
+        </PieConfigContext.Provider>
+    )
+}
 
 
 export default PieTelegramRoot

@@ -1,5 +1,3 @@
-"use client"
-
 import { useContext, useEffect } from 'react';
 import { isRenderingLogEnabled } from '../../util/pieConfig';
 import CentrifugeIOContext from '../../util/centrifuge';
