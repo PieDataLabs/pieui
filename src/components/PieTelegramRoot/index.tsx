@@ -1,6 +1,7 @@
 import React, {useEffect, useMemo} from 'react'
 import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
 
+import Radium from "radium";
 import {PieRootProps} from '../PieRoot/types'
 
 import MittContext, {emitter} from "../../util/mitt"
@@ -130,7 +131,9 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
 
-                                <UI uiConfig={uiConfiguration} />
+                                <Radium.StyleRoot>
+                                    <UI uiConfig={uiConfiguration} />
+                                </Radium.StyleRoot>
 
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>

@@ -1,8 +1,7 @@
 import {useEffect, useMemo} from 'react'
 import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
 
-// import Radium from "radium";
-
+import Radium from "radium";
 import {PieRootProps} from './types'
 
 import MittContext, {emitter} from "../../util/mitt"
@@ -126,7 +125,9 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
 
-                                <UI uiConfig={uiConfiguration} />
+                                <Radium.StyleRoot>
+                                    <UI uiConfig={uiConfiguration} />
+                                </Radium.StyleRoot>
 
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>

@@ -6,6 +6,7 @@ import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
 import FallbackContext from '../../../../util/fallback'
 import { registerPieComponent } from '../../../../util/registry'
+import Radium from "radium";
 
 
 const AjaxGroupCard = ({
@@ -92,4 +93,4 @@ const AjaxGroupCard = ({
     )
 }
 
-export default AjaxGroupCard
+export default Radium(AjaxGroupCard)
