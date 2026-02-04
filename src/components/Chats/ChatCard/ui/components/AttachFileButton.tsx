@@ -27,6 +27,7 @@ const AttachFileButton = ({
             }}
         >
             <input
+                id={name + "__pie__" + 'file'}
                 name={name + "__pie__" + 'file'}
                 className='hidden'
                 type='file'
@@ -38,7 +39,8 @@ const AttachFileButton = ({
                     }
                 }}
             />
-            {icons.attachFileIcon ? <img src={icons.attachFileIcon} alt='' /> : <AttachFileIcon />}
+            <label htmlFor={name + "__pie__" + 'file'} />
+            {icons.attachFileIcon ? <img src={icons.attachFileIcon} alt=''/> : <AttachFileIcon/>}
         </button>
     )
 }

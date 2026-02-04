@@ -85,6 +85,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.90.20",
     "@types/radium": "^0.24.8",
+    "annyang": "^2.6.1",
     "axios": "^1.13.2",
     "axios-date-transformer": "^1.2.1",
     "centrifuge": "^5.5.3",
