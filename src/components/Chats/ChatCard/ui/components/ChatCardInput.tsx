@@ -1,7 +1,7 @@
 import { CSSProperties, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import ResizableTextarea from './ResizableTextarea'
-import annyang from 'annyang'
-import '../../types/annyang.d.ts'
+// import annyang from 'annyang'
+// import '../../types/annyang.d.ts'
 import SendButton from './SendButton'
 import { Option } from '../../types'
 import AttachFileButton from './AttachFileButton'
@@ -70,28 +70,28 @@ const ChatCardInput = forwardRef<
         }, [defaultValue])
 
         useEffect(() => {
-            if (annyang) {
-                annyang.addCallback('result', (phrases: string[]) => {
-                    setValue(phrases[0])
-                })
-                return () => {
-                    annyang.abort()
-                    annyang.removeCallback()
-                }
-            }
+            // if (annyang) {
+            //     annyang.addCallback('result', (phrases: string[]) => {
+            //         setValue(phrases[0])
+            //     })
+            //     return () => {
+            //         annyang.abort()
+            //         annyang.removeCallback()
+            //     }
+            // }
         }, [])
 
         const toggleListening = () => {
-            if (!annyang) return
-            if (isListening) {
-                annyang.abort()
-                setIsListening(false)
-                handleSendMessage()
-            } else {
-                annyang.start({ autoRestart: true, continuous: true })
-                setValue('')
-                setIsListening(true)
-            }
+            // if (!annyang) return
+            // if (isListening) {
+            //     annyang.abort()
+            //     setIsListening(false)
+            //     handleSendMessage()
+            // } else {
+            //     annyang.start({ autoRestart: true, continuous: true })
+            //     setValue('')
+            //     setIsListening(true)
+            // }
         }
 
         return (

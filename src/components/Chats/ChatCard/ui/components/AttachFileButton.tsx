@@ -17,6 +17,7 @@ const AttachFileButton = ({
     icons: ChatIconsType
 }) => {
     return (
+        <>
         <button
             className='rounded-md p-1 text-gray-500 ring-0 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent'
             type='button'
@@ -26,22 +27,22 @@ const AttachFileButton = ({
                 }
             }}
         >
-            <input
-                id={name + "__pie__" + 'file'}
-                name={name + "__pie__" + 'file'}
-                className='hidden'
-                type='file'
-                accept={accept}
-                ref={fileInputRef}
-                onChange={(e) => {
-                    if (e.target.files) {
-                        onSelectFile(e.target.files[0])
-                    }
-                }}
-            />
-            <label htmlFor={name + "__pie__" + 'file'} />
             {icons.attachFileIcon ? <img src={icons.attachFileIcon} alt=''/> : <AttachFileIcon/>}
         </button>
+        <input
+            id={name + "__pie__" + 'file'}
+            name={name + "__pie__" + 'file'}
+            className='hidden'
+            type='file'
+            accept={accept}
+            ref={fileInputRef}
+            onChange={(e) => {
+                if (e.target.files) {
+                    onSelectFile(e.target.files[0])
+                }
+            }}
+        />
+        </>
     )
 }
 
