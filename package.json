@@ -92,6 +92,7 @@
     "html-react-parser": "^5.2.15",
     "mitt": "^3.0.1",
     "radium": "^0.26.2",
-    "socket.io-client": "^4.8.3"
+    "socket.io-client": "^4.8.3",
+    "tailwind-merge": "^3.4.0"
   }
 }
