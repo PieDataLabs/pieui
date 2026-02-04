@@ -1,4 +1,4 @@
-import {useEffect, useMemo} from 'react'
+import {useCallback, useEffect, useMemo, useState} from 'react'
 import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
 
 import Radium from "radium";
@@ -11,7 +11,7 @@ import CentrifugeIOContext, { getCentrifuge } from "../../util/centrifuge"
 import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
 import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
 import FallbackContext from "../../util/fallback";
-import {UIConfigType} from "../../types";
+import {UIConfigType, UIEventType} from "../../types";
 import {AxiosError} from "axios";
 import UI from "../UI";
 import { createAxiosDateTransformer } from "axios-date-transformer";
@@ -38,31 +38,27 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
     }, [])
 
     const axiosInstance = useMemo(() => createAxiosDateTransformer({
-        baseURL: apiServer,
-    }), [])
+        baseURL: apiServer || '',
+    }), [apiServer])
 
-    if (renderingLogEnabled) {
-        console.log('[PieRoot] Rendering with location:', location)
-        console.log('[PieRoot] API_SERVER:', apiServer)
-        console.log('[PieRoot] Fallback provided:', !!fallback)
-    }
+    const [ajaxConfig, setAjaxConfig] = useState<UIConfigType | null>(null)
+    const setUiAjaxConfiguration = useCallback((content: UIConfigType | UIEventType[] | null) => {
+        if (content === null || Array.isArray(content)) {
+            setAjaxConfig(null)
+        } else {
+            setAjaxConfig(content)
+        }
+    }, [])
 
-    if (!apiServer) {
-        throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
-    }
-
-    // if (!isPieComponentsInitialized()) {
-    //     throw Error("Pie components are not initialized. Use initializePieComponents() at the top of page file")
-    // }
-
+    // Все хуки вызываем до любых return/throw, иначе ломается порядок хуков
     const {
         data: uiConfiguration,
         isLoading,
         error,
     } = useQuery<UIConfigType, AxiosError>({
-        queryKey: ['uiConfig', location.pathname + location.search, isPieComponentsInitialized()],
+        queryKey: ['uiConfig', location.pathname + location.search, isPieComponentsInitialized(), apiServer],
         queryFn: async () => {
-            if (!isPieComponentsInitialized()) {
+            if (!apiServer || !isPieComponentsInitialized()) {
                 return
             }
             const apiEndpoint = '/api/content' + location.pathname + location.search
@@ -90,6 +86,16 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
         retry: true,
         retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 30000),
     })
+
+    if (!apiServer) {
+        return fallback ?? null
+    }
+
+    if (renderingLogEnabled) {
+        console.log('[PieRoot] Rendering with location:', location)
+        console.log('[PieRoot] API_SERVER:', apiServer)
+        console.log('[PieRoot] Fallback provided:', !!fallback)
+    }
 
     if (error) {
         if (renderingLogEnabled) {
@@ -126,7 +132,10 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
                             <CentrifugeIOInitProvider>
 
                                 <Radium.StyleRoot>
-                                    <UI uiConfig={uiConfiguration} />
+                                    <UI
+                                        uiConfig={ajaxConfig ?? uiConfiguration}
+                                        setUiAjaxConfiguration={setUiAjaxConfiguration}
+                                    />
                                 </Radium.StyleRoot>
 
                             </CentrifugeIOInitProvider>

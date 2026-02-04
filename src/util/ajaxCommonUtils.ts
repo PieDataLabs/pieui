@@ -1,16 +1,22 @@
-import {getApiServer, isRenderingLogEnabled} from './pieConfig'
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
 import waitForSidAvailable from './waitForSidAvailable'
 
+/** Options to avoid calling hooks inside useMemo. Pass from component via usePieConfig(). */
+export type GetAjaxSubmitOptions = {
+    apiServer?: string | null
+    renderingLogEnabled?: boolean
+}
 
 export const getAjaxSubmit = (
     setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
     kwargs: Record<string, any> = {},
     depsNames: Array<string> = [],
     pathname?: string,
+    options?: GetAjaxSubmitOptions,
 ) => {
-    const renderingLogEnabled = isRenderingLogEnabled()
+    const renderingLogEnabled = options?.renderingLogEnabled ?? false
+    const apiServer = options?.apiServer ?? ''
 
     if (renderingLogEnabled) {
         console.log('Registering AJAX: ', pathname, kwargs, depsNames)
@@ -65,7 +71,7 @@ export const getAjaxSubmit = (
             }
         }
 
-        const apiEndpoint = getApiServer() + 'api/ajax_content' + pathname
+        const apiEndpoint = apiServer + 'api/ajax_content' + pathname
 
         setUiAjaxConfiguration(null)
         return await fetch(apiEndpoint, {

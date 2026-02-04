@@ -1,4 +1,5 @@
 import { getAjaxSubmit } from '../../../../util/ajaxCommonUtils'
+import { usePieConfig } from '../../../../util/pieConfig'
 import { ChatCardProps } from '../types'
 import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
@@ -9,6 +10,7 @@ const ChatCard = ({
     data,
     setUiAjaxConfiguration,
 }: ChatCardProps) => {
+    const { apiServer, enableRenderingLog } = usePieConfig()
     const {
         name,
         defaultValue,
@@ -37,8 +39,11 @@ const ChatCard = ({
     const [dirty, setDirty] = useState<boolean>(false)
 
     const ajaxSubmit = useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname],
+        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
+            apiServer,
+            renderingLogEnabled: enableRenderingLog,
+        }),
+        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, enableRenderingLog],
     )
 
     useEffect(() => {

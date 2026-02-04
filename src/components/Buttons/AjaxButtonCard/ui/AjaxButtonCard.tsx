@@ -1,6 +1,7 @@
 import {AjaxButtonCardProps} from '../types'
 import PieCard from '../../../PieCard'
 import { getAjaxSubmit } from '../../../../util/ajaxCommonUtils'
+import { usePieConfig } from '../../../../util/pieConfig'
 import { useMemo } from 'react'
 import parse from 'html-react-parser'
 import Radium from "radium";
@@ -11,10 +12,14 @@ const AjaxButtonCard = ({
     data,
     setUiAjaxConfiguration,
 }: AjaxButtonCardProps) => {
+    const { apiServer, enableRenderingLog } = usePieConfig()
     const { name, title, iconUrl, iconPosition, sx, pathname, kwargs, depsNames } = data
     const ajaxSubmit = useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname],
+        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
+            apiServer,
+            renderingLogEnabled: enableRenderingLog,
+        }),
+        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, enableRenderingLog],
     )
 
     return (
