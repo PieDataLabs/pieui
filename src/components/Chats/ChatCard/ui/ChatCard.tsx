@@ -1,5 +1,4 @@
-import { getAjaxSubmit } from '../../../../util/ajaxCommonUtils'
-import { usePieConfig } from '../../../../util/pieConfig'
+import {useAjaxSubmit} from '../../../../util/ajaxCommonUtils'
 import { ChatCardProps } from '../types'
 import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
@@ -10,7 +9,6 @@ const ChatCard = ({
     data,
     setUiAjaxConfiguration,
 }: ChatCardProps) => {
-    const { apiServer, enableRenderingLog } = usePieConfig()
     const {
         name,
         defaultValue,
@@ -37,14 +35,7 @@ const ChatCard = ({
     const inputRef = useRef<ChatCardInputHandle>(null)
     const messagesRef = useRef<MessagesBoardHandle>(null)
     const [dirty, setDirty] = useState<boolean>(false)
-
-    const ajaxSubmit = useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
-            apiServer,
-            renderingLogEnabled: enableRenderingLog,
-        }),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, enableRenderingLog],
-    )
+    const ajaxSubmit = useAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname)
 
     useEffect(() => {
         if (dirty) {

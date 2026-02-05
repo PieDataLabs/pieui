@@ -13,10 +13,7 @@
     "pieui": "dist/cli.js"
   },
   "files": [
-    "dist",
-    "src",
-    "!src/cli.ts",
-    "!src/cli-schema.d.ts"
+    "dist"
   ],
   "sideEffects": false,
   "exports": {

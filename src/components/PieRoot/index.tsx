@@ -41,15 +41,6 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
         baseURL: apiServer || '',
     }), [apiServer])
 
-    const [ajaxConfig, setAjaxConfig] = useState<UIConfigType | null>(null)
-    const setUiAjaxConfiguration = useCallback((content: UIConfigType | UIEventType[] | null) => {
-        if (content === null || Array.isArray(content)) {
-            setAjaxConfig(null)
-        } else {
-            setAjaxConfig(content)
-        }
-    }, [])
-
     // Все хуки вызываем до любых return/throw, иначе ломается порядок хуков
     const {
         data: uiConfiguration,
@@ -133,8 +124,7 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
 
                                 <Radium.StyleRoot>
                                     <UI
-                                        uiConfig={ajaxConfig ?? uiConfiguration}
-                                        setUiAjaxConfiguration={setUiAjaxConfiguration}
+                                        uiConfig={uiConfiguration}
                                     />
                                 </Radium.StyleRoot>
 

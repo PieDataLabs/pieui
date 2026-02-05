@@ -1,6 +1,8 @@
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
 import waitForSidAvailable from './waitForSidAvailable'
+import {usePieConfig} from "./pieConfig.ts";
+import {useMemo} from "react";
 
 /** Options to avoid calling hooks inside useMemo. Pass from component via usePieConfig(). */
 export type GetAjaxSubmitOptions = {
@@ -140,4 +142,21 @@ export const getAjaxSubmit = (
                 return err
             })
     }
+}
+
+
+export const useAjaxSubmit = (
+    setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
+    kwargs: Record<string, any> = {},
+    depsNames: Array<string> = [],
+    pathname?: string,
+) => {
+    const { apiServer, enableRenderingLog } = usePieConfig()
+    return useMemo(
+        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
+            apiServer,
+            renderingLogEnabled: enableRenderingLog,
+        }),
+        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, enableRenderingLog],
+    )
 }
