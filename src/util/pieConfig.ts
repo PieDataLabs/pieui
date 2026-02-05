@@ -41,3 +41,9 @@ export const usePageProcessor = () => {
 }
 
 export const getPageProcessor = usePageProcessor
+
+//
+// export const useOnNavigate = () => {
+//     const { onN } = usePieConfig()
+//     return pageProcessor
+// }
