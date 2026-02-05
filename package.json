@@ -41,7 +41,7 @@
     "build:components:cjs:debug": "bun build src/components/index.ts --outfile dist/components/index.js --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
     "build:debug": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm:debug && NODE_ENV=production bun run build:cjs:debug && NODE_ENV=production bun run build:components:esm:debug && NODE_ENV=production bun run build:components:cjs:debug && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
     "build:types": "tsc --emitDeclarationOnly",
-    "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node",
+    "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node --external vm2",
     "dev": "bun run src/index.ts",
     "typecheck": "tsc --noEmit",
     "lint": "echo 'Linting not configured yet'",
@@ -94,6 +94,7 @@
     "mitt": "^3.0.1",
     "radium": "^0.26.2",
     "socket.io-client": "^4.8.3",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "vm2": "^3.10.0"
   }
 }

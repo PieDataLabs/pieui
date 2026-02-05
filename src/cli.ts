@@ -421,7 +421,7 @@ const addCommand = (componentName: string, componentType: ComponentType = 'compl
             break
     }
 
-    const typesContent = `import { ${baseInterface} } from 'pieui'
+    const typesContent = `import { ${baseInterface} } from '@piedata/pieui'
 
 export interface ${componentName}Data {
     name: string
@@ -437,7 +437,7 @@ export interface ${componentName}Props extends ${baseInterface}<${componentName}
 
     if (componentType === 'simple') {
         componentContent = `import React from 'react'
-import { PieCard } from 'pieui'
+import { PieCard } from '@piedata/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName}: React.FC<${componentName}Props> = ({ data }) => {
@@ -457,7 +457,7 @@ export default ${componentName}
 `
     } else if (componentType === 'complex') {
         componentContent = `import React from 'react'
-import { PieCard } from 'pieui'
+import { PieCard } from '@piedata/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName}: React.FC<${componentName}Props> = ({ data, children }) => {
@@ -478,7 +478,7 @@ export default ${componentName}
 `
     } else if (componentType === 'simple-container') {
         componentContent = `import React from 'react'
-import { PieCard, UI } from 'pieui'
+import { PieCard, UI } from '@piedata/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName}: React.FC<${componentName}Props> = ({
@@ -508,7 +508,7 @@ export default ${componentName}
 `
     } else { // complex-container
         componentContent = `import React from 'react'
-import { PieCard, UI } from 'pieui'
+import { PieCard, UI } from '@piedata/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName}: React.FC<${componentName}Props> = ({
@@ -771,7 +771,7 @@ const main = async () => {
             console.log('[pieui] Append mode enabled - loading existing pieui components')
 
             // First, try to find pieui's manifest in node_modules
-            const nodeModulesPath = path.join(process.cwd(), 'node_modules', 'pieui', 'dist', MANIFEST_FILENAME)
+            const nodeModulesPath = path.join(process.cwd(), 'node_modules', '@piedata', 'pieui', 'dist', MANIFEST_FILENAME)
 
             if (fs.existsSync(nodeModulesPath)) {
                 try {
