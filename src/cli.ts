@@ -277,19 +277,15 @@ const initCommand = () => {
 
     // Create registry.ts
     const registryPath = path.join(pieComponentsDir, 'registry.ts')
-    const registryContent = `
-"use client"
-import { registerPieComponent, initializePieComponents, isPieComponentsInitialized } from "pieui";
+    const registryContent = `"use client"
+
+import { registerPieComponent } from "@piedata/pieui";
 
 // Import your custom components here
 // Example:
 // import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";
 
-// Initialize and register components
-if (!isPieComponentsInitialized()) {
-    // Initialize PieUI built-in components
-    initializePieComponents();
-
+export const initializePieUI = () => {
     // Register your custom components here
     // Example:
     // registerPieComponent({
@@ -306,10 +302,65 @@ if (!isPieComponentsInitialized()) {
         console.log('[pieui] registry.ts already exists')
     }
 
+    // Update tailwind.config.js if it exists
+    const tailwindConfigPath = path.join(process.cwd(), 'tailwind.config.js')
+    const tailwindConfigTsPath = path.join(process.cwd(), 'tailwind.config.ts')
+    const pieuiContentPath = './node_modules/@piedata/pieui/dist/**/*.{js,mjs,ts,jsx,tsx}'
+
+    let configPath = null
+    if (fs.existsSync(tailwindConfigPath)) {
+        configPath = tailwindConfigPath
+    } else if (fs.existsSync(tailwindConfigTsPath)) {
+        configPath = tailwindConfigTsPath
+    }
+
+    if (configPath) {
+        console.log('[pieui] Updating Tailwind config...')
+
+        try {
+            let configContent = fs.readFileSync(configPath, 'utf8')
+
+            // Check if the path is already added
+            if (!configContent.includes(pieuiContentPath)) {
+                // Try to find the content array
+                const contentMatch = configContent.match(/content\s*:\s*\[([^\]]*)\]/s)
+
+                if (contentMatch) {
+                    const contentArray = contentMatch[1]
+                    // Add the pieui path to the content array
+                    const newContentArray = contentArray.trim()
+                        ? `${contentArray.trim()},\n    "${pieuiContentPath}"`
+                        : `\n    "${pieuiContentPath}"\n  `
+
+                    configContent = configContent.replace(
+                        contentMatch[0],
+                        `content: [${newContentArray}]`
+                    )
+
+                    fs.writeFileSync(configPath, configContent, 'utf8')
+                    console.log('[pieui] Added PieUI path to Tailwind content configuration')
+                } else {
+                    console.log('[pieui] Warning: Could not find content array in Tailwind config')
+                    console.log('[pieui] Please manually add the following to your Tailwind content array:')
+                    console.log(`[pieui]   "${pieuiContentPath}"`)
+                }
+            } else {
+                console.log('[pieui] PieUI path already exists in Tailwind config')
+            }
+        } catch (error) {
+            console.error('[pieui] Error updating Tailwind config:', error)
+            console.log('[pieui] Please manually add the following to your Tailwind content array:')
+            console.log(`[pieui]   "${pieuiContentPath}"`)
+        }
+    } else {
+        console.log('[pieui] No Tailwind config found. If you use Tailwind CSS, add this to your content array:')
+        console.log(`[pieui]   "${pieuiContentPath}"`)
+    }
+
     console.log('[pieui] Initialization complete!')
     console.log('[pieui] Next steps:')
-    console.log('  1. Import { registerCustomComponents } from "./piecomponents/registry" in your app')
-    console.log('  2. Call registerCustomComponents() before using PieRoot')
+    console.log('  1. Import { initializePieUI } from "./piecomponents/registry" in your app')
+    console.log('  2. Call initializePieUI() before using PieRoot')
     console.log('  3. Use "pieui add <ComponentName>" to create new components')
 }
 
@@ -517,7 +568,7 @@ export default ${componentName}
     // Add import
     const importLine = `import ${componentName} from "./${componentName}/ui/${componentName}";`
 
-    // Find the position to insert the import (after other component imports)
+    // Find the position to insert the import (after other component imports or after pieui import)
     const lastImportMatch = registryContent.match(/import .* from "\.\/.*\/ui\/.*";/g)
     if (lastImportMatch) {
         const lastImport = lastImportMatch[lastImportMatch.length - 1]
@@ -525,24 +576,58 @@ export default ${componentName}
         registryContent = registryContent.slice(0, insertPos) + '\n' + importLine + registryContent.slice(insertPos)
     } else {
         // Insert after the pieui import
-        const pieuiImportEnd = registryContent.indexOf('";') + 2
-        registryContent = registryContent.slice(0, pieuiImportEnd) + '\n\n' + importLine + registryContent.slice(pieuiImportEnd)
+        const pieuiImportMatch = registryContent.match(/import .* from ["']@piedata\/pieui["'];/)
+        if (pieuiImportMatch) {
+            const pieuiImportEnd = registryContent.indexOf(pieuiImportMatch[0]) + pieuiImportMatch[0].length
+            registryContent = registryContent.slice(0, pieuiImportEnd) + '\n\n// Import your custom components here\n// Example:\n// import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";\n' + importLine + registryContent.slice(pieuiImportEnd)
+        }
     }
 
-    // Add registration inside the if block
+    // Add registration inside the initializePieUI function
     const registerLine = `    registerPieComponent({
         name: '${componentName}',
         component: ${componentName},
     });`
 
-    // Find the closing brace of the if block
-    const ifBlockEnd = registryContent.lastIndexOf('\n}')
-    if (ifBlockEnd !== -1) {
-        // Insert before the closing brace
-        registryContent = registryContent.slice(0, ifBlockEnd) + '\n\n' + registerLine + registryContent.slice(ifBlockEnd)
-    } else {
-        // Fallback: add at the end
-        registryContent = registryContent.trimEnd() + '\n\n' + registerLine + '\n}'
+    // Find the initializePieUI function
+    const functionMatch = registryContent.match(/export const initializePieUI = \(\) => \{([\s\S]*?)\n\}/m)
+    if (functionMatch) {
+        const functionContent = functionMatch[1]
+
+        // Check if there are already registrations
+        if (functionContent.includes('registerPieComponent({')) {
+            // Add after the last registration
+            const lastRegisterMatch = functionContent.match(/registerPieComponent\([^)]+\);/g)
+            if (lastRegisterMatch) {
+                const lastRegister = lastRegisterMatch[lastRegisterMatch.length - 1]
+                const lastRegisterPos = registryContent.lastIndexOf(lastRegister) + lastRegister.length
+                registryContent = registryContent.slice(0, lastRegisterPos) + '\n\n' + registerLine + registryContent.slice(lastRegisterPos)
+            }
+        } else {
+            // Find where to insert - after the opening brace of the function
+            const functionStart = registryContent.indexOf('export const initializePieUI = () => {')
+            const openBracePos = registryContent.indexOf('{', functionStart) + 1
+
+            // Check if we should replace comment block
+            const commentStart = registryContent.indexOf('// Register your custom components here', openBracePos)
+            if (commentStart !== -1 && commentStart < registryContent.indexOf('}', openBracePos)) {
+                // Find the end of the comment block
+                const lines = registryContent.substring(commentStart).split('\n')
+                let commentEnd = commentStart
+                for (const line of lines) {
+                    if (line.trim() && !line.trim().startsWith('//')) {
+                        break
+                    }
+                    commentEnd += line.length + 1
+                }
+
+                // Replace the comment block
+                registryContent = registryContent.slice(0, commentStart) + registerLine + '\n' + registryContent.slice(commentEnd)
+            } else {
+                // Just add after the opening brace
+                registryContent = registryContent.slice(0, openBracePos) + '\n' + registerLine + registryContent.slice(openBracePos)
+            }
+        }
     }
 
     fs.writeFileSync(registryPath, registryContent, 'utf8')

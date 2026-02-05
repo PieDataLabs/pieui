@@ -122,7 +122,7 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
 
-                                <Radium.StyleRoot>
+                                <Radium.StyleRoot style={{display: "contents"}}>
                                     <UI
                                         uiConfig={uiConfiguration}
                                     />
