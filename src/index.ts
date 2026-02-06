@@ -13,3 +13,4 @@ export type {
     PieConfig
 } from './types'
 
+export { useAjaxSubmit } from './util/ajaxCommonUtils'
