@@ -23,6 +23,7 @@ import {
 } from "../../util/pieConfig";
 import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
 import {useWebApp} from "../../util/useWebApp.ts";
+import NavigateContext from "../../util/navigate.ts";
 
 
 const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
@@ -149,11 +150,13 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
 const PieTelegramRoot: React.FC<PieRootProps> = (props) => {
     const queryClient = new QueryClient()
     return (
-        <PieConfigContext.Provider value={props.config}>
-            <QueryClientProvider client={queryClient}>
-                <PieTelegramRootContent {...props} />
-            </QueryClientProvider>
-        </PieConfigContext.Provider>
+        <NavigateContext.Provider value={props.onNavigate}>
+            <PieConfigContext.Provider value={props.config}>
+                <QueryClientProvider client={queryClient}>
+                    <PieTelegramRootContent {...props} />
+                </QueryClientProvider>
+            </PieConfigContext.Provider>
+        </NavigateContext.Provider>
     )
 }
 

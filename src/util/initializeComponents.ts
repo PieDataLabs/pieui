@@ -8,6 +8,9 @@ import AjaxGroupCard from '../components/Containers/AjaxGroupCard/ui/AjaxGroupCa
 import AjaxButtonCard from '../components/Buttons/AjaxButtonCard/ui/AjaxButtonCard'
 
 import ChatCard from '../components/Chats/ChatCard/ui/ChatCard'
+import HiddenCard from "../components/Common/HiddenCard";
+import AutoRedirectCard from "../components/Common/AutoRedirectCard";
+import HTMLEmbedCard from "../components/Common/HTMLEmbedCard";
 
 let initialized = false
 
@@ -68,6 +71,30 @@ export function initializePieComponents(): void {
     registerPieComponent({
         name: 'ChatCard',
         component: ChatCard,
+        metadata: {
+            author: "PieData",
+        }
+    })
+
+    registerPieComponent({
+        name: 'HiddenCard',
+        component: HiddenCard,
+        metadata: {
+            author: "PieData",
+        }
+    })
+
+    registerPieComponent({
+        name: 'AutoRedirectCard',
+        component: AutoRedirectCard,
+        metadata: {
+            author: "PieData",
+        }
+    })
+
+    registerPieComponent({
+        name: 'HTMLEmbedCard',
+        component: HTMLEmbedCard,
         metadata: {
             author: "PieData",
         }

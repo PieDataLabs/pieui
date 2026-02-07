@@ -22,6 +22,7 @@ import {
     getCentrifugeServer,
     PieConfigContext
 } from "../../util/pieConfig";
+import NavigateContext from "../../util/navigate.ts";
 
 
 const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootProps) => {
@@ -141,11 +142,13 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
 const PieRoot = (props: PieRootProps) => {
     const queryClient = new QueryClient()
     return (
-        <PieConfigContext.Provider value={props.config}>
-            <QueryClientProvider client={queryClient}>
-                <PieRootContent {...props} />
-            </QueryClientProvider>
-        </PieConfigContext.Provider>
+        <NavigateContext.Provider value={props.onNavigate}>
+            <PieConfigContext.Provider value={props.config}>
+                <QueryClientProvider client={queryClient}>
+                    <PieRootContent {...props} />
+                </QueryClientProvider>
+            </PieConfigContext.Provider>
+        </NavigateContext.Provider>
     )
 }
 
