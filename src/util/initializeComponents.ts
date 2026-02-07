@@ -11,6 +11,7 @@ import ChatCard from '../components/Chats/ChatCard/ui/ChatCard'
 import HiddenCard from "../components/Common/HiddenCard";
 import AutoRedirectCard from "../components/Common/AutoRedirectCard";
 import HTMLEmbedCard from "../components/Common/HTMLEmbedCard";
+import IOEventsCard from "../components/Common/IOEventsCard";
 
 let initialized = false
 
@@ -95,6 +96,14 @@ export function initializePieComponents(): void {
     registerPieComponent({
         name: 'HTMLEmbedCard',
         component: HTMLEmbedCard,
+        metadata: {
+            author: "PieData",
+        }
+    })
+
+    registerPieComponent({
+        name: 'IOEventsCard',
+        component: IOEventsCard,
         metadata: {
             author: "PieData",
         }
