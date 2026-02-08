@@ -69,11 +69,11 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
             if (!isPieComponentsInitialized()) {
                 return
             }
-            const querySymbol = location.search ? '&' : '?'
+            const querySymbol = location.search ? '&' : ''
             const initData = webApp?.initData
                 ? `${querySymbol}initData=${encodeURIComponent(webApp.initData)}`
                 : ''
-            const apiEndpoint = '/api/content' + location.pathname + location.search + initData
+            const apiEndpoint = '/api/content' + location.pathname + (location.search.startsWith("?") ? location.search: `?${location.search}`) + initData
 
             if (renderingLogEnabled) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)

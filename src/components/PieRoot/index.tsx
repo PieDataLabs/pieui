@@ -53,7 +53,7 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
             if (!apiServer || !isPieComponentsInitialized()) {
                 return
             }
-            const apiEndpoint = '/api/content' + location.pathname + location.search
+            const apiEndpoint = '/api/content' + location.pathname + (location.search.startsWith("?") ? location.search: `?${location.search}`)
             if (renderingLogEnabled) {
                 console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
             }
