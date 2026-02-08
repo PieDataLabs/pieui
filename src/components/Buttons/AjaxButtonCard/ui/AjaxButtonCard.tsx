@@ -17,7 +17,7 @@ const AjaxButtonCard = ({
         <PieCard card={'AjaxButtonCard'} data={data}>
             <button
                 id={name}
-                className='box-border flex min-h-12 w-full min-w-min cursor-pointer items-center justify-center rounded-[16px] border border-[#080318] bg-white text-center font-[TTForsTrial] text-[#080318] hover:bg-neutral-300'
+                className='box-border flex min-h-12 w-full min-w-min cursor-pointer items-center justify-center gap-4 rounded-l border border-black bg-white text-center text-black hover:bg-neutral-300'
                 value={name}
                 onClick={() => ajaxSubmit()}
                 style={sx2radium(sx)}

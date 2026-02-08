@@ -12,6 +12,7 @@ import HiddenCard from "../components/Common/HiddenCard";
 import AutoRedirectCard from "../components/Common/AutoRedirectCard";
 import HTMLEmbedCard from "../components/Common/HTMLEmbedCard";
 import IOEventsCard from "../components/Common/IOEventsCard";
+import RedirectButtonCard from "../components/Buttons/RedirectButtonCard";
 
 let initialized = false
 
@@ -66,6 +67,15 @@ export function initializePieComponents(): void {
         metadata: {
             author: "PieData",
             description: "Button with AJAX support"
+        }
+    })
+
+    registerPieComponent({
+        name: 'RedirectButtonCard',
+        component: RedirectButtonCard,
+        metadata: {
+            author: "PieData",
+            description: "Button with Redirect on click"
         }
     })
 
