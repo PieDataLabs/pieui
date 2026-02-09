@@ -13,7 +13,6 @@ export interface IOEventsCardData {
 
 
 export interface IOEventData extends Omit<ToastOptions, 'transition' | 'style' | 'className' | 'onClick' | 'onClose' | 'onOpen'> {
-    alertType: string
     message: string
     transition: 'bounce' | 'slide' | 'zoom' | 'flip'
     sx: CSSProperties
