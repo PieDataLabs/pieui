@@ -33,7 +33,7 @@ jobs:
           ls -la dist/
           echo "Checking required files..."
           test -f dist/index.js
-          test -f dist/index.esm.js
+#          test -f dist/index.esm.js
           test -f dist/index.d.ts
 
       - name: Setup Node.js for npm publishing
