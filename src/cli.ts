@@ -39,7 +39,7 @@ const parseArgs = (argv: string[]): ParsedArgs => {
     const srcDirIndex = argv.findIndex((arg) => arg === '--src-dir' || arg === '-s')
     const appendFlag = argv.includes('--append')
 
-    let outDir = 'public'
+    let outDir = command === 'postbuild' ? 'public' : '.'
     let srcDir = 'src'
     let componentType: ComponentType | undefined
     let componentName: string | undefined
@@ -87,6 +87,9 @@ const printUsage = () => {
     console.log('  complex-container       Container with array content (data + content[])')
     console.log('                         (default if type not specified)')
     console.log('')
+    console.log('Options for init:')
+    console.log('  --out-dir <dir>, -o <dir>    Base directory for piecomponents (default: .)')
+    console.log('')
     console.log('Options for postbuild:')
     console.log('  --out-dir <dir>, -o <dir>    Output directory (default: public)')
     console.log('  --src-dir <dir>, -s <dir>    Source directory (default: src)')
@@ -94,6 +97,7 @@ const printUsage = () => {
     console.log('')
     console.log('Examples:')
     console.log('  pieui init')
+    console.log('  pieui init --out-dir packages/app')
     console.log('  pieui add MyCustomCard                        # Creates complex-container by default')
     console.log('  pieui add simple MySimpleCard                 # Creates simple component')
     console.log('  pieui add complex-container MyContainerCard   # Creates complex container')
@@ -262,10 +266,12 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
     return components
 }
 
-const initCommand = () => {
-    console.log('[pieui] Initializing piecomponents directory...')
+const initCommand = (outDir: string) => {
+    const resolvedOutDir = path.resolve(process.cwd(), outDir)
 
-    const pieComponentsDir = path.join(process.cwd(), 'piecomponents')
+    console.log(`[pieui] Initializing piecomponents directory in ${resolvedOutDir}...`)
+
+    const pieComponentsDir = path.join(resolvedOutDir, 'piecomponents')
 
     // Create piecomponents directory
     if (!fs.existsSync(pieComponentsDir)) {
@@ -303,8 +309,8 @@ export const initializePieUI = () => {
     }
 
     // Update tailwind.config.js if it exists
-    const tailwindConfigPath = path.join(process.cwd(), 'tailwind.config.js')
-    const tailwindConfigTsPath = path.join(process.cwd(), 'tailwind.config.ts')
+    const tailwindConfigPath = path.join(resolvedOutDir, 'tailwind.config.js')
+    const tailwindConfigTsPath = path.join(resolvedOutDir, 'tailwind.config.ts')
     const pieuiContentPath = './node_modules/@piedata/pieui/dist/**/*.{js,mjs,ts,jsx,tsx}'
 
     let configPath = null
@@ -663,7 +669,7 @@ const main = async () => {
 
     switch (command) {
         case 'init':
-            initCommand()
+            initCommand(outDir)
             return
 
         case 'add':
