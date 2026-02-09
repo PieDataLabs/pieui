@@ -8,11 +8,12 @@ import AjaxGroupCard from '../components/Containers/AjaxGroupCard/ui/AjaxGroupCa
 import AjaxButtonCard from '../components/Buttons/AjaxButtonCard/ui/AjaxButtonCard'
 
 import ChatCard from '../components/Chats/ChatCard/ui/ChatCard'
-import HiddenCard from "../components/Common/HiddenCard";
-import AutoRedirectCard from "../components/Common/AutoRedirectCard";
-import HTMLEmbedCard from "../components/Common/HTMLEmbedCard";
-import IOEventsCard from "../components/Common/IOEventsCard";
-import RedirectButtonCard from "../components/Buttons/RedirectButtonCard";
+import HiddenCard from '../components/Common/HiddenCard'
+import AutoRedirectCard from '../components/Common/AutoRedirectCard'
+import HTMLEmbedCard from '../components/Common/HTMLEmbedCard'
+import IOEventsCard from '../components/Common/IOEventsCard'
+import RedirectButtonCard from '../components/Buttons/RedirectButtonCard'
+import { OpenAIVoiceAgentCard } from '../components'
 
 let initialized = false
 
@@ -38,85 +39,93 @@ export function initializePieComponents(): void {
         name: 'SequenceCard',
         component: SequenceCard,
         metadata: {
-            author: "PieData",
-            description: "Simple div with styles joining few components"
-        }
+            author: 'PieData',
+            description: 'Simple div with styles joining few components',
+        },
     })
 
     registerPieComponent({
         name: 'UnionCard',
         component: UnionCard,
         metadata: {
-            author: "PieData",
-            description: "Renders one of many components"
-        }
+            author: 'PieData',
+            description: 'Renders one of many components',
+        },
     })
 
     registerPieComponent({
         name: 'AjaxGroupCard',
         component: AjaxGroupCard,
         metadata: {
-            author: "PieData",
-            description: "Group card with AJAX support"
-        }
+            author: 'PieData',
+            description: 'Group card with AJAX support',
+        },
     })
 
     registerPieComponent({
         name: 'AjaxButtonCard',
         component: AjaxButtonCard,
         metadata: {
-            author: "PieData",
-            description: "Button with AJAX support"
-        }
+            author: 'PieData',
+            description: 'Button with AJAX support',
+        },
     })
 
     registerPieComponent({
         name: 'RedirectButtonCard',
         component: RedirectButtonCard,
         metadata: {
-            author: "PieData",
-            description: "Button with Redirect on click"
-        }
+            author: 'PieData',
+            description: 'Button with Redirect on click',
+        },
     })
 
     registerPieComponent({
         name: 'ChatCard',
         component: ChatCard,
         metadata: {
-            author: "PieData",
-        }
+            author: 'PieData',
+        },
     })
 
     registerPieComponent({
         name: 'HiddenCard',
         component: HiddenCard,
         metadata: {
-            author: "PieData",
-        }
+            author: 'PieData',
+        },
     })
 
     registerPieComponent({
         name: 'AutoRedirectCard',
         component: AutoRedirectCard,
         metadata: {
-            author: "PieData",
-        }
+            author: 'PieData',
+        },
     })
 
     registerPieComponent({
         name: 'HTMLEmbedCard',
         component: HTMLEmbedCard,
         metadata: {
-            author: "PieData",
-        }
+            author: 'PieData',
+        },
     })
 
     registerPieComponent({
         name: 'IOEventsCard',
         component: IOEventsCard,
         metadata: {
-            author: "PieData",
-        }
+            author: 'PieData',
+        },
+    })
+
+    registerPieComponent({
+        name: 'OpenAIVoiceAgentCard',
+        component: OpenAIVoiceAgentCard,
+        metadata: {
+            author: 'PieData',
+        },
     })
 
     initialized = true
