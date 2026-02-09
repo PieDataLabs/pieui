@@ -1,4 +1,5 @@
 import {ComponentType, ReactNode} from "react";
+import {ShowPopupOptions} from "@telegram-apps/sdk";
 
 export type WebAppUser = {
     id: string
@@ -32,6 +33,7 @@ export type WebAppInitData = {
 export type WebApp = {
     sendData: (data: string) => void
     showAlert: (message: string) => void
+    showPopup: (options: ShowPopupOptions) => void
     MainButton: MainButtonType
     BackButton: BackButtonType
     initDataUnsafe: WebAppInitData
