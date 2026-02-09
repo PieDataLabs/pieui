@@ -31,17 +31,17 @@
     "scripts": {
         "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm && NODE_ENV=production bun run build:cjs && NODE_ENV=production bun run build:components:esm && NODE_ENV=production bun run build:components:cjs && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
         "build:clean": "rm -rf dist",
-        "build:esm": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query --minify",
-        "build:cjs": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
-        "build:components:esm": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema --minify",
-        "build:components:cjs": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
-        "build:esm:debug": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query",
-        "build:cjs:debug": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
-        "build:components:esm:debug": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema",
-        "build:components:cjs:debug": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
+        "build:esm": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query --minify",
+        "build:cjs": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
+        "build:components:esm": "bun build src/components/index.ts --outfile dist/components/index.esm.js --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema --minify",
+        "build:components:cjs": "bun build src/components/index.ts --outfile dist/components/index.js --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
+        "build:esm:debug": "bun build src/index.ts --outfile dist/index.esm.js --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query",
+        "build:cjs:debug": "bun build src/index.ts --outfile dist/index.js --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
+        "build:components:esm:debug": "bun build src/components/index.ts --outfile dist/components/index.esm.js --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema",
+        "build:components:cjs:debug": "bun build src/components/index.ts --outfile dist/components/index.js --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
         "build:debug": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm:debug && NODE_ENV=production bun run build:cjs:debug && NODE_ENV=production bun run build:components:esm:debug && NODE_ENV=production bun run build:components:cjs:debug && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
         "build:types": "tsc --emitDeclarationOnly",
-        "build:cli": "bun build src/cli.ts --outdir dist --format cjs --target node --external vm2",
+        "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node --external vm2",
         "dev": "bun run src/index.ts",
         "typecheck": "tsc --noEmit",
         "lint": "echo 'Linting not configured yet'",
@@ -56,16 +56,7 @@
         "publish:npm": "npm publish",
         "publish:beta": "npm publish --tag beta",
         "unrelease": "git tag -d v$(node -p \"require('./package.json').version\") && git push origin :refs/tags/v$(node -p \"require('./package.json').version\")",
-        "version:current": "node -p \"require('./package.json').version\"",
-        "prepare": "husky"
-    },
-    "gitmoji": {
-        "autoAdd": false,
-        "emojiFormat": "emoji",
-        "scopePrompt": false,
-        "messagePrompt": true,
-        "capitalizeTitle": true,
-        "gitmojisUrl": "https://gitmoji.dev/api/gitmojis"
+        "version:current": "node -p \"require('./package.json').version\""
     },
     "keywords": [
         "react",
@@ -81,23 +72,14 @@
         "react-dom": ">=19"
     },
     "devDependencies": {
-        "@eslint/js": "^10.0.1",
         "@types/bun": "latest",
         "@types/glob": "^9.0.0",
         "autoprefixer": "10",
-        "eslint": "^10.0.0",
         "eslint-plugin-no-browser-globals": "^1.0.1",
-        "eslint-plugin-react": "^7.37.5",
-        "gitmoji-cli": "^9.7.0",
         "glob": "^13.0.0",
-        "globals": "^17.3.0",
-        "husky": "^9.1.7",
-        "lint-staged": "^16.2.7",
         "postcss": "8",
-        "prettier": "^3.8.1",
         "tailwindcss": "3",
         "typescript": ">=5",
-        "typescript-eslint": "^8.54.0",
         "typescript-json-schema": "^0.67.1"
     },
     "dependencies": {

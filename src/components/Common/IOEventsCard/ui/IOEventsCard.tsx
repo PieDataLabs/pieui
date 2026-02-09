@@ -1,13 +1,12 @@
 import { Bounce, Slide, Zoom, Flip } from 'react-toastify'
 import { toast, ToastContainer, ToastOptions } from 'react-toastify'
-import 'react-toastify/dist/ReactToastify.css'
+// import 'react-toastify/dist/ReactToastify.css'
 // import addNotification from 'react-push-notification'
 import PieCard from '../../../PieCard'
-import {IOEventData, IOEventsCardProps} from '../types'
-import {useContext} from "react";
-import NavigateContext from "../../../../util/navigate.ts";
-import {ShowPopupOptions} from "@telegram-apps/sdk";
-
+import { IOEventData, IOEventsCardProps } from '../types'
+import { useContext } from 'react'
+import NavigateContext from '../../../../util/navigate.ts'
+import { ShowPopupOptions } from '@telegram-apps/sdk'
 
 const createTransition = (name?: string) => {
     if (name === 'bounce') {
@@ -22,7 +21,12 @@ const createTransition = (name?: string) => {
 }
 
 const IOEventsCard = ({ data }: IOEventsCardProps) => {
-    const { useCentrifugeSupport, useSocketioSupport, useMittSupport, centrifugeChannel } = data
+    const {
+        useCentrifugeSupport,
+        useSocketioSupport,
+        useMittSupport,
+        centrifugeChannel,
+    } = data
     const navigate = useContext(NavigateContext)
 
     const onShowTelegramPopupEvent = (event: ShowPopupOptions) => {
@@ -30,7 +34,6 @@ const IOEventsCard = ({ data }: IOEventsCardProps) => {
     }
 
     const onToastEvent = (event: IOEventData) => {
-
         const options: ToastOptions = {
             ...event,
             transition: createTransition(event.transition),
@@ -45,11 +48,11 @@ const IOEventsCard = ({ data }: IOEventsCardProps) => {
         toast(event.message, options)
     }
 
-    const onLogEvent = (event: any) => {
+    const onLogEvent = (event: string) => {
         console.log('Log event', event)
     }
 
-    const onRedirectEvent = (event: any) => {
+    const onRedirectEvent = (event: { to: string }) => {
         if (event.to) {
             const url = event.to
 
@@ -59,7 +62,6 @@ const IOEventsCard = ({ data }: IOEventsCardProps) => {
             } else {
                 navigate?.(url)
             }
-
         } else {
             window.location.reload()
         }
