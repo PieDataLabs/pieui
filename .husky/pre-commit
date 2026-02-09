@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+
+bunx tsc --noEmit
+bunx lint-staged

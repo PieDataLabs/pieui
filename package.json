@@ -1,105 +1,123 @@
 {
-  "name": "@piedata/pieui",
-  "version": "1.1.11",
-  "description": "A React component library featuring PieCard component",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/PieDataLabs/pieui.git"
-  },
-  "main": "dist/index.js",
-  "module": "dist/index.esm.js",
-  "types": "dist/index.d.ts",
-  "bin": {
-    "pieui": "dist/cli.js"
-  },
-  "files": [
-    "dist"
-  ],
-  "sideEffects": false,
-  "exports": {
-    ".": {
-      "import": "./dist/index.esm.js",
-      "require": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+    "name": "@piedata/pieui",
+    "version": "1.1.11",
+    "description": "A React component library featuring PieCard component",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/PieDataLabs/pieui.git"
     },
-    "./components": {
-      "import": "./dist/components/index.esm.js",
-      "require": "./dist/components/index.js",
-      "types": "./dist/components/index.d.ts"
+    "main": "dist/index.js",
+    "module": "dist/index.esm.js",
+    "types": "dist/index.d.ts",
+    "bin": {
+        "pieui": "dist/cli.js"
+    },
+    "files": [
+        "dist"
+    ],
+    "sideEffects": false,
+    "exports": {
+        ".": {
+            "import": "./dist/index.esm.js",
+            "require": "./dist/index.js",
+            "types": "./dist/index.d.ts"
+        },
+        "./components": {
+            "import": "./dist/components/index.esm.js",
+            "require": "./dist/components/index.js",
+            "types": "./dist/components/index.d.ts"
+        }
+    },
+    "scripts": {
+        "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm && NODE_ENV=production bun run build:cjs && NODE_ENV=production bun run build:components:esm && NODE_ENV=production bun run build:components:cjs && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
+        "build:clean": "rm -rf dist",
+        "build:esm": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query --minify",
+        "build:cjs": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
+        "build:components:esm": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema --minify",
+        "build:components:cjs": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
+        "build:esm:debug": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query",
+        "build:cjs:debug": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
+        "build:components:esm:debug": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema",
+        "build:components:cjs:debug": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
+        "build:debug": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm:debug && NODE_ENV=production bun run build:cjs:debug && NODE_ENV=production bun run build:components:esm:debug && NODE_ENV=production bun run build:components:cjs:debug && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
+        "build:types": "tsc --emitDeclarationOnly",
+        "build:cli": "bun build src/cli.ts --outdir dist --format cjs --target node --external vm2",
+        "dev": "bun run src/index.ts",
+        "typecheck": "tsc --noEmit",
+        "lint": "echo 'Linting not configured yet'",
+        "prepublishOnly": "bun run build",
+        "release": "npm version patch && git push && git push --tags",
+        "release:retry": "git tag v$(node -p \"require('./package.json').version\") && git push --tags",
+        "release:patch": "npm version patch && git push --tags",
+        "release:minor": "npm version minor && git push --tags",
+        "release:major": "npm version major && git push --tags",
+        "release:prerelease": "npm version prerelease --preid=beta && git push && git push --tags",
+        "release:dry-run": "npm publish --dry-run",
+        "publish:npm": "npm publish",
+        "publish:beta": "npm publish --tag beta",
+        "unrelease": "git tag -d v$(node -p \"require('./package.json').version\") && git push origin :refs/tags/v$(node -p \"require('./package.json').version\")",
+        "version:current": "node -p \"require('./package.json').version\"",
+        "prepare": "husky"
+    },
+    "gitmoji": {
+        "autoAdd": false,
+        "emojiFormat": "emoji",
+        "scopePrompt": false,
+        "messagePrompt": true,
+        "capitalizeTitle": true,
+        "gitmojisUrl": "https://gitmoji.dev/api/gitmojis"
+    },
+    "keywords": [
+        "react",
+        "component",
+        "ui",
+        "pie",
+        "card"
+    ],
+    "author": "",
+    "license": "MIT",
+    "peerDependencies": {
+        "react": ">=19",
+        "react-dom": ">=19"
+    },
+    "devDependencies": {
+        "@eslint/js": "^10.0.1",
+        "@types/bun": "latest",
+        "@types/glob": "^9.0.0",
+        "autoprefixer": "10",
+        "eslint": "^10.0.0",
+        "eslint-plugin-no-browser-globals": "^1.0.1",
+        "eslint-plugin-react": "^7.37.5",
+        "gitmoji-cli": "^9.7.0",
+        "glob": "^13.0.0",
+        "globals": "^17.3.0",
+        "husky": "^9.1.7",
+        "lint-staged": "^16.2.7",
+        "postcss": "8",
+        "prettier": "^3.8.1",
+        "tailwindcss": "3",
+        "typescript": ">=5",
+        "typescript-eslint": "^8.54.0",
+        "typescript-json-schema": "^0.67.1"
+    },
+    "dependencies": {
+        "@openai/agents": "^0.4.5",
+        "@tanstack/react-query": "^5.90.20",
+        "@telegram-apps/sdk": "^3.11.8",
+        "@types/radium": "^0.24.8",
+        "annyang": "^2.6.1",
+        "axios": "^1.13.2",
+        "axios-date-transformer": "^1.2.1",
+        "centrifuge": "^5.5.3",
+        "clsx": "^2.1.1",
+        "html-react-parser": "^5.2.16",
+        "mitt": "^3.0.1",
+        "radium": "^0.26.2",
+        "react-toastify": "^11.0.5",
+        "socket.io-client": "^4.8.3",
+        "tailwind-merge": "^3.4.0",
+        "vm2": "^3.10.0",
+        "zod": "^4.3.6",
+        "zod-from-json-schema": "^0.5.2"
     }
-  },
-  "scripts": {
-    "build": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm && NODE_ENV=production bun run build:cjs && NODE_ENV=production bun run build:components:esm && NODE_ENV=production bun run build:components:cjs && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
-    "build:clean": "rm -rf dist",
-    "build:esm": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query --minify",
-    "build:cjs": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
-    "build:components:esm": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema --minify",
-    "build:components:cjs": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema --minify",
-    "build:esm:debug": "bun build src/index.ts --outdir dist --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external typescript-json-schema --external @tanstack/react-query",
-    "build:cjs:debug": "bun build src/index.ts --outdir dist --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
-    "build:components:esm:debug": "bun build src/components/index.ts --outdir dist/components --format esm --target browser --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external @tanstack/react-query --external typescript --external typescript-json-schema",
-    "build:components:cjs:debug": "bun build src/components/index.ts --outdir dist/components --format cjs --target node --jsx=automatic --jsx-import-source=react --external react --external react-dom --external highlight.js --external rehype-highlight --external glob --external typescript --external @tanstack/react-query --external typescript-json-schema",
-    "build:debug": "rm -rf ./dist && rm -rf pieui-*.tgz && bun run build:clean && NODE_ENV=production bun run build:esm:debug && NODE_ENV=production bun run build:cjs:debug && NODE_ENV=production bun run build:components:esm:debug && NODE_ENV=production bun run build:components:cjs:debug && NODE_ENV=production bun run build:types && NODE_ENV=production bun run build:cli && bun src/cli.ts postbuild --src-dir src --out-dir dist && bun pm pack",
-    "build:types": "tsc --emitDeclarationOnly",
-    "build:cli": "bun build src/cli.ts --outdir dist --format cjs --target node --external vm2",
-    "dev": "bun run src/index.ts",
-    "typecheck": "tsc --noEmit",
-    "lint": "echo 'Linting not configured yet'",
-    "prepublishOnly": "bun run build",
-    "release": "npm version patch && git push && git push --tags",
-    "release:retry": "git tag v$(node -p \"require('./package.json').version\") && git push --tags",
-    "release:patch": "npm version patch && git push --tags",
-    "release:minor": "npm version minor && git push --tags",
-    "release:major": "npm version major && git push --tags",
-    "release:prerelease": "npm version prerelease --preid=beta && git push && git push --tags",
-    "release:dry-run": "npm publish --dry-run",
-    "publish:npm": "npm publish",
-    "publish:beta": "npm publish --tag beta",
-    "unrelease": "git tag -d v$(node -p \"require('./package.json').version\") && git push origin :refs/tags/v$(node -p \"require('./package.json').version\")",
-    "version:current": "node -p \"require('./package.json').version\""
-  },
-  "keywords": [
-    "react",
-    "component",
-    "ui",
-    "pie",
-    "card"
-  ],
-  "author": "",
-  "license": "MIT",
-  "peerDependencies": {
-    "react": ">=19",
-    "react-dom": ">=19"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "@types/glob": "^9.0.0",
-    "autoprefixer": "10",
-    "eslint-plugin-no-browser-globals": "^1.0.1",
-    "glob": "^13.0.0",
-    "postcss": "8",
-    "tailwindcss": "3",
-    "typescript": ">=5",
-    "typescript-json-schema": "^0.67.1"
-  },
-  "dependencies": {
-    "@openai/agents": "^0.4.5",
-    "@tanstack/react-query": "^5.90.20",
-    "@telegram-apps/sdk": "^3.11.8",
-    "@types/radium": "^0.24.8",
-    "annyang": "^2.6.1",
-    "axios": "^1.13.2",
-    "axios-date-transformer": "^1.2.1",
-    "centrifuge": "^5.5.3",
-    "clsx": "^2.1.1",
-    "html-react-parser": "^5.2.16",
-    "mitt": "^3.0.1",
-    "radium": "^0.26.2",
-    "react-toastify": "^11.0.5",
-    "socket.io-client": "^4.8.3",
-    "tailwind-merge": "^3.4.0",
-    "vm2": "^3.10.0",
-    "zod": "^4.3.6",
-    "zod-from-json-schema": "^0.5.2"
-  }
 }

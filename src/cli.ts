@@ -3,13 +3,18 @@
 import fs from 'fs'
 import path from 'path'
 import { glob } from 'glob'
-import * as ts from 'typescript'
 import * as TJS from 'typescript-json-schema'
 
 const MANIFEST_FILENAME = 'pieui.components.json'
 const REGISTER_FUNCTION = 'registerPieComponent'
 
-type ComponentType = 'simple' | 'complex' | 'simple-container' | 'complex-container'
+const ts = TJS.ts
+
+type ComponentType =
+    | 'simple'
+    | 'complex'
+    | 'simple-container'
+    | 'complex-container'
 
 type ParsedArgs = {
     command: string
@@ -35,8 +40,12 @@ const parseArgs = (argv: string[]): ParsedArgs => {
     const [command = ''] = argv
     const outDirFlag = argv.find((arg) => arg.startsWith('--out-dir='))
     const srcDirFlag = argv.find((arg) => arg.startsWith('--src-dir='))
-    const outDirIndex = argv.findIndex((arg) => arg === '--out-dir' || arg === '-o')
-    const srcDirIndex = argv.findIndex((arg) => arg === '--src-dir' || arg === '-s')
+    const outDirIndex = argv.findIndex(
+        (arg) => arg === '--out-dir' || arg === '-o'
+    )
+    const srcDirIndex = argv.findIndex(
+        (arg) => arg === '--src-dir' || arg === '-s'
+    )
     const appendFlag = argv.includes('--append')
 
     let outDir = command === 'postbuild' ? 'public' : '.'
@@ -46,7 +55,12 @@ const parseArgs = (argv: string[]): ParsedArgs => {
 
     if (command === 'add' && argv[1]) {
         // Check if first argument is a component type
-        const validTypes: ComponentType[] = ['simple', 'complex', 'simple-container', 'complex-container']
+        const validTypes: ComponentType[] = [
+            'simple',
+            'complex',
+            'simple-container',
+            'complex-container',
+        ]
         if (validTypes.includes(argv[1] as ComponentType)) {
             componentType = argv[1] as ComponentType
             componentName = argv[2]
@@ -69,38 +83,71 @@ const parseArgs = (argv: string[]): ParsedArgs => {
         srcDir = argv[srcDirIndex + 1]
     }
 
-    return { command, outDir, srcDir, append: appendFlag, componentName, componentType }
+    return {
+        command,
+        outDir,
+        srcDir,
+        append: appendFlag,
+        componentName,
+        componentType,
+    }
 }
 
 const printUsage = () => {
     console.log('Usage: pieui <command> [options]')
     console.log('')
     console.log('Commands:')
-    console.log('  init                                    Initialize piecomponents directory with registry.ts')
-    console.log('  add [type] <ComponentName>              Create a new component in piecomponents directory')
-    console.log('  postbuild                               Scan for components and generate manifest')
+    console.log(
+        '  init                                    Initialize piecomponents directory with registry.ts'
+    )
+    console.log(
+        '  add [type] <ComponentName>              Create a new component in piecomponents directory'
+    )
+    console.log(
+        '  postbuild                               Scan for components and generate manifest'
+    )
     console.log('')
     console.log('Component types for add command:')
     console.log('  simple                  Simple component (only data prop)')
-    console.log('  complex                 Complex component (data + children props)')
-    console.log('  simple-container        Container with single content (data + content)')
-    console.log('  complex-container       Container with array content (data + content[])')
+    console.log(
+        '  complex                 Complex component (data + children props)'
+    )
+    console.log(
+        '  simple-container        Container with single content (data + content)'
+    )
+    console.log(
+        '  complex-container       Container with array content (data + content[])'
+    )
     console.log('                         (default if type not specified)')
     console.log('')
     console.log('Options for init:')
-    console.log('  --out-dir <dir>, -o <dir>    Base directory for piecomponents (default: .)')
+    console.log(
+        '  --out-dir <dir>, -o <dir>    Base directory for piecomponents (default: .)'
+    )
     console.log('')
     console.log('Options for postbuild:')
-    console.log('  --out-dir <dir>, -o <dir>    Output directory (default: public)')
-    console.log('  --src-dir <dir>, -s <dir>    Source directory (default: src)')
-    console.log('  --append                      Include built-in pieui components in the manifest')
+    console.log(
+        '  --out-dir <dir>, -o <dir>    Output directory (default: public)'
+    )
+    console.log(
+        '  --src-dir <dir>, -s <dir>    Source directory (default: src)'
+    )
+    console.log(
+        '  --append                      Include built-in pieui components in the manifest'
+    )
     console.log('')
     console.log('Examples:')
     console.log('  pieui init')
     console.log('  pieui init --out-dir packages/app')
-    console.log('  pieui add MyCustomCard                        # Creates complex-container by default')
-    console.log('  pieui add simple MySimpleCard                 # Creates simple component')
-    console.log('  pieui add complex-container MyContainerCard   # Creates complex container')
+    console.log(
+        '  pieui add MyCustomCard                        # Creates complex-container by default'
+    )
+    console.log(
+        '  pieui add simple MySimpleCard                 # Creates simple component'
+    )
+    console.log(
+        '  pieui add complex-container MyContainerCard   # Creates complex container'
+    )
     console.log('  pieui postbuild --append --out-dir dist')
 }
 
@@ -113,7 +160,7 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
 
     console.log(`[pieui] Found ${files.length} files to scan`)
 
-    const compilerOptions: ts.CompilerOptions = {
+    const compilerOptions = {
         allowJs: true,
         jsx: ts.JsxEmit.ReactJSX,
         target: ts.ScriptTarget.ES2020,
@@ -132,27 +179,42 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
         if (sourceFile.isDeclarationFile) continue
 
         const relativePath = path.relative(process.cwd(), sourceFile.fileName)
-        if (!files.some(f => path.resolve(f) === path.resolve(sourceFile.fileName))) continue
+        if (
+            !files.some(
+                (f) => path.resolve(f) === path.resolve(sourceFile.fileName)
+            )
+        )
+            continue
 
-        function visit(node: ts.Node) {
+        function visit(node: any) {
             if (ts.isCallExpression(node)) {
                 const expr = node.expression
                 const isRegisterCall =
-                    (ts.isIdentifier(expr) && expr.text === REGISTER_FUNCTION) ||
-                    (ts.isPropertyAccessExpression(expr) && expr.name.text === REGISTER_FUNCTION)
+                    (ts.isIdentifier(expr) &&
+                        expr.text === REGISTER_FUNCTION) ||
+                    (ts.isPropertyAccessExpression(expr) &&
+                        expr.name.text === REGISTER_FUNCTION)
 
                 if (isRegisterCall && node.arguments.length > 0) {
                     const arg = node.arguments[0]
                     if (ts.isObjectLiteralExpression(arg)) {
                         let componentName: string | null = null
-                        let componentRef: ts.Expression | null = null
+                        let componentRef: any | null = null
 
                         for (const prop of arg.properties) {
                             if (ts.isPropertyAssignment(prop)) {
-                                if (ts.isIdentifier(prop.name) || ts.isStringLiteral(prop.name)) {
-                                    const propName = ts.isIdentifier(prop.name) ? prop.name.text : prop.name.text
+                                if (
+                                    ts.isIdentifier(prop.name) ||
+                                    ts.isStringLiteral(prop.name)
+                                ) {
+                                    const propName = ts.isIdentifier(prop.name)
+                                        ? prop.name.text
+                                        : prop.name.text
 
-                                    if (propName === 'name' && ts.isStringLiteral(prop.initializer)) {
+                                    if (
+                                        propName === 'name' &&
+                                        ts.isStringLiteral(prop.initializer)
+                                    ) {
                                         componentName = prop.initializer.text
                                     }
 
@@ -168,44 +230,85 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
                         }
 
                         if (componentName && componentRef) {
-                            console.log(`[pieui] Found component registration: ${componentName}`)
+                            console.log(
+                                `[pieui] Found component registration: ${componentName}`
+                            )
 
                             let foundDataType = false
 
                             // Try to determine the data type name
-                            const componentType = checker.getTypeAtLocation(componentRef)
+                            const componentType =
+                                checker.getTypeAtLocation(componentRef)
                             const symbol = componentType.getSymbol()
 
                             if (symbol) {
                                 const componentTypeName = symbol.getName()
 
                                 // Try to find the actual data type from props
-                                const signatures = checker.getSignaturesOfType(componentType, ts.SignatureKind.Call)
+                                const signatures = checker.getSignaturesOfType(
+                                    componentType,
+                                    ts.SignatureKind.Call
+                                )
                                 if (signatures.length > 0) {
-                                    const propsParam = signatures[0].getParameters()[0]
+                                    const propsParam =
+                                        signatures[0].getParameters()[0]
                                     if (propsParam) {
-                                        const propsType = checker.getTypeOfSymbolAtLocation(propsParam, componentRef)
-                                        const dataProperty = propsType.getProperty('data')
+                                        const propsType =
+                                            checker.getTypeOfSymbolAtLocation(
+                                                propsParam,
+                                                componentRef
+                                            )
+                                        const dataProperty =
+                                            propsType.getProperty('data')
 
                                         if (dataProperty) {
-                                            const dataType = checker.getTypeOfSymbolAtLocation(dataProperty, componentRef)
-                                            const dataSymbol = dataType.getSymbol()
+                                            const dataType =
+                                                checker.getTypeOfSymbolAtLocation(
+                                                    dataProperty,
+                                                    componentRef
+                                                )
+                                            const dataSymbol =
+                                                dataType.getSymbol()
 
-                                            if (dataSymbol && dataSymbol.declarations && dataSymbol.declarations.length > 0) {
-                                                const declaration = dataSymbol.declarations[0]
-                                                const sourceFile = declaration.getSourceFile()
+                                            if (
+                                                dataSymbol &&
+                                                dataSymbol.declarations &&
+                                                dataSymbol.declarations.length >
+                                                    0
+                                            ) {
+                                                const declaration =
+                                                    dataSymbol.declarations[0]
+                                                const sourceFile =
+                                                    declaration.getSourceFile()
 
                                                 // Check if it's exported
-                                                if (ts.isInterfaceDeclaration(declaration) || ts.isTypeAliasDeclaration(declaration)) {
-                                                    const hasExport = declaration.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+                                                if (
+                                                    ts.isInterfaceDeclaration(
+                                                        declaration
+                                                    ) ||
+                                                    ts.isTypeAliasDeclaration(
+                                                        declaration
+                                                    )
+                                                ) {
+                                                    const hasExport =
+                                                        declaration.modifiers?.some(
+                                                            (m) =>
+                                                                m.kind ===
+                                                                ts.SyntaxKind
+                                                                    .ExportKeyword
+                                                        )
                                                     if (hasExport) {
-                                                        const dataTypeName = dataSymbol.getName()
-                                                        console.log(`[pieui]   Found exported data type: ${dataTypeName}`)
+                                                        const dataTypeName =
+                                                            dataSymbol.getName()
+                                                        console.log(
+                                                            `[pieui]   Found exported data type: ${dataTypeName}`
+                                                        )
 
                                                         components.push({
                                                             name: componentName,
                                                             file: sourceFile.fileName,
-                                                            dataTypeName: dataTypeName
+                                                            dataTypeName:
+                                                                dataTypeName,
                                                         })
                                                         foundDataType = true
                                                     }
@@ -227,17 +330,43 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
                                     ]
 
                                     for (const typeName of possibleDataTypes) {
-                                        const typeSymbol = checker.resolveName(typeName, undefined, ts.SymbolFlags.Type, false)
-                                        if (typeSymbol && typeSymbol.declarations && typeSymbol.declarations.length > 0) {
-                                            const declaration = typeSymbol.declarations[0]
-                                            if (ts.isInterfaceDeclaration(declaration) || ts.isTypeAliasDeclaration(declaration)) {
-                                                const hasExport = declaration.modifiers?.some(m => m.kind === ts.SyntaxKind.ExportKeyword)
+                                        const typeSymbol = checker.resolveName(
+                                            typeName,
+                                            undefined,
+                                            ts.SymbolFlags.Type,
+                                            false
+                                        )
+                                        if (
+                                            typeSymbol &&
+                                            typeSymbol.declarations &&
+                                            typeSymbol.declarations.length > 0
+                                        ) {
+                                            const declaration =
+                                                typeSymbol.declarations[0]
+                                            if (
+                                                ts.isInterfaceDeclaration(
+                                                    declaration
+                                                ) ||
+                                                ts.isTypeAliasDeclaration(
+                                                    declaration
+                                                )
+                                            ) {
+                                                const hasExport =
+                                                    declaration.modifiers?.some(
+                                                        (m) =>
+                                                            m.kind ===
+                                                            ts.SyntaxKind
+                                                                .ExportKeyword
+                                                    )
                                                 if (hasExport) {
-                                                    console.log(`[pieui]   Found data type: ${typeName}`)
+                                                    console.log(
+                                                        `[pieui]   Found data type: ${typeName}`
+                                                    )
                                                     components.push({
                                                         name: componentName,
-                                                        file: declaration.getSourceFile().fileName,
-                                                        dataTypeName: typeName
+                                                        file: declaration.getSourceFile()
+                                                            .fileName,
+                                                        dataTypeName: typeName,
                                                     })
                                                     foundDataType = true
                                                     break
@@ -248,7 +377,9 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
                                 }
 
                                 if (!foundDataType) {
-                                    console.log(`[pieui]   Warning: Could not find exported data type for ${componentName}`)
+                                    console.log(
+                                        `[pieui]   Warning: Could not find exported data type for ${componentName}`
+                                    )
                                 }
                             }
                         }
@@ -266,10 +397,211 @@ const findComponentRegistrations = (srcDir: string): ComponentInfo[] => {
     return components
 }
 
+const isCssPropertiesType = (type: any, checker: any): boolean => {
+    if (type.isUnion()) {
+        return type.types.some((unionType: any) =>
+            isCssPropertiesType(unionType, checker)
+        )
+    }
+
+    const aliasSymbol = type.aliasSymbol
+    if (aliasSymbol && aliasSymbol.getName() === 'CSSProperties') {
+        return true
+    }
+
+    const symbol = type.getSymbol()
+    if (symbol && symbol.getName() === 'CSSProperties') {
+        return true
+    }
+
+    const typeText = checker.typeToString(type)
+    if (typeText.includes('CSSProperties')) {
+        return true
+    }
+
+    if (symbol) {
+        const declarations = symbol.getDeclarations()
+        if (!declarations || declarations.length === 0) {
+            return false
+        }
+
+        return declarations.some((declaration: any) => {
+            const fileName = declaration.getSourceFile().fileName
+            return fileName.includes('react') || fileName.includes('csstype')
+        })
+    }
+
+    return false
+}
+
+const schemaForIndexType = (type: any, checker: any): Record<string, any> => {
+    const normalizedType = type.getNonNullableType
+        ? type.getNonNullableType()
+        : type
+
+    if (normalizedType.flags & ts.TypeFlags.StringLike) {
+        return { type: 'string' }
+    }
+
+    if (normalizedType.flags & ts.TypeFlags.NumberLike) {
+        return { type: 'number' }
+    }
+
+    if (normalizedType.flags & ts.TypeFlags.BooleanLike) {
+        return { type: 'boolean' }
+    }
+
+    if (normalizedType.flags & ts.TypeFlags.BigIntLike) {
+        return { type: 'integer' }
+    }
+
+    if (isCssPropertiesType(normalizedType, checker)) {
+        return { type: 'object', additionalProperties: {} }
+    }
+
+    if (normalizedType.isUnion()) {
+        return {
+            anyOf: normalizedType.types.map((unionType: any) =>
+                schemaForIndexType(unionType, checker)
+            ),
+        }
+    }
+
+    if (checker.isArrayType(normalizedType)) {
+        const elementType = checker.getElementTypeOfArrayType(normalizedType)
+        if (elementType) {
+            return {
+                type: 'array',
+                items: schemaForIndexType(elementType, checker),
+            }
+        }
+    }
+
+    return {}
+}
+
+const patchSchemaForType = (
+    type: any,
+    schema: Record<string, any>,
+    checker: any,
+    visited: Set<number> = new Set()
+): void => {
+    if (!schema || typeof schema !== 'object') {
+        return
+    }
+
+    const normalizedType = type.getNonNullableType
+        ? type.getNonNullableType()
+        : type
+    if (visited.has(normalizedType.id)) {
+        return
+    }
+    visited.add(normalizedType.id)
+
+    if (isCssPropertiesType(normalizedType, checker)) {
+        schema.type = 'object'
+        schema.additionalProperties = {}
+        delete schema.properties
+        delete schema.required
+        return
+    }
+
+    const stringIndexType = normalizedType.getStringIndexType?.()
+    if (stringIndexType) {
+        const indexSchema = schemaForIndexType(stringIndexType, checker)
+        schema.type = 'object'
+        schema.additionalProperties = indexSchema
+
+        if (schema.properties && Object.keys(schema.properties).length === 0) {
+            delete schema.properties
+            delete schema.required
+        }
+    }
+
+    if (checker.isTupleType(normalizedType)) {
+        const elementTypes = checker.getTypeArguments(normalizedType as any)
+        if (schema.items && Array.isArray(schema.items)) {
+            for (
+                let i = 0;
+                i < schema.items.length && i < elementTypes.length;
+                i += 1
+            ) {
+                patchSchemaForType(
+                    elementTypes[i],
+                    schema.items[i],
+                    checker,
+                    visited
+                )
+            }
+        }
+        return
+    }
+
+    if (checker.isArrayType(normalizedType)) {
+        const elementType = checker.getElementTypeOfArrayType(normalizedType)
+        if (elementType && schema.items && !Array.isArray(schema.items)) {
+            patchSchemaForType(elementType, schema.items, checker, visited)
+        }
+        return
+    }
+
+    if (normalizedType.isUnion() && Array.isArray(schema.anyOf)) {
+        const unionTypes = normalizedType.types
+        for (
+            let i = 0;
+            i < schema.anyOf.length && i < unionTypes.length;
+            i += 1
+        ) {
+            patchSchemaForType(unionTypes[i], schema.anyOf[i], checker, visited)
+        }
+        return
+    }
+
+    if (normalizedType.isIntersection() && Array.isArray(schema.allOf)) {
+        const intersectionTypes = normalizedType.types
+        for (
+            let i = 0;
+            i < schema.allOf.length && i < intersectionTypes.length;
+            i += 1
+        ) {
+            patchSchemaForType(
+                intersectionTypes[i],
+                schema.allOf[i],
+                checker,
+                visited
+            )
+        }
+        return
+    }
+
+    const properties = checker.getPropertiesOfType(normalizedType)
+    if (schema.properties && properties.length > 0) {
+        for (const property of properties) {
+            const propertyName = property.getName()
+            const propertySchema = schema.properties[propertyName]
+            if (!propertySchema) {
+                continue
+            }
+            const declaration =
+                property.valueDeclaration ?? property.declarations?.[0]
+            if (!declaration) {
+                continue
+            }
+            const propertyType = checker.getTypeOfSymbolAtLocation(
+                property,
+                declaration
+            )
+            patchSchemaForType(propertyType, propertySchema, checker, visited)
+        }
+    }
+}
+
 const initCommand = (outDir: string) => {
     const resolvedOutDir = path.resolve(process.cwd(), outDir)
 
-    console.log(`[pieui] Initializing piecomponents directory in ${resolvedOutDir}...`)
+    console.log(
+        `[pieui] Initializing piecomponents directory in ${resolvedOutDir}...`
+    )
 
     const pieComponentsDir = path.join(resolvedOutDir, 'piecomponents')
 
@@ -311,7 +643,8 @@ export const initializePieUI = () => {
     // Update tailwind.config.js if it exists
     const tailwindConfigPath = path.join(resolvedOutDir, 'tailwind.config.js')
     const tailwindConfigTsPath = path.join(resolvedOutDir, 'tailwind.config.ts')
-    const pieuiContentPath = './node_modules/@piedata/pieui/dist/**/*.{js,mjs,ts,jsx,tsx}'
+    const pieuiContentPath =
+        './node_modules/@piedata/pieui/dist/**/*.{js,mjs,ts,jsx,tsx}'
 
     let configPath = null
     if (fs.existsSync(tailwindConfigPath)) {
@@ -329,7 +662,9 @@ export const initializePieUI = () => {
             // Check if the path is already added
             if (!configContent.includes(pieuiContentPath)) {
                 // Try to find the content array
-                const contentMatch = configContent.match(/content\s*:\s*\[([^\]]*)\]/s)
+                const contentMatch = configContent.match(
+                    /content\s*:\s*\[([^\]]*)\]/s
+                )
 
                 if (contentMatch) {
                     const contentArray = contentMatch[1]
@@ -344,33 +679,50 @@ export const initializePieUI = () => {
                     )
 
                     fs.writeFileSync(configPath, configContent, 'utf8')
-                    console.log('[pieui] Added PieUI path to Tailwind content configuration')
+                    console.log(
+                        '[pieui] Added PieUI path to Tailwind content configuration'
+                    )
                 } else {
-                    console.log('[pieui] Warning: Could not find content array in Tailwind config')
-                    console.log('[pieui] Please manually add the following to your Tailwind content array:')
+                    console.log(
+                        '[pieui] Warning: Could not find content array in Tailwind config'
+                    )
+                    console.log(
+                        '[pieui] Please manually add the following to your Tailwind content array:'
+                    )
                     console.log(`[pieui]   "${pieuiContentPath}"`)
                 }
             } else {
-                console.log('[pieui] PieUI path already exists in Tailwind config')
+                console.log(
+                    '[pieui] PieUI path already exists in Tailwind config'
+                )
             }
         } catch (error) {
             console.error('[pieui] Error updating Tailwind config:', error)
-            console.log('[pieui] Please manually add the following to your Tailwind content array:')
+            console.log(
+                '[pieui] Please manually add the following to your Tailwind content array:'
+            )
             console.log(`[pieui]   "${pieuiContentPath}"`)
         }
     } else {
-        console.log('[pieui] No Tailwind config found. If you use Tailwind CSS, add this to your content array:')
+        console.log(
+            '[pieui] No Tailwind config found. If you use Tailwind CSS, add this to your content array:'
+        )
         console.log(`[pieui]   "${pieuiContentPath}"`)
     }
 
     console.log('[pieui] Initialization complete!')
     console.log('[pieui] Next steps:')
-    console.log('  1. Import { initializePieUI } from "./piecomponents/registry" in your app')
+    console.log(
+        '  1. Import { initializePieUI } from "./piecomponents/registry" in your app'
+    )
     console.log('  2. Call initializePieUI() before using PieRoot')
     console.log('  3. Use "pieui add <ComponentName>" to create new components')
 }
 
-const addCommand = (componentName: string, componentType: ComponentType = 'complex-container') => {
+const addCommand = (
+    componentName: string,
+    componentType: ComponentType = 'complex-container'
+) => {
     if (!componentName) {
         console.error('[pieui] Error: Component name is required')
         console.log('Usage: pieui add [type] <ComponentName>')
@@ -379,7 +731,9 @@ const addCommand = (componentName: string, componentType: ComponentType = 'compl
 
     // Validate component name
     if (!/^[A-Z][a-zA-Z0-9]+$/.test(componentName)) {
-        console.error('[pieui] Error: Component name must start with uppercase letter and contain only letters and numbers')
+        console.error(
+            '[pieui] Error: Component name must start with uppercase letter and contain only letters and numbers'
+        )
         process.exit(1)
     }
 
@@ -387,7 +741,9 @@ const addCommand = (componentName: string, componentType: ComponentType = 'compl
 
     const pieComponentsDir = path.join(process.cwd(), 'piecomponents')
     if (!fs.existsSync(pieComponentsDir)) {
-        console.error('[pieui] Error: piecomponents directory not found. Run "pieui init" first.')
+        console.error(
+            '[pieui] Error: piecomponents directory not found. Run "pieui init" first.'
+        )
         process.exit(1)
     }
 
@@ -395,7 +751,9 @@ const addCommand = (componentName: string, componentType: ComponentType = 'compl
 
     // Check if component already exists
     if (fs.existsSync(componentDir)) {
-        console.error(`[pieui] Error: Component ${componentName} already exists`)
+        console.error(
+            `[pieui] Error: Component ${componentName} already exists`
+        )
         console.error(`[pieui] Directory exists at: ${componentDir}`)
         process.exit(1)
     }
@@ -436,7 +794,11 @@ export interface ${componentName}Data {
 
 export interface ${componentName}Props extends ${baseInterface}<${componentName}Data> {}
 `
-    fs.writeFileSync(path.join(componentDir, 'types', 'index.ts'), typesContent, 'utf8')
+    fs.writeFileSync(
+        path.join(componentDir, 'types', 'index.ts'),
+        typesContent,
+        'utf8'
+    )
 
     // Create ui/ComponentName.tsx based on component type
     let componentContent: string
@@ -512,7 +874,8 @@ const ${componentName}: React.FC<${componentName}Props> = ({
 
 export default ${componentName}
 `
-    } else { // complex-container
+    } else {
+        // complex-container
         componentContent = `import React from 'react'
 import { PieCard, UI } from '@piedata/pieui'
 import { ${componentName}Props } from '../types'
@@ -545,16 +908,25 @@ export default ${componentName}
 `
     }
 
-    fs.writeFileSync(path.join(componentDir, 'ui', `${componentName}.tsx`), componentContent, 'utf8')
+    fs.writeFileSync(
+        path.join(componentDir, 'ui', `${componentName}.tsx`),
+        componentContent,
+        'utf8'
+    )
 
     // Update registry.ts
     const registryPath = path.join(pieComponentsDir, 'registry.ts')
     let registryContent = fs.readFileSync(registryPath, 'utf8')
 
     // Check if component is already registered
-    const componentRegex = new RegExp(`registerPieComponent\\s*\\(\\s*\\{[^}]*name:\\s*['"\`]${componentName}['"\`]`, 's')
+    const componentRegex = new RegExp(
+        `registerPieComponent\\s*\\(\\s*\\{[^}]*name:\\s*['"\`]${componentName}['"\`]`,
+        's'
+    )
     if (componentRegex.test(registryContent)) {
-        console.error(`[pieui] Error: Component ${componentName} is already registered in registry.ts`)
+        console.error(
+            `[pieui] Error: Component ${componentName} is already registered in registry.ts`
+        )
         console.error('[pieui] Aborting to prevent duplicate registration')
         // Clean up created files
         fs.rmSync(componentDir, { recursive: true, force: true })
@@ -564,7 +936,9 @@ export default ${componentName}
     // Check if import already exists
     const importRegex = new RegExp(`import\\s+${componentName}\\s+from`)
     if (importRegex.test(registryContent)) {
-        console.error(`[pieui] Error: Import for ${componentName} already exists in registry.ts`)
+        console.error(
+            `[pieui] Error: Import for ${componentName} already exists in registry.ts`
+        )
         console.error('[pieui] Aborting to prevent duplicate import')
         // Clean up created files
         fs.rmSync(componentDir, { recursive: true, force: true })
@@ -575,17 +949,32 @@ export default ${componentName}
     const importLine = `import ${componentName} from "./${componentName}/ui/${componentName}";`
 
     // Find the position to insert the import (after other component imports or after pieui import)
-    const lastImportMatch = registryContent.match(/import .* from "\.\/.*\/ui\/.*";/g)
+    const lastImportMatch = registryContent.match(
+        /import .* from "\.\/.*\/ui\/.*";/g
+    )
     if (lastImportMatch) {
         const lastImport = lastImportMatch[lastImportMatch.length - 1]
-        const insertPos = registryContent.lastIndexOf(lastImport) + lastImport.length
-        registryContent = registryContent.slice(0, insertPos) + '\n' + importLine + registryContent.slice(insertPos)
+        const insertPos =
+            registryContent.lastIndexOf(lastImport) + lastImport.length
+        registryContent =
+            registryContent.slice(0, insertPos) +
+            '\n' +
+            importLine +
+            registryContent.slice(insertPos)
     } else {
         // Insert after the pieui import
-        const pieuiImportMatch = registryContent.match(/import .* from ["']@piedata\/pieui["'];/)
+        const pieuiImportMatch = registryContent.match(
+            /import .* from ["']@piedata\/pieui["'];/
+        )
         if (pieuiImportMatch) {
-            const pieuiImportEnd = registryContent.indexOf(pieuiImportMatch[0]) + pieuiImportMatch[0].length
-            registryContent = registryContent.slice(0, pieuiImportEnd) + '\n\n// Import your custom components here\n// Example:\n// import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";\n' + importLine + registryContent.slice(pieuiImportEnd)
+            const pieuiImportEnd =
+                registryContent.indexOf(pieuiImportMatch[0]) +
+                pieuiImportMatch[0].length
+            registryContent =
+                registryContent.slice(0, pieuiImportEnd) +
+                '\n\n// Import your custom components here\n// Example:\n// import MyCustomCard from "./MyCustomCard/ui/MyCustomCard";\n' +
+                importLine +
+                registryContent.slice(pieuiImportEnd)
         }
     }
 
@@ -596,29 +985,50 @@ export default ${componentName}
     });`
 
     // Find the initializePieUI function
-    const functionMatch = registryContent.match(/export const initializePieUI = \(\) => \{([\s\S]*?)\n\}/m)
+    const functionMatch = registryContent.match(
+        /export const initializePieUI = \(\) => \{([\s\S]*?)\n\}/m
+    )
     if (functionMatch) {
         const functionContent = functionMatch[1]
 
         // Check if there are already registrations
         if (functionContent.includes('registerPieComponent({')) {
             // Add after the last registration
-            const lastRegisterMatch = functionContent.match(/registerPieComponent\([^)]+\);/g)
+            const lastRegisterMatch = functionContent.match(
+                /registerPieComponent\([^)]+\);/g
+            )
             if (lastRegisterMatch) {
-                const lastRegister = lastRegisterMatch[lastRegisterMatch.length - 1]
-                const lastRegisterPos = registryContent.lastIndexOf(lastRegister) + lastRegister.length
-                registryContent = registryContent.slice(0, lastRegisterPos) + '\n\n' + registerLine + registryContent.slice(lastRegisterPos)
+                const lastRegister =
+                    lastRegisterMatch[lastRegisterMatch.length - 1]
+                const lastRegisterPos =
+                    registryContent.lastIndexOf(lastRegister) +
+                    lastRegister.length
+                registryContent =
+                    registryContent.slice(0, lastRegisterPos) +
+                    '\n\n' +
+                    registerLine +
+                    registryContent.slice(lastRegisterPos)
             }
         } else {
             // Find where to insert - after the opening brace of the function
-            const functionStart = registryContent.indexOf('export const initializePieUI = () => {')
+            const functionStart = registryContent.indexOf(
+                'export const initializePieUI = () => {'
+            )
             const openBracePos = registryContent.indexOf('{', functionStart) + 1
 
             // Check if we should replace comment block
-            const commentStart = registryContent.indexOf('// Register your custom components here', openBracePos)
-            if (commentStart !== -1 && commentStart < registryContent.indexOf('}', openBracePos)) {
+            const commentStart = registryContent.indexOf(
+                '// Register your custom components here',
+                openBracePos
+            )
+            if (
+                commentStart !== -1 &&
+                commentStart < registryContent.indexOf('}', openBracePos)
+            ) {
                 // Find the end of the comment block
-                const lines = registryContent.substring(commentStart).split('\n')
+                const lines = registryContent
+                    .substring(commentStart)
+                    .split('\n')
                 let commentEnd = commentStart
                 for (const line of lines) {
                     if (line.trim() && !line.trim().startsWith('//')) {
@@ -628,17 +1038,27 @@ export default ${componentName}
                 }
 
                 // Replace the comment block
-                registryContent = registryContent.slice(0, commentStart) + registerLine + '\n' + registryContent.slice(commentEnd)
+                registryContent =
+                    registryContent.slice(0, commentStart) +
+                    registerLine +
+                    '\n' +
+                    registryContent.slice(commentEnd)
             } else {
                 // Just add after the opening brace
-                registryContent = registryContent.slice(0, openBracePos) + '\n' + registerLine + registryContent.slice(openBracePos)
+                registryContent =
+                    registryContent.slice(0, openBracePos) +
+                    '\n' +
+                    registerLine +
+                    registryContent.slice(openBracePos)
             }
         }
     }
 
     fs.writeFileSync(registryPath, registryContent, 'utf8')
 
-    console.log(`[pieui] Component ${componentName} (${componentType}) created successfully!`)
+    console.log(
+        `[pieui] Component ${componentName} (${componentType}) created successfully!`
+    )
     console.log(`[pieui] Files created:`)
     console.log(`  - piecomponents/${componentName}/index.ts`)
     console.log(`  - piecomponents/${componentName}/types/index.ts`)
@@ -663,7 +1083,8 @@ export default ${componentName}
 }
 
 const main = async () => {
-    const { command, outDir, srcDir, append, componentName, componentType } = parseArgs(process.argv.slice(2))
+    const { command, outDir, srcDir, append, componentName, componentType } =
+        parseArgs(process.argv.slice(2))
 
     console.log(`[pieui] CLI started with command: "${command}"`)
 
@@ -674,7 +1095,9 @@ const main = async () => {
 
         case 'add':
             if (!componentName) {
-                console.error('[pieui] Error: Component name is required for add command')
+                console.error(
+                    '[pieui] Error: Component name is required for add command'
+                )
                 printUsage()
                 process.exit(1)
             }
@@ -701,9 +1124,14 @@ const main = async () => {
 
         // Get all unique files that contain components
         const cliSchemaPath = path.join(__dirname, 'cli-schema.d.ts')
-        const uniqueFiles = [cliSchemaPath, ...new Set(components.map(c => c.file))]
+        const uniqueFiles = [
+            cliSchemaPath,
+            ...new Set(components.map((c) => c.file)),
+        ]
 
-        console.log('[pieui] Creating TypeScript program for schema generation...')
+        console.log(
+            '[pieui] Creating TypeScript program for schema generation...'
+        )
 
         // Create program with all files
         const program = TJS.getProgramFromFiles(uniqueFiles, {
@@ -716,6 +1144,52 @@ const main = async () => {
             allowSyntheticDefaultImports: true,
             skipLibCheck: true,
         })
+
+        const checker = program.getTypeChecker()
+
+        const findTypeSymbol = (component: ComponentInfo): any => {
+            const sourceFile = program.getSourceFile(component.file)
+            if (sourceFile) {
+                let found: any
+
+                const visit = (node: any) => {
+                    if (
+                        ts.isInterfaceDeclaration(node) ||
+                        ts.isTypeAliasDeclaration(node)
+                    ) {
+                        if (node.name.text === component.dataTypeName) {
+                            found = checker.getSymbolAtLocation(node.name)
+                            return
+                        }
+                    }
+                    ts.forEachChild(node, visit)
+                }
+
+                visit(sourceFile)
+
+                if (found) {
+                    return found
+                }
+
+                const symbols = checker.getSymbolsInScope(
+                    sourceFile,
+                    ts.SymbolFlags.Type
+                )
+                const match = symbols.find(
+                    (symbol) => symbol.getName() === component.dataTypeName
+                )
+                if (match) {
+                    return match
+                }
+            }
+
+            return checker.resolveName(
+                component.dataTypeName,
+                undefined,
+                ts.SymbolFlags.Type,
+                false
+            ) as any
+        }
 
         // Create schema generator
         const generator = TJS.buildGenerator(program, {
@@ -737,15 +1211,25 @@ const main = async () => {
 
         // Generate schema for each component
         for (const component of components) {
-            console.log(`[pieui] Generating schema for ${component.name} (type: ${component.dataTypeName})...`)
+            console.log(
+                `[pieui] Generating schema for ${component.name} (type: ${component.dataTypeName})...`
+            )
 
             try {
-                const schema = generator.getSchemaForSymbol(component.dataTypeName)
+                const schema = generator.getSchemaForSymbol(
+                    component.dataTypeName
+                )
 
                 if (schema) {
+                    const typeSymbol = findTypeSymbol(component)
+                    if (typeSymbol) {
+                        const declaredType =
+                            checker.getDeclaredTypeOfSymbol(typeSymbol)
+                        patchSchemaForType(declaredType, schema, checker)
+                    }
                     entries.push({
                         card: component.name,
-                        data: schema
+                        data: schema,
                     })
                     console.log(`[pieui]   ✓ Schema generated successfully`)
                 } else {
@@ -754,18 +1238,20 @@ const main = async () => {
                         card: component.name,
                         data: {
                             type: 'object',
-                            additionalProperties: true
-                        }
+                            additionalProperties: true,
+                        },
                     })
                 }
             } catch (error) {
-                console.error(`[pieui]   ✗ Error: ${error instanceof Error ? error.message : error}`)
+                console.error(
+                    `[pieui]   ✗ Error: ${error instanceof Error ? error.message : error}`
+                )
                 entries.push({
                     card: component.name,
                     data: {
                         type: 'object',
-                        additionalProperties: true
-                    }
+                        additionalProperties: true,
+                    },
                 })
             }
         }
@@ -774,24 +1260,45 @@ const main = async () => {
         let existingEntries: ComponentManifestEntry[] = []
 
         if (append) {
-            console.log('[pieui] Append mode enabled - loading existing pieui components')
+            console.log(
+                '[pieui] Append mode enabled - loading existing pieui components'
+            )
 
             // First, try to find pieui's manifest in node_modules
-            const nodeModulesPath = path.join(process.cwd(), 'node_modules', '@piedata', 'pieui', 'dist', MANIFEST_FILENAME)
+            const nodeModulesPath = path.join(
+                process.cwd(),
+                'node_modules',
+                '@piedata',
+                'pieui',
+                'dist',
+                MANIFEST_FILENAME
+            )
 
             if (fs.existsSync(nodeModulesPath)) {
                 try {
-                    const existingManifest = fs.readFileSync(nodeModulesPath, 'utf8')
+                    const existingManifest = fs.readFileSync(
+                        nodeModulesPath,
+                        'utf8'
+                    )
                     existingEntries = JSON.parse(existingManifest)
-                    console.log(`[pieui] Loaded ${existingEntries.length} existing components from pieui library at ${nodeModulesPath}`)
+                    console.log(
+                        `[pieui] Loaded ${existingEntries.length} existing components from pieui library at ${nodeModulesPath}`
+                    )
                 } catch (error) {
-                    console.error(`[pieui] Error reading manifest from ${nodeModulesPath}:`, error)
+                    console.error(
+                        `[pieui] Error reading manifest from ${nodeModulesPath}:`,
+                        error
+                    )
                 }
             } else {
-                console.log(`[pieui] No existing pieui manifest found at ${nodeModulesPath}`)
+                console.log(
+                    `[pieui] No existing pieui manifest found at ${nodeModulesPath}`
+                )
             }
         } else {
-            console.log('[pieui] Append mode disabled - only including components from current project')
+            console.log(
+                '[pieui] Append mode disabled - only including components from current project'
+            )
         }
 
         // Merge existing and new entries
@@ -814,14 +1321,21 @@ const main = async () => {
         const resolvedOutDir = path.resolve(process.cwd(), outDir)
         fs.mkdirSync(resolvedOutDir, { recursive: true })
         const manifestPath = path.join(resolvedOutDir, MANIFEST_FILENAME)
-        fs.writeFileSync(manifestPath, JSON.stringify(mergedEntries, null, 2), 'utf8')
+        fs.writeFileSync(
+            manifestPath,
+            JSON.stringify(mergedEntries, null, 2),
+            'utf8'
+        )
 
         console.log(`[pieui] Component manifest saved to ${manifestPath}`)
-        console.log(`[pieui] Total components: ${mergedEntries.length} (${existingEntries.length} from pieui, ${entries.length} new/updated)`)
-
+        console.log(
+            `[pieui] Total components: ${mergedEntries.length} (${existingEntries.length} from pieui, ${entries.length} new/updated)`
+        )
     } catch (error) {
         const message = error instanceof Error ? error.message : String(error)
-        console.error(`[pieui] Failed to generate component manifest: ${message}`)
+        console.error(
+            `[pieui] Failed to generate component manifest: ${message}`
+        )
         if (error instanceof Error && error.stack) {
             console.error('[pieui] Stack trace:', error.stack)
         }
