@@ -1,31 +1,42 @@
-import {useCallback, useEffect, useMemo, useState} from 'react'
-import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
+import { useEffect, useMemo } from 'react'
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
+} from '@tanstack/react-query'
 
-import Radium from "radium";
-import {PieRootProps} from './types'
+import Radium from 'radium'
+import { PieRootProps } from './types'
 
-import MittContext, {emitter} from "../../util/mitt"
-import SocketIOContext, {getSocket} from "../../util/socket"
-import CentrifugeIOContext, { getCentrifuge } from "../../util/centrifuge"
+import MittContext, { emitter } from '../../util/mitt'
+import SocketIOContext, { getSocket } from '../../util/socket'
+import CentrifugeIOContext, { getCentrifuge } from '../../util/centrifuge'
 
-import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
-import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
-import FallbackContext from "../../util/fallback";
-import {UIConfigType, UIEventType} from "../../types";
-import {AxiosError} from "axios";
-import UI from "../UI";
-import { createAxiosDateTransformer } from "axios-date-transformer";
-import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
+import SocketIOInitProvider from '../../providers/SocketIOInitProvider'
+import CentrifugeIOInitProvider from '../../providers/CentrifugeIOInitProvider'
+import FallbackContext from '../../util/fallback'
+import { UIConfigType } from '../../types'
+import { AxiosError } from 'axios'
+import UI from '../UI'
+import { createAxiosDateTransformer } from 'axios-date-transformer'
+import {
+    initializePieComponents,
+    isPieComponentsInitialized,
+} from '../../util/initializeComponents.ts'
 import {
     getApiServer,
     isRenderingLogEnabled,
     getCentrifugeServer,
-    PieConfigContext
-} from "../../util/pieConfig";
-import NavigateContext from "../../util/navigate.ts";
+    PieConfigContext,
+} from '../../util/pieConfig'
+import NavigateContext from '../../util/navigate.ts'
 
-
-const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootProps) => {
+const PieRootContent = ({
+    location,
+    fallback,
+    onError,
+    initializePie,
+}: PieRootProps) => {
     const apiServer = getApiServer()
     const centrifugeServer = getCentrifugeServer()
     const renderingLogEnabled = isRenderingLogEnabled()
@@ -38,9 +49,13 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
         initializePie()
     }, [])
 
-    const axiosInstance = useMemo(() => createAxiosDateTransformer({
-        baseURL: apiServer || '',
-    }), [apiServer])
+    const axiosInstance = useMemo(
+        () =>
+            createAxiosDateTransformer({
+                baseURL: apiServer || '',
+            }),
+        [apiServer]
+    )
 
     // Все хуки вызываем до любых return/throw, иначе ломается порядок хуков
     const {
@@ -48,25 +63,42 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
         isLoading,
         error,
     } = useQuery<UIConfigType, AxiosError>({
-        queryKey: ['uiConfig', location.pathname + location.search, isPieComponentsInitialized(), apiServer],
+        queryKey: [
+            'uiConfig',
+            location.pathname + location.search,
+            isPieComponentsInitialized(),
+            apiServer,
+        ],
         queryFn: async () => {
             if (!apiServer || !isPieComponentsInitialized()) {
                 return
             }
-            const apiEndpoint = '/api/content' + location.pathname + (location.search.startsWith("?") ? location.search: `?${location.search}`)
+            const apiEndpoint =
+                '/api/content' +
+                location.pathname +
+                (location.search.startsWith('?')
+                    ? location.search
+                    : `?${location.search}`)
             if (renderingLogEnabled) {
-                console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
+                console.log(
+                    '[PieRoot] Fetching UI configuration from:',
+                    apiEndpoint
+                )
             }
             const response = await axiosInstance.get(apiEndpoint, {
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+                    'Access-Control-Allow-Methods':
+                        'GET,PUT,POST,DELETE,PATCH,OPTIONS',
                     'Content-type': 'application/json',
                 },
                 withCredentials: true,
             })
             if (renderingLogEnabled) {
-                console.log('[PieRoot] Received UI configuration:', response.data)
+                console.log(
+                    '[PieRoot] Received UI configuration:',
+                    response.data
+                )
             }
             return response.data
         },
@@ -95,40 +127,56 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
             console.error('[PieRoot] Error details:', {
                 message: error.message,
                 status: error.response?.status,
-                data: error.response?.data
+                data: error.response?.data,
             })
         }
         onError?.()
         return fallback
     }
 
-
     if (isLoading || !uiConfiguration) {
         if (renderingLogEnabled) {
-            console.log('[PieRoot] Loading state:', { isLoading, hasUiConfiguration: !!uiConfiguration })
+            console.log('[PieRoot] Loading state:', {
+                isLoading,
+                hasUiConfiguration: !!uiConfiguration,
+            })
         }
         return fallback
     }
 
     if (renderingLogEnabled) {
-        console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
+        console.log(
+            '[PieRoot] UI configuration loaded successfully:',
+            uiConfiguration
+        )
         console.log('[PieRoot] Rendering UI with configuration')
     }
 
     return (
         <MittContext.Provider value={emitter}>
             <SocketIOContext.Provider value={getSocket(apiServer)}>
-                <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
+                <CentrifugeIOContext.Provider
+                    value={getCentrifuge(apiServer, centrifugeServer)}
+                >
                     <FallbackContext.Provider value={fallback ?? <></>}>
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
-
-                                <Radium.StyleRoot style={{display: "contents"}}>
-                                    <UI
-                                        uiConfig={uiConfiguration}
-                                    />
+                                <Radium.StyleRoot
+                                    style={{ display: 'contents' }}
+                                >
+                                    <form
+                                        id="piedata_global_form"
+                                        action={
+                                            apiServer +
+                                            'api/process' +
+                                            location.pathname
+                                        }
+                                        method="post"
+                                        encType="multipart/form-data"
+                                    >
+                                        <UI uiConfig={uiConfiguration} />
+                                    </form>
                                 </Radium.StyleRoot>
-
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>
                     </FallbackContext.Provider>
@@ -137,7 +185,6 @@ const PieRootContent = ({ location, fallback, onError, initializePie }: PieRootP
         </MittContext.Provider>
     )
 }
-
 
 const PieRoot = (props: PieRootProps) => {
     const queryClient = new QueryClient()
@@ -151,6 +198,5 @@ const PieRoot = (props: PieRootProps) => {
         </NavigateContext.Provider>
     )
 }
-
 
 export default PieRoot

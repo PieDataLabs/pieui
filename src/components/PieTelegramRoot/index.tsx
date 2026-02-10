@@ -172,7 +172,18 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
                                 <Radium.StyleRoot>
-                                    <UI uiConfig={uiConfiguration} />
+                                    <form
+                                        id="piedata_global_form"
+                                        action={
+                                            apiServer +
+                                            'api/process' +
+                                            location.pathname
+                                        }
+                                        method="post"
+                                        encType="multipart/form-data"
+                                    >
+                                        <UI uiConfig={uiConfiguration} />
+                                    </form>
                                 </Radium.StyleRoot>
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>
