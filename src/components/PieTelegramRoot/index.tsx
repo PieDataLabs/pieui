@@ -1,32 +1,43 @@
-import React, {useEffect, useMemo} from 'react'
-import {QueryClient, QueryClientProvider, useQuery} from '@tanstack/react-query'
+import React, { useEffect, useMemo } from 'react'
+import {
+    QueryClient,
+    QueryClientProvider,
+    useQuery,
+} from '@tanstack/react-query'
 
-import Radium from "radium";
-import {PieRootProps} from '../PieRoot/types'
+import Radium from 'radium'
+import { PieRootProps } from '../PieRoot/types'
 
-import MittContext, {emitter} from "../../util/mitt"
-import SocketIOContext, {getSocket} from "../../util/socket"
-import CentrifugeIOContext, {getCentrifuge} from "../../util/centrifuge"
+import MittContext, { emitter } from '../../util/mitt'
+import SocketIOContext, { getSocket } from '../../util/socket'
+import CentrifugeIOContext, { getCentrifuge } from '../../util/centrifuge'
 
-import SocketIOInitProvider from "../../providers/SocketIOInitProvider"
-import CentrifugeIOInitProvider from "../../providers/CentrifugeIOInitProvider"
-import FallbackContext from "../../util/fallback";
-import {UIConfigType} from "../../types";
-import {AxiosError} from "axios";
-import UI from "../UI";
-import { createAxiosDateTransformer } from "axios-date-transformer";
+import SocketIOInitProvider from '../../providers/SocketIOInitProvider'
+import CentrifugeIOInitProvider from '../../providers/CentrifugeIOInitProvider'
+import FallbackContext from '../../util/fallback'
+import { UIConfigType } from '../../types'
+import { AxiosError } from 'axios'
+import UI from '../UI'
+import { createAxiosDateTransformer } from 'axios-date-transformer'
 import {
     getApiServer,
     isRenderingLogEnabled,
     getCentrifugeServer,
-    PieConfigContext
-} from "../../util/pieConfig";
-import {initializePieComponents, isPieComponentsInitialized} from "../../util/initializeComponents.ts";
-import {useWebApp} from "../../util/useWebApp.ts";
-import NavigateContext from "../../util/navigate.ts";
+    PieConfigContext,
+} from '../../util/pieConfig'
+import {
+    initializePieComponents,
+    isPieComponentsInitialized,
+} from '../../util/initializeComponents.ts'
+import { useWebApp } from '../../util/useWebApp.ts'
+import NavigateContext from '../../util/navigate.ts'
 
-
-const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, onError, initializePie }) => {
+const PieTelegramRootContent: React.FC<PieRootProps> = ({
+    location,
+    fallback,
+    onError,
+    initializePie,
+}) => {
     const apiServer = getApiServer()
     const centrifugeServer = getCentrifugeServer()
     const renderingLogEnabled = isRenderingLogEnabled()
@@ -39,10 +50,14 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         initializePie()
     }, [])
 
-    const axiosInstance = useMemo(() => createAxiosDateTransformer({
-        baseURL: apiServer,
-    }), [])
-    
+    const axiosInstance = useMemo(
+        () =>
+            createAxiosDateTransformer({
+                baseURL: apiServer,
+            }),
+        []
+    )
+
     if (renderingLogEnabled) {
         console.log('[PieRoot] Rendering with location:', location)
         console.log('[PieRoot] API_SERVER:', apiServer)
@@ -50,7 +65,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
     }
 
     if (!apiServer) {
-        throw Error("Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER")
+        throw Error('Set PIE_API_SERVER and PIE_CENTRIFUGE_SERVER')
     }
 
     // if (!isPieComponentsInitialized()) {
@@ -64,7 +79,12 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         isLoading,
         error,
     } = useQuery<UIConfigType, AxiosError>({
-        queryKey: ['uiConfig', location.pathname + location.search, webApp?.initData, isPieComponentsInitialized()],
+        queryKey: [
+            'uiConfig',
+            location.pathname + location.search,
+            webApp?.initData,
+            isPieComponentsInitialized(),
+        ],
         queryFn: async () => {
             if (!isPieComponentsInitialized()) {
                 return
@@ -73,21 +93,34 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
             const initData = webApp?.initData
                 ? `${querySymbol}initData=${encodeURIComponent(webApp.initData)}`
                 : ''
-            const apiEndpoint = '/api/content' + location.pathname + (location.search.startsWith("?") ? location.search: `?${location.search}`) + initData
+            const apiEndpoint =
+                '/api/content' +
+                location.pathname +
+                (location.search.startsWith('?')
+                    ? location.search
+                    : `?${location.search}`) +
+                initData
 
             if (renderingLogEnabled) {
-                console.log('[PieRoot] Fetching UI configuration from:', apiEndpoint)
+                console.log(
+                    '[PieRoot] Fetching UI configuration from:',
+                    apiEndpoint
+                )
             }
             const response = await axiosInstance.get(apiEndpoint, {
                 headers: {
                     'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,PATCH,OPTIONS',
+                    'Access-Control-Allow-Methods':
+                        'GET,PUT,POST,DELETE,PATCH,OPTIONS',
                     'Content-type': 'application/json',
                 },
                 withCredentials: true,
             })
             if (renderingLogEnabled) {
-                console.log('[PieRoot] Received UI configuration:', response.data)
+                console.log(
+                    '[PieRoot] Received UI configuration:',
+                    response.data
+                )
             }
             return response.data
         },
@@ -105,37 +138,42 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         console.error('[PieRoot] Error details:', {
             message: error.message,
             status: error.response?.status,
-            data: error.response?.data
+            data: error.response?.data,
         })
         onError?.()
         return fallback
     }
 
-
     if (isLoading || !uiConfiguration) {
         if (renderingLogEnabled) {
-            console.log('[PieRoot] Loading state:', { isLoading, hasUiConfiguration: !!uiConfiguration })
+            console.log('[PieRoot] Loading state:', {
+                isLoading,
+                hasUiConfiguration: !!uiConfiguration,
+            })
         }
         return fallback
     }
 
     if (renderingLogEnabled) {
-        console.log('[PieRoot] UI configuration loaded successfully:', uiConfiguration)
+        console.log(
+            '[PieRoot] UI configuration loaded successfully:',
+            uiConfiguration
+        )
         console.log('[PieRoot] Rendering UI with configuration')
     }
 
     return (
         <MittContext.Provider value={emitter}>
             <SocketIOContext.Provider value={getSocket(apiServer)}>
-                <CentrifugeIOContext.Provider value={getCentrifuge(apiServer, centrifugeServer)}>
+                <CentrifugeIOContext.Provider
+                    value={getCentrifuge(apiServer, centrifugeServer)}
+                >
                     <FallbackContext.Provider value={fallback ?? <></>}>
                         <SocketIOInitProvider>
                             <CentrifugeIOInitProvider>
-
                                 <Radium.StyleRoot>
                                     <UI uiConfig={uiConfiguration} />
                                 </Radium.StyleRoot>
-
                             </CentrifugeIOInitProvider>
                         </SocketIOInitProvider>
                     </FallbackContext.Provider>
@@ -144,8 +182,6 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({ location, fallback, on
         </MittContext.Provider>
     )
 }
-
-
 
 const PieTelegramRoot: React.FC<PieRootProps> = (props) => {
     const queryClient = new QueryClient()
@@ -159,6 +195,5 @@ const PieTelegramRoot: React.FC<PieRootProps> = (props) => {
         </NavigateContext.Provider>
     )
 }
-
 
 export default PieTelegramRoot

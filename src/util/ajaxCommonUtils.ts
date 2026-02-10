@@ -1,8 +1,8 @@
 import '../types'
 import { SetUiAjaxConfigurationType, UIEventType } from '../types'
 import waitForSidAvailable from './waitForSidAvailable'
-import {usePieConfig} from "./pieConfig.ts";
-import {useMemo} from "react";
+import { usePieConfig } from './pieConfig.ts'
+import { useMemo } from 'react'
 
 /** Options to avoid calling hooks inside useMemo. Pass from component via usePieConfig(). */
 export type GetAjaxSubmitOptions = {
@@ -15,10 +15,17 @@ export const getAjaxSubmit = (
     kwargs: Record<string, any> = {},
     depsNames: Array<string> = [],
     pathname?: string,
-    options?: GetAjaxSubmitOptions,
+    options?: GetAjaxSubmitOptions
 ) => {
     const renderingLogEnabled = options?.renderingLogEnabled ?? false
-    const apiServer = options?.apiServer ?? ''
+
+    if (!options?.apiServer) {
+        if (renderingLogEnabled) {
+            console.warn('Registration FAILED: apiServer is missing!')
+        }
+        return () => {}
+    }
+    const apiServer = options?.apiServer
 
     if (renderingLogEnabled) {
         console.log('Registering AJAX: ', pathname, kwargs, depsNames)
@@ -26,7 +33,9 @@ export const getAjaxSubmit = (
 
     if (!pathname || !setUiAjaxConfiguration) {
         if (renderingLogEnabled) {
-            console.warn('Registration FAILED: pathname or setUiAjaxConfiguration is missing!')
+            console.warn(
+                'Registration FAILED: pathname or setUiAjaxConfiguration is missing!'
+            )
         }
         return () => {}
     }
@@ -34,7 +43,9 @@ export const getAjaxSubmit = (
     return async (extraKwargs: Record<string, any> = {}) => {
         if (typeof window === 'undefined' || typeof document === 'undefined') {
             if (renderingLogEnabled) {
-                console.warn('getAjaxSubmit called on server, skipping DOM-dependent logic')
+                console.warn(
+                    'getAjaxSubmit called on server, skipping DOM-dependent logic'
+                )
             }
             return
         }
@@ -44,13 +55,17 @@ export const getAjaxSubmit = (
         }
 
         const data = new FormData()
-        for (const [key, value] of Object.entries({ ...kwargs, ...extraKwargs })) {
+        for (const [key, value] of Object.entries({
+            ...kwargs,
+            ...extraKwargs,
+        })) {
             data.append(key, value)
         }
 
         for (const depName of depsNames) {
             if (depName === 'sid') {
-                if (!window.sid) throw new Error("SocketIO isn't initialized properly")
+                if (!window.sid)
+                    throw new Error("SocketIO isn't initialized properly")
                 data.append('sid', window.sid)
             } else {
                 const inputs = document.getElementsByName(depName)
@@ -63,7 +78,9 @@ export const getAjaxSubmit = (
                 const input = inputs[0]
                 if (input instanceof HTMLInputElement) {
                     if (input.type === 'file' && input.files) {
-                        Array.from(input.files).forEach((file) => data.append(depName, file))
+                        Array.from(input.files).forEach((file) =>
+                            data.append(depName, file)
+                        )
                     } else {
                         data.append(depName, input.value)
                     }
@@ -90,7 +107,6 @@ export const getAjaxSubmit = (
                     const decoder = new TextDecoder()
                     let buffer = ''
 
-                    // eslint-disable-next-line no-constant-condition
                     while (true) {
                         const { done, value } = await reader.read()
                         if (done) break
@@ -103,13 +119,20 @@ export const getAjaxSubmit = (
                             const trimmed = line.trim()
                             if (!trimmed) continue
                             try {
-                                const currentEvent = JSON.parse(trimmed) as UIEventType
-                                ;(setUiAjaxConfiguration as (events: UIEventType[]) => void)([
-                                    currentEvent,
-                                ])
-                            } catch (err) {
+                                const currentEvent = JSON.parse(
+                                    trimmed
+                                ) as UIEventType
+                                ;(
+                                    setUiAjaxConfiguration as (
+                                        events: UIEventType[]
+                                    ) => void
+                                )([currentEvent])
+                            } catch {
                                 if (renderingLogEnabled) {
-                                    console.warn('Failed to parse streamed line:', trimmed)
+                                    console.warn(
+                                        'Failed to parse streamed line:',
+                                        trimmed
+                                    )
                                 }
                             }
                         }
@@ -117,13 +140,20 @@ export const getAjaxSubmit = (
 
                     if (buffer.trim()) {
                         try {
-                            const currentEvent = JSON.parse(buffer) as UIEventType
-                            ;(setUiAjaxConfiguration as (events: UIEventType[]) => void)([
-                                currentEvent,
-                            ])
-                        } catch (err) {
+                            const currentEvent = JSON.parse(
+                                buffer
+                            ) as UIEventType
+                            ;(
+                                setUiAjaxConfiguration as (
+                                    events: UIEventType[]
+                                ) => void
+                            )([currentEvent])
+                        } catch {
                             if (renderingLogEnabled) {
-                                console.warn('Failed to parse final streamed line:', buffer)
+                                console.warn(
+                                    'Failed to parse final streamed line:',
+                                    buffer
+                                )
                             }
                         }
                     }
@@ -144,19 +174,26 @@ export const getAjaxSubmit = (
     }
 }
 
-
 export const useAjaxSubmit = (
     setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
     kwargs: Record<string, any> = {},
     depsNames: Array<string> = [],
-    pathname?: string,
+    pathname?: string
 ) => {
     const { apiServer, enableRenderingLog } = usePieConfig()
     return useMemo(
-        () => getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
+        () =>
+            getAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname, {
+                apiServer,
+                renderingLogEnabled: enableRenderingLog,
+            }),
+        [
+            setUiAjaxConfiguration,
+            kwargs,
+            depsNames,
+            pathname,
             apiServer,
-            renderingLogEnabled: enableRenderingLog,
-        }),
-        [setUiAjaxConfiguration, kwargs, depsNames, pathname, apiServer, enableRenderingLog],
+            enableRenderingLog,
+        ]
     )
 }
