@@ -118,6 +118,7 @@ const PieRootContent = ({
     if (renderingLogEnabled) {
         console.log('[PieRoot] Rendering with location:', location)
         console.log('[PieRoot] API_SERVER:', apiServer)
+        console.log('[PieRoot] CENTRIFUGE_SERVER:', centrifugeServer)
         console.log('[PieRoot] Fallback provided:', !!fallback)
     }
 
