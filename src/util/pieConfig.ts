@@ -1,6 +1,5 @@
-import {createContext, useContext} from "react";
-import {PieConfig} from "../types";
-
+import { createContext, useContext } from 'react'
+import { PieConfig } from '../types'
 
 export const PieConfigContext = createContext<PieConfig | null>(null)
 
@@ -19,7 +18,6 @@ export const useApiServer = () => {
 }
 
 export const getApiServer = useApiServer
-
 
 export const useCentrifugeServer = () => {
     const { centrifugeServer } = usePieConfig()
@@ -47,3 +45,5 @@ export const getPageProcessor = usePageProcessor
 //     const { onN } = usePieConfig()
 //     return pageProcessor
 // }
+
+export const PIEBREAK = '__piedemo__'
