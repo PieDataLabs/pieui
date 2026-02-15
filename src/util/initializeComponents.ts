@@ -14,6 +14,7 @@ import HTMLEmbedCard from '../components/Common/HTMLEmbedCard'
 import IOEventsCard from '../components/Common/IOEventsCard'
 import RedirectButtonCard from '../components/Buttons/RedirectButtonCard'
 import { OpenAIVoiceAgentCard } from '../components'
+import TableCard from '../components/Containers/TableCard'
 
 let initialized = false
 
@@ -123,6 +124,14 @@ export function initializePieComponents(): void {
     registerPieComponent({
         name: 'OpenAIVoiceAgentCard',
         component: OpenAIVoiceAgentCard,
+        metadata: {
+            author: 'PieData',
+        },
+    })
+
+    registerPieComponent({
+        name: 'TableCard',
+        component: TableCard,
         metadata: {
             author: 'PieData',
         },
