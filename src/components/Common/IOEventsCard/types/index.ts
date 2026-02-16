@@ -1,7 +1,6 @@
-import { PieSimpleComponentProps } from "../../../../types";
-import { ToastOptions } from "react-toastify";
-import {CSSProperties} from "react";
-
+import { PieSimpleComponentProps } from '../../../../types'
+import { ToastOptions } from 'react-toastify'
+import { CSSProperties } from 'react'
 
 export interface IOEventsCardData {
     name: string
@@ -11,12 +10,17 @@ export interface IOEventsCardData {
     centrifugeChannel?: string
 }
 
-
-export interface IOEventData extends Omit<ToastOptions, 'transition' | 'style' | 'className' | 'onClick' | 'onClose' | 'onOpen'> {
+export interface IOEventData extends Omit<
+    ToastOptions,
+    'transition' | 'style' | 'className' | 'onClick' | 'onClose' | 'onOpen'
+> {
     message: string
     transition: 'bounce' | 'slide' | 'zoom' | 'flip'
     sx: CSSProperties
 }
 
+export interface NotificationEvent extends NotificationOptions {
+    title: string
+}
 
 export interface IOEventsCardProps extends PieSimpleComponentProps<IOEventsCardData> {}

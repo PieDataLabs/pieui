@@ -3,7 +3,7 @@ import { toast, ToastContainer, ToastOptions } from 'react-toastify'
 // import 'react-toastify/dist/ReactToastify.css'
 // import addNotification from 'react-push-notification'
 import PieCard from '../../../PieCard'
-import { IOEventData, IOEventsCardProps } from '../types'
+import { IOEventData, IOEventsCardProps, NotificationEvent } from '../types'
 import { useContext } from 'react'
 import NavigateContext from '../../../../util/navigate.ts'
 import { ShowPopupOptions } from '@telegram-apps/sdk'
@@ -52,6 +52,44 @@ const IOEventsCard = ({ data }: IOEventsCardProps) => {
         console.log('Log event', event)
     }
 
+    const onNotifyEvent = (event: NotificationEvent) => {
+        if (typeof window === 'undefined' || !window.Notification) {
+            console.warn('[IOEventsCard] Notifications API is not available')
+            return
+        }
+
+        const { title, ...options } = event
+
+        const show = () => {
+            try {
+                new window.Notification(title, options)
+            } catch (error) {
+                console.error(
+                    '[IOEventsCard] Failed to show notification',
+                    error
+                )
+            }
+        }
+
+        const permission = window.Notification.permission
+
+        if (permission === 'granted') {
+            show()
+            return
+        }
+
+        if (permission === 'denied') {
+            console.warn('[IOEventsCard] Notification permission denied')
+            return
+        }
+
+        window.Notification.requestPermission().then((result) => {
+            if (result === 'granted') {
+                show()
+            }
+        })
+    }
+
     const onRedirectEvent = (event: { to: string }) => {
         if (event.to) {
             const url = event.to
@@ -95,6 +133,7 @@ const IOEventsCard = ({ data }: IOEventsCardProps) => {
                 methods={{
                     toast: onToastEvent,
                     showTelegramPopup: onShowTelegramPopupEvent,
+                    notify: onNotifyEvent,
                     log: onLogEvent,
                     redirect: onRedirectEvent,
                     // push: onPushNotificationEvent,
