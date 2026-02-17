@@ -44,7 +44,7 @@
         "build:cli": "bun build src/cli.ts --outfile dist/cli.js --format cjs --target node --external vm2",
         "dev": "bun run src/index.ts",
         "typecheck": "tsc --noEmit",
-        "lint": "echo 'Linting not configured yet'",
+        "lint": "prettier --write ./",
         "prepublishOnly": "bun run build",
         "release": "npm version patch && git push && git push --tags",
         "release:retry": "git tag v$(node -p \"require('./package.json').version\") && git push --tags",

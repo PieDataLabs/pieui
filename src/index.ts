@@ -9,11 +9,14 @@ export {
 } from './util/initializeComponents'
 
 export type {
+    PieComponentProps,
     PieSimpleComponentProps,
     PieComplexComponentProps,
     PieContainerComponentProps,
     PieComplexContainerComponentProps,
     PieConfig,
+    UIConfigType,
+    SetUiAjaxConfigurationType,
 } from './types'
 
 export { useAjaxSubmit } from './util/ajaxCommonUtils'
