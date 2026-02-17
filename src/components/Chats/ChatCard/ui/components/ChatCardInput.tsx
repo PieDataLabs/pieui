@@ -1,4 +1,11 @@
-import { CSSProperties, forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import {
+    CSSProperties,
+    forwardRef,
+    useEffect,
+    useImperativeHandle,
+    useRef,
+    useState,
+} from 'react'
 import ResizableTextarea from './ResizableTextarea'
 // import annyang from 'annyang'
 // import '../../types/annyang.d.ts'
@@ -25,7 +32,10 @@ const ChatCardInput = forwardRef<
         placeholder: string
         fileAccept: string
         optionsPosition: 'top' | 'bottom'
-        icons: Record<'voiceRecordingIcon' | 'sendIcon' | 'cancelIcon' | 'attachFileIcon', string>
+        icons: Record<
+            'voiceRecordingIcon' | 'sendIcon' | 'cancelIcon' | 'attachFileIcon',
+            string
+        >
         handleOptionClick: (option: string) => void
         handleSendMessage: () => void
         sx: CSSProperties
@@ -45,7 +55,7 @@ const ChatCardInput = forwardRef<
             handleSendMessage,
             sx,
         },
-        ref,
+        ref
     ) => {
         const fileInputRef = useRef<HTMLInputElement>(null!)
         const [selectedFile, setSelectedFile] = useState<File | null>(null)
@@ -96,22 +106,26 @@ const ChatCardInput = forwardRef<
 
         return (
             <div
-                className='flex flex-col items-center gap-[0.1rem]'
+                className="flex flex-col items-center gap-[0.1rem]"
                 id={name + '_chat_input'}
                 style={sx}
             >
                 {options && optionsPosition === 'top' && (
-                    <Options options={options} handleOptionClick={handleOptionClick} />
+                    <Options
+                        options={options}
+                        handleOptionClick={handleOptionClick}
+                    />
                 )}
-                <div className='stretch relative flex size-full flex-1 flex-row items-stretch gap-3 last:mb-2 md:mx-4 md:flex-col md:last:mb-6 lg:mx-auto'>
-                    <div className='flex w-full grow flex-row items-center rounded-md bg-transparent'>
+                <div className="stretch relative flex size-full flex-1 flex-row items-stretch gap-3 last:mb-2 md:mx-4 md:flex-col md:last:mb-6 lg:mx-auto">
+                    <div className="flex w-full grow flex-row items-center rounded-md bg-transparent">
                         {selectedFile ? (
                             <AttachedFileView
                                 name={name}
                                 selectedFile={selectedFile}
                                 onDropFile={() => {
                                     setSelectedFile(null)
-                                    if (fileInputRef.current) fileInputRef.current.value = ''
+                                    if (fileInputRef.current)
+                                        fileInputRef.current.value = ''
                                 }}
                             />
                         ) : !isArea ? (
@@ -128,8 +142,12 @@ const ChatCardInput = forwardRef<
                                 }}
                                 tabIndex={0}
                                 placeholder={placeholder}
-                                className='m-0 w-full resize-none border-0 bg-transparent outline-none'
-                                style={{ maxHeight: 200, height: '100%', overflowY: 'hidden' }}
+                                className="m-0 w-full resize-none border-0 bg-transparent outline-none"
+                                style={{
+                                    maxHeight: 200,
+                                    height: '100%',
+                                    overflowY: 'hidden',
+                                }}
                             />
                         ) : (
                             <ResizableTextarea
@@ -146,8 +164,12 @@ const ChatCardInput = forwardRef<
                                 tabIndex={0}
                                 rows={2}
                                 placeholder={placeholder}
-                                className='m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 outline-none md:pl-0'
-                                style={{ maxHeight: 200, height: '100%', minHeight: 24 }}
+                                className="m-0 w-full resize-none border-0 bg-transparent p-0 pl-2 pr-7 outline-none md:pl-0"
+                                style={{
+                                    maxHeight: 200,
+                                    height: '100%',
+                                    minHeight: 24,
+                                }}
                             />
                         )}
 
@@ -167,11 +189,14 @@ const ChatCardInput = forwardRef<
                     </div>
                 </div>
                 {options && optionsPosition === 'bottom' && (
-                    <Options options={options} handleOptionClick={handleOptionClick} />
+                    <Options
+                        options={options}
+                        handleOptionClick={handleOptionClick}
+                    />
                 )}
             </div>
         )
-    },
+    }
 )
 
 export default ChatCardInput

@@ -15,7 +15,7 @@ import IOEventsCard from '../components/Common/IOEventsCard'
 import RedirectButtonCard from '../components/Buttons/RedirectButtonCard'
 import { OpenAIVoiceAgentCard } from '../components'
 import TableCard from '../components/Containers/TableCard'
-import BoxCard from "../components/Containers/BoxCard";
+import BoxCard from '../components/Containers/BoxCard'
 
 let initialized = false
 

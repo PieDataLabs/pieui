@@ -1,9 +1,8 @@
 import { UIConfigType, SetUiAjaxConfigurationType } from '../../types'
-import { getRegistryEntry } from "../../util/registry";
-import {Suspense, useContext, ReactNode} from "react";
-import FallbackContext from "../../util/fallback";
-import { isRenderingLogEnabled } from '../../util/pieConfig';
-
+import { getRegistryEntry } from '../../util/registry'
+import { Suspense, useContext, ReactNode } from 'react'
+import FallbackContext from '../../util/fallback'
+import { isRenderingLogEnabled } from '../../util/pieConfig'
 
 function UI({
     uiConfig,
@@ -19,13 +18,18 @@ function UI({
         console.log('[UI] Rendering component:', uiConfig.card)
         console.log('[UI] Component data:', uiConfig.data)
         console.log('[UI] Component content:', uiConfig.content)
-        console.log('[UI] Has setUiAjaxConfiguration:', !!setUiAjaxConfiguration)
+        console.log(
+            '[UI] Has setUiAjaxConfiguration:',
+            !!setUiAjaxConfiguration
+        )
     }
 
     const entry = getRegistryEntry(uiConfig.card)
     if (!entry?.component) {
         if (renderingLogEnabled) {
-            console.warn(`[UI] Component not found in registry: ${uiConfig.card}`)
+            console.warn(
+                `[UI] Component not found in registry: ${uiConfig.card}`
+            )
             console.log('[UI] Returning fallback component')
         }
         return Fallback
@@ -35,7 +39,7 @@ function UI({
         console.log('[UI] Found component in registry:', {
             name: entry.name,
             isLazy: entry.isLazy,
-            hasMetadata: !!entry.metadata
+            hasMetadata: !!entry.metadata,
         })
     }
 
@@ -51,10 +55,16 @@ function UI({
 
     if (entry.isLazy) {
         if (renderingLogEnabled) {
-            console.log('[UI] Rendering lazy component with Suspense:', entry.name)
+            console.log(
+                '[UI] Rendering lazy component with Suspense:',
+                entry.name
+            )
         }
         return (
-            <Suspense key={`${entry.name}`} fallback={entry.fallback ?? Fallback}>
+            <Suspense
+                key={`${entry.name}`}
+                fallback={entry.fallback ?? Fallback}
+            >
                 {node}
             </Suspense>
         )

@@ -11,7 +11,7 @@ function MarkdownRender({ children }: { children: string }) {
     }, [children])
 
     return (
-        <div className='max-w-full first:mt-0'>
+        <div className="max-w-full first:mt-0">
             {/*<ReactMarkdown rehypePlugins={[rehypeHighlight]}>{content}</ReactMarkdown>*/}
             {content}
         </div>

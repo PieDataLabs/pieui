@@ -9,9 +9,15 @@ const Options = ({
     handleOptionClick: (option: string) => void
 }) => {
     return (
-        <div className='flex w-full flex-row flex-wrap justify-start gap-[5px]'>
+        <div className="flex w-full flex-row flex-wrap justify-start gap-[5px]">
             {options.map((option: Option, idx: number) => {
-                return <ChatOption key={idx} option={option} onClickOption={handleOptionClick} />
+                return (
+                    <ChatOption
+                        key={idx}
+                        option={option}
+                        onClickOption={handleOptionClick}
+                    />
+                )
             })}
         </div>
     )

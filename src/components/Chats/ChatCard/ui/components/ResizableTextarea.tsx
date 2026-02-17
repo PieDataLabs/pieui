@@ -8,7 +8,10 @@ import {
 } from 'react'
 
 export default function ResizableTextarea(
-    props: DetailedHTMLProps<TextareaHTMLAttributes<HTMLTextAreaElement>, HTMLTextAreaElement>,
+    props: DetailedHTMLProps<
+        TextareaHTMLAttributes<HTMLTextAreaElement>,
+        HTMLTextAreaElement
+    >
 ) {
     const [canResize, setCanResize] = useState<boolean>(false)
     const textareaRef = useRef<HTMLTextAreaElement | null>(null)
@@ -53,7 +56,11 @@ export default function ResizableTextarea(
             onKeyUp={handleKeyUp}
             onKeyDown={handleKeyDown}
             onBlur={handleBlur}
-            style={{ resize: canResize ? 'vertical' : 'none', overflowY: 'auto', ...props.style }}
+            style={{
+                resize: canResize ? 'vertical' : 'none',
+                overflowY: 'auto',
+                ...props.style,
+            }}
         />
     )
 }

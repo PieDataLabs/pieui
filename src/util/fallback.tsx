@@ -1,5 +1,4 @@
-import {createContext, ReactNode} from "react";
-
+import { createContext, ReactNode } from 'react'
 
 const FallbackContext = createContext<ReactNode>(<></>)
 

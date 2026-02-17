@@ -1,7 +1,6 @@
-import {AutoRedirectCardProps} from '../types'
-import {useContext, useEffect} from "react";
-import NavigateContext from "../../../../util/navigate.ts";
-
+import { AutoRedirectCardProps } from '../types'
+import { useContext, useEffect } from 'react'
+import NavigateContext from '../../../../util/navigate.ts'
 
 const AutoRedirectCard = ({ data }: AutoRedirectCardProps) => {
     const { url } = data

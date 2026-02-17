@@ -9,7 +9,8 @@ interface WebRTCClientOptions {
     audioOutputDeviceId?: string
 }
 
-const isBrowser = typeof window !== 'undefined' && typeof navigator !== 'undefined'
+const isBrowser =
+    typeof window !== 'undefined' && typeof navigator !== 'undefined'
 
 export class WebRTCClient {
     private peerConnection: RTCPeerConnection | null = null
@@ -70,16 +71,17 @@ export class WebRTCClient {
                         : true,
                 }
 
-                this.mediaStream = await navigator.mediaDevices.getUserMedia(constraints)
+                this.mediaStream =
+                    await navigator.mediaDevices.getUserMedia(constraints)
             } catch (mediaError: any) {
                 console.error('Media error:', mediaError)
                 if (mediaError.name === 'NotAllowedError') {
                     throw new Error(
-                        'Microphone access denied. Please allow microphone access and try again.',
+                        'Microphone access denied. Please allow microphone access and try again.'
                     )
                 } else if (mediaError.name === 'NotFoundError') {
                     throw new Error(
-                        'No microphone detected. Please connect a microphone and try again.',
+                        'No microphone detected. Please connect a microphone and try again.'
                     )
                 } else {
                     throw mediaError
@@ -99,9 +101,13 @@ export class WebRTCClient {
                     const stream = event.streams[0]
 
                     // If we have an audio output device specified and the browser supports setSinkId
-                    if (this.currentOutputDeviceId && 'setSinkId' in HTMLAudioElement.prototype) {
+                    if (
+                        this.currentOutputDeviceId &&
+                        'setSinkId' in HTMLAudioElement.prototype
+                    ) {
                         // We'll let the callback handle this, as we need access to the audio element
-                        this.options.audioOutputDeviceId = this.currentOutputDeviceId
+                        this.options.audioOutputDeviceId =
+                            this.currentOutputDeviceId
                     }
 
                     this.options.onAudioStream(stream)
@@ -157,14 +163,17 @@ export class WebRTCClient {
     }
 
     private setupAudioAnalysis() {
-        if (!isBrowser || !this.mediaStream || !this.options.onAudioLevel) return
+        if (!isBrowser || !this.mediaStream || !this.options.onAudioLevel)
+            return
 
         try {
             this.audioContext = new AudioContext()
             this.analyser = this.audioContext.createAnalyser()
             this.analyser.fftSize = 256
 
-            const source = this.audioContext.createMediaStreamSource(this.mediaStream)
+            const source = this.audioContext.createMediaStreamSource(
+                this.mediaStream
+            )
             source.connect(this.analyser)
 
             const bufferLength = this.analyser.frequencyBinCount
@@ -177,7 +186,8 @@ export class WebRTCClient {
     }
 
     private startAnalysis() {
-        if (!this.analyser || !this.dataArray || !this.options.onAudioLevel) return
+        if (!this.analyser || !this.dataArray || !this.options.onAudioLevel)
+            return
 
         // Add throttling to prevent too many updates
         let lastUpdateTime = 0

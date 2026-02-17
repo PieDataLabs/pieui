@@ -1,5 +1,4 @@
-import {PieContainerComponentProps} from "../../../../types";
-
+import { PieContainerComponentProps } from '../../../../types'
 
 export interface AjaxGroupCardData {
     name: string
@@ -12,6 +11,5 @@ export interface AjaxGroupCardData {
     useMittSupport?: boolean
     centrifugeChannel?: string
 }
-
 
 export interface AjaxGroupCardProps extends PieContainerComponentProps<AjaxGroupCardData> {}

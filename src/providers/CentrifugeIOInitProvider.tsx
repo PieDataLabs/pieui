@@ -1,8 +1,7 @@
 import { ReactNode, useContext, useEffect } from 'react'
 import CentrifugeIOContext from '../util/centrifuge'
 import { useIsSupported } from '../util/useIsSupported'
-import { getApiServer } from "../util/pieConfig";
-
+import { getApiServer } from '../util/pieConfig'
 
 const CentrifugeIOInitProvider = ({ children }: { children: ReactNode }) => {
     const centrifuge = useContext(CentrifugeIOContext)

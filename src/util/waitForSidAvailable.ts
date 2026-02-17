@@ -1,5 +1,3 @@
-
-
 export default function waitForSidAvailable(interval = 1000) {
     return new Promise<void>((resolve) => {
         if (typeof window === 'undefined') {

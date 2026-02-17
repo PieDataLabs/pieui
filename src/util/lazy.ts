@@ -4,7 +4,7 @@ const moduleCache = new Map<string, any>()
 
 export function trackLazy<T extends ComponentType<any>>(
     loader: () => Promise<{ default: T }>,
-    name: string,
+    name: string
 ): LazyExoticComponent<T> {
     return lazy(() => {
         if (moduleCache.has(name)) {
@@ -16,7 +16,10 @@ export function trackLazy<T extends ComponentType<any>>(
     })
 }
 
-export const preloadComponent = async (name: string, loader?: () => Promise<any>) => {
+export const preloadComponent = async (
+    name: string,
+    loader?: () => Promise<any>
+) => {
     if (!loader) return
     if (moduleCache.has(name)) return moduleCache.get(name)
     const promise = loader().then((mod) => mod)

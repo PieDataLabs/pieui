@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
-import {HiddenCardProps} from '../types'
+import { HiddenCardProps } from '../types'
 import PieCard from '../../../PieCard'
-
 
 const HiddenCard = ({ data }: HiddenCardProps) => {
     const {
@@ -32,7 +31,7 @@ const HiddenCard = ({ data }: HiddenCardProps) => {
                 },
             }}
         >
-            <input type='hidden' id={name} name={name} value={currentValue} />
+            <input type="hidden" id={name} name={name} value={currentValue} />
         </PieCard>
     )
 }

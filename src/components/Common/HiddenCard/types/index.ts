@@ -1,4 +1,4 @@
-import {PieSimpleComponentProps} from "../../../../types";
+import { PieSimpleComponentProps } from '../../../../types'
 
 export interface HiddenCardData {
     name: string
@@ -10,6 +10,4 @@ export interface HiddenCardData {
     centrifugeChannel?: string
 }
 
-
 export interface HiddenCardProps extends PieSimpleComponentProps<HiddenCardData> {}
-

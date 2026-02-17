@@ -1,26 +1,32 @@
 import PieCard from '../../../PieCard'
 import { useEffect, useState } from 'react'
 import parse from 'html-react-parser'
-import {HTMLEmbedCardProps} from '../types'
+import { HTMLEmbedCardProps } from '../types'
 import Radium from 'radium'
 import useOpenAIWebRTC from '../../../../util/useOpenAIWebRTC'
 
-
 const HTMLEmbedCard = ({ data }: HTMLEmbedCardProps) => {
-    const { html, useSocketioSupport, useCentrifugeSupport, useMittSupport, centrifugeChannel } =
-        data
+    const {
+        html,
+        useSocketioSupport,
+        useCentrifugeSupport,
+        useMittSupport,
+        centrifugeChannel,
+    } = data
     const [valueCurrent, setValueCurrent] = useState(html)
 
-    const {
-        isSessionActive,
-        startSession,
-        sendTextMessage,
-    } = useOpenAIWebRTC(null, (event) => {
-        console.log(event.type, event.type === 'response.output_text.delta' && event.delta)
-        if (event.type === 'response.output_text.delta' && event.delta) {
-            setValueCurrent((prev) => prev + event.delta)
+    const { isSessionActive, startSession, sendTextMessage } = useOpenAIWebRTC(
+        null,
+        (event) => {
+            console.log(
+                event.type,
+                event.type === 'response.output_text.delta' && event.delta
+            )
+            if (event.type === 'response.output_text.delta' && event.delta) {
+                setValueCurrent((prev) => prev + event.delta)
+            }
         }
-    })
+    )
 
     useEffect(() => {
         setValueCurrent(html)
@@ -45,7 +51,6 @@ const HTMLEmbedCard = ({ data }: HTMLEmbedCardProps) => {
 
             // Отправляем текст в AI
             sendTextMessage(event.prompt)
-
         } catch (err) {
             console.error('Failed to generate using AI', err)
         }
@@ -53,7 +58,7 @@ const HTMLEmbedCard = ({ data }: HTMLEmbedCardProps) => {
 
     return (
         <PieCard
-            card='HTMLEmbedCard'
+            card="HTMLEmbedCard"
             data={data}
             methods={{
                 update: onUpdateEvent,

@@ -1,4 +1,4 @@
-import {ReactNode, useContext, useEffect, useRef, useState} from 'react'
+import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
 import UI from '../../../UI'
 import { AjaxGroupCardProps } from '../types'
 import { UIConfigType, UIEventType } from '../../../../types'
@@ -6,13 +6,9 @@ import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
 import FallbackContext from '../../../../util/fallback'
 import { registerPieComponent } from '../../../../util/registry'
-import Radium from "radium";
+import Radium from 'radium'
 
-
-const AjaxGroupCard = ({
-    data,
-    content,
-}: AjaxGroupCardProps) => {
+const AjaxGroupCard = ({ data, content }: AjaxGroupCardProps) => {
     const {
         useLoader,
         noReturn,
@@ -24,11 +20,14 @@ const AjaxGroupCard = ({
     } = data
     const Fallback: ReactNode = useContext(FallbackContext)
     const [isLoading, setIsLoading] = useState<boolean>(false)
-    const [uiAjaxConfiguration, setUiAjaxConfiguration] = useState<UIConfigType | null>(null)
+    const [uiAjaxConfiguration, setUiAjaxConfiguration] =
+        useState<UIConfigType | null>(null)
     const lastValidUiConfigRef = useRef<UIConfigType>(content)
     const mitt = useContext(MittContext)
 
-    const setUiAjaxConfigurationForContentWrapper = (content: UIConfigType | null) => {
+    const setUiAjaxConfigurationForContentWrapper = (
+        content: UIConfigType | null
+    ) => {
         if (content === null) {
             setIsLoading(true)
         } else {
@@ -47,7 +46,9 @@ const AjaxGroupCard = ({
         setUiAjaxConfiguration(event.content)
     }
 
-    const setUiAjaxConfigurationForEventsWrapper = (events: Array<UIEventType> | null) => {
+    const setUiAjaxConfigurationForEventsWrapper = (
+        events: Array<UIEventType> | null
+    ) => {
         if (events === null) {
             setIsLoading(true)
         } else {

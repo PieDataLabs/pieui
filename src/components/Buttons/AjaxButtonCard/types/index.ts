@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react'
-import {PieContainerComponentProps} from "../../../../types";
+import { PieContainerComponentProps } from '../../../../types'
 
 export interface AjaxButtonCardData {
     name: string

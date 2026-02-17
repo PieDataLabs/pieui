@@ -1,14 +1,11 @@
-import {useAjaxSubmit} from '../../../../util/ajaxCommonUtils'
+import { useAjaxSubmit } from '../../../../util/ajaxCommonUtils'
 import { ChatCardProps } from '../types'
 import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
 import MessagesBoard, { MessagesBoardHandle } from './components/MessagesBoard'
 import { useEffect, useMemo, useRef, useState } from 'react'
 
-const ChatCard = ({
-    data,
-    setUiAjaxConfiguration,
-}: ChatCardProps) => {
+const ChatCard = ({ data, setUiAjaxConfiguration }: ChatCardProps) => {
     const {
         name,
         defaultValue,
@@ -35,7 +32,12 @@ const ChatCard = ({
     const inputRef = useRef<ChatCardInputHandle>(null)
     const messagesRef = useRef<MessagesBoardHandle>(null)
     const [dirty, setDirty] = useState<boolean>(false)
-    const ajaxSubmit = useAjaxSubmit(setUiAjaxConfiguration, kwargs, depsNames, pathname)
+    const ajaxSubmit = useAjaxSubmit(
+        setUiAjaxConfiguration,
+        kwargs,
+        depsNames,
+        pathname
+    )
 
     useEffect(() => {
         if (dirty) {
@@ -83,7 +85,7 @@ const ChatCard = ({
 
     return (
         <PieCard
-            card='ChatCard'
+            card="ChatCard"
             data={data}
             methods={{
                 clearInput: onClearInput,
@@ -95,7 +97,7 @@ const ChatCard = ({
             useCentrifugeSupport={useCentrifugeSupport}
             centrifugeChannel={centrifugeChannel}
         >
-            <div className='flex size-full flex-col' style={sxMap.container}>
+            <div className="flex size-full flex-col" style={sxMap.container}>
                 <MessagesBoard
                     ref={messagesRef}
                     name={name}

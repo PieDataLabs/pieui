@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react'
-import {PieSimpleComponentProps} from "../../../../types";
+import { PieSimpleComponentProps } from '../../../../types'
 
 export interface RedirectButtonCardData {
     name: string
@@ -9,6 +9,5 @@ export interface RedirectButtonCardData {
     iconPosition?: 'start' | 'end'
     sx?: CSSProperties
 }
-
 
 export interface RedirectButtonCardProps extends PieSimpleComponentProps<RedirectButtonCardData> {}

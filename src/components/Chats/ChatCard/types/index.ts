@@ -1,6 +1,5 @@
-import {ButtonHTMLAttributes, CSSProperties, DetailedHTMLProps} from 'react'
-import {PieComplexComponentProps, UIConfigType} from '../../../../types'
-
+import { ButtonHTMLAttributes, CSSProperties, DetailedHTMLProps } from 'react'
+import { PieComplexComponentProps, UIConfigType } from '../../../../types'
 
 export interface Option {
     title: string
@@ -25,9 +24,10 @@ export type ChatIconsType = Record<
     string
 >
 
-
-export interface ChatButtonProps
-    extends DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement> {
+export interface ChatButtonProps extends DetailedHTMLProps<
+    ButtonHTMLAttributes<HTMLButtonElement>,
+    HTMLButtonElement
+> {
     icons: ChatIconsType
 }
 

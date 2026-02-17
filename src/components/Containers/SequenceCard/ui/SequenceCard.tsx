@@ -1,9 +1,9 @@
 import { UIConfigType } from '../../../../types'
-import {SequenceCardProps} from '../types'
+import { SequenceCardProps } from '../types'
 import PieCard from '../../../PieCard'
 import UI from '../../../UI'
-import Radium from "radium";
-import {sx2radium} from "../../../../util/sx2radium.ts";
+import Radium from 'radium'
+import { sx2radium } from '../../../../util/sx2radium.ts'
 
 const SequenceCard = ({
     data,
@@ -27,6 +27,5 @@ const SequenceCard = ({
         </PieCard>
     )
 }
-
 
 export default Radium(SequenceCard)

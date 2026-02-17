@@ -1,6 +1,5 @@
 import { CSSProperties } from 'react'
-import {PieSimpleComponentProps} from "../../../../types";
-
+import { PieSimpleComponentProps } from '../../../../types'
 
 export interface HTMLEmbedCardData {
     name: string

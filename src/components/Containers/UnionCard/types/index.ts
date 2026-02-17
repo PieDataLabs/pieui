@@ -1,5 +1,4 @@
-import {PieComplexContainerComponentProps} from "../../../../types";
-
+import { PieComplexContainerComponentProps } from '../../../../types'
 
 export interface UnionCardData {
     name: string

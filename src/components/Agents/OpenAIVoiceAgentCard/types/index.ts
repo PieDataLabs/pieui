@@ -1,6 +1,5 @@
 import { CSSProperties } from 'react'
-import { PieComplexComponentProps } from "../../../../types";
-
+import { PieComplexComponentProps } from '../../../../types'
 
 export interface VoiceAgentTool {
     name: string
@@ -13,7 +12,6 @@ export interface VoiceAgentTool {
     kwargs: Record<string, any>
 }
 
-
 export interface OpenAIVoiceAgentCardData {
     name: string
     titles: Record<'enabled' | 'disabled', string>
@@ -25,7 +23,7 @@ export interface OpenAIVoiceAgentCardData {
 
     language: string | null
     muted: boolean
-    outputModalities?: ('text' | 'audio')[];
+    outputModalities?: ('text' | 'audio')[]
 
     iconUrl?: string
     iconPosition?: 'start' | 'end'

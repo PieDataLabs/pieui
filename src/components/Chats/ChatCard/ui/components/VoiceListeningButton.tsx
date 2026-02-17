@@ -13,18 +13,18 @@ const VoiceListeningButton = ({
 }) => {
     return (
         <button
-            className='rounded-md p-1 text-gray-500 ring-0 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent'
-            type='button'
+            className="rounded-md p-1 text-gray-500 ring-0 hover:bg-gray-100 disabled:opacity-40 disabled:hover:bg-transparent"
+            type="button"
             onClick={toggleListening}
         >
             {isListening ? (
                 icons.cancelIcon ? (
-                    <img src={icons.cancelIcon} alt='' />
+                    <img src={icons.cancelIcon} alt="" />
                 ) : (
                     <CancelFileIcon />
                 )
             ) : icons.voiceRecordingIcon ? (
-                <img src={icons.voiceRecordingIcon} alt='' />
+                <img src={icons.voiceRecordingIcon} alt="" />
             ) : (
                 <VoiceRecordIcon />
             )}

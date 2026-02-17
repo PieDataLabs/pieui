@@ -9,6 +9,7 @@ PieUI is a React component library that provides a dynamic UI rendering system w
 ## Key Commands
 
 ### Build Commands
+
 - `bun run build` - Full build process: cleans dist, builds ESM/CJS/types/CLI, and creates package
 - `bun run build:esm` - Build ES module format for browsers
 - `bun run build:cjs` - Build CommonJS format for Node.js
@@ -16,13 +17,15 @@ PieUI is a React component library that provides a dynamic UI rendering system w
 - `bun run build:cli` - Build the CLI tool
 
 ### Development Commands
+
 - `bun run dev` - Run development mode
 - `bun run typecheck` - Type check without emitting files
 - `bun run lint` - Currently not configured (placeholder)
 
 ### CLI Commands
+
 - `pieui postbuild` - Scans project for registerPieComponent calls and generates pieui.components.json
-  - Options: `--out-dir <dir>` (default: dist), `--src-dir <dir>` (default: src)
+    - Options: `--out-dir <dir>` (default: dist), `--src-dir <dir>` (default: src)
 
 ## Architecture Overview
 
@@ -31,30 +34,31 @@ PieUI is a React component library that provides a dynamic UI rendering system w
 The library uses a registry-based component system where components are registered with names and can be dynamically loaded:
 
 1. **Component Registry** (`src/util/registry.ts`): Central registry for all PieUI components
-   - Components register using `registerPieComponent({ name, component/loader })`
-   - Supports both sync and lazy-loaded components
-   - Registry entries include metadata and fallback components
+    - Components register using `registerPieComponent({ name, component/loader })`
+    - Supports both sync and lazy-loaded components
+    - Registry entries include metadata and fallback components
 
 2. **Dynamic UI Rendering**: The UI is driven by a UIConfigType structure:
-   ```typescript
-   interface UIConfigType {
-     card: string        // Component name to render
-     data: any          // Props passed to component
-     content: UIConfigType | Array<UIConfigType>  // Nested components
-   }
-   ```
+
+    ```typescript
+    interface UIConfigType {
+        card: string // Component name to render
+        data: any // Props passed to component
+        content: UIConfigType | Array<UIConfigType> // Nested components
+    }
+    ```
 
 3. **Component Types**:
-   - Simple components: Receive only `data` prop
-   - Container components: Receive `data` and single `content` child
-   - Complex container components: Receive `data` and array of `content` children
+    - Simple components: Receive only `data` prop
+    - Container components: Receive `data` and single `content` child
+    - Complex container components: Receive `data` and array of `content` children
 
 ### Root Components
 
 - **PieRoot**: Main entry point that fetches UI configuration from API
-  - Fetches from `/api/content{pathname}{search}`
-  - Provides all context providers (QueryClient, Mitt, Socket.IO, Centrifuge)
-  - Requires `PIE_API_SERVER` and `PIE_CENTRIFUGE_SERVER` environment variables
+    - Fetches from `/api/content{pathname}{search}`
+    - Provides all context providers (QueryClient, Mitt, Socket.IO, Centrifuge)
+    - Requires `PIE_API_SERVER` and `PIE_CENTRIFUGE_SERVER` environment variables
 
 - **PieStaticRoot**: For static UI configurations (no API fetch)
 - **PieBaseRoot**: Base implementation shared by other roots
@@ -62,6 +66,7 @@ The library uses a registry-based component system where components are register
 ### Real-time Communication
 
 PieCard component integrates three communication methods:
+
 1. **Socket.IO**: WebSocket events in format `pie{methodName}_{componentName}`
 2. **Centrifuge**: Pub/sub with channels `pie{methodName}_{componentName}_{channel}`
 3. **Mitt**: Local event emitter with events `pie{methodName}_{componentName}`
@@ -69,10 +74,12 @@ PieCard component integrates three communication methods:
 ### Environment Configuration
 
 Required environment variables (supports multiple formats):
+
 - `PIE_API_SERVER` / `VITE_PIE_API_SERVER` / `NEXT_PUBLIC_PIE_API_SERVER`
 - `PIE_CENTRIFUGE_SERVER` / `VITE_PIE_CENTRIFUGE_SERVER` / `NEXT_PUBLIC_PIE_CENTRIFUGE_SERVER`
 
 Optional:
+
 - `PIE_ENABLE_RENDERING_LOG` - Enable debug logging
 - `PIE_PAGE_PROCESSOR` - Page processing configuration
 
@@ -81,6 +88,7 @@ Use "auto-api" value to automatically derive from hostname.
 ### Component Registration Pattern
 
 Components must be registered before use:
+
 ```typescript
 import { registerPieComponent } from 'pieui'
 

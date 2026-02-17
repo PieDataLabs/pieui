@@ -25,7 +25,10 @@ export const useWebApp = (): WebApp | null => {
     return webApp
 }
 
-export const useInitData = (): readonly [InitDataUnsafe | undefined, InitData | undefined] => {
+export const useInitData = (): readonly [
+    InitDataUnsafe | undefined,
+    InitData | undefined,
+] => {
     const webApp = useWebApp()
 
     return [webApp?.initDataUnsafe, webApp?.initData] as const

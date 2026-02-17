@@ -1,11 +1,10 @@
-import {ComponentMetadata, ComponentRegistration} from '../types'
-import {trackLazy} from './lazy'
-import {ComponentType} from 'react'
+import { ComponentMetadata, ComponentRegistration } from '../types'
+import { trackLazy } from './lazy'
+import { ComponentType } from 'react'
 
 const registry = new Map<string, ComponentRegistration<any>>()
 
-
-const normalizeRegistration = <TProps,>(
+const normalizeRegistration = <TProps>(
     registration: ComponentRegistration<TProps>
 ): ComponentRegistration<TProps> => {
     if (!registration.name) {
@@ -13,7 +12,9 @@ const normalizeRegistration = <TProps,>(
     }
 
     if (!registration.component && !registration.loader) {
-        throw new Error(`Component "${registration.name}" requires component or loader`)
+        throw new Error(
+            `Component "${registration.name}" requires component or loader`
+        )
     }
 
     const entry: ComponentRegistration<TProps> = {
@@ -37,7 +38,6 @@ const normalizeRegistration = <TProps,>(
     return entry
 }
 
-
 export function registerPieComponent<TProps>(
     registration: ComponentRegistration<TProps>
 ): ComponentType<TProps> | undefined {
@@ -45,7 +45,6 @@ export function registerPieComponent<TProps>(
     registry.set(entry.name, entry)
     return entry.component
 }
-
 
 export const registerMultipleComponents = (
     components: ComponentRegistration<any>[]
@@ -61,10 +60,11 @@ export const hasComponent = (name: string) => {
     return registry.has(name)
 }
 
-export const getComponentMeta = (name: string): ComponentMetadata | undefined => {
+export const getComponentMeta = (
+    name: string
+): ComponentMetadata | undefined => {
     return registry.get(name)?.metadata
 }
-
 
 export const getRegistryEntry = (
     name: string

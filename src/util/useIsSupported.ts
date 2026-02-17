@@ -1,6 +1,9 @@
 import { useEffect, useState } from 'react'
 
-export function useIsSupported(apiServer: string, name: string): boolean | null {
+export function useIsSupported(
+    apiServer: string,
+    name: string
+): boolean | null {
     const [isSupported, setIsSupported] = useState<boolean | null>(null)
     const [supportIsRequested, setSupportIsRequested] = useState(false)
     useEffect(() => {

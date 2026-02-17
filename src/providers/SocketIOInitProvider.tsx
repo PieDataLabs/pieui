@@ -2,8 +2,7 @@ import { ReactNode, useContext, useEffect } from 'react'
 import SocketIOContext from '../util/socket'
 import { useIsSupported } from '../util/useIsSupported'
 import { Socket } from 'socket.io-client'
-import { getApiServer } from "../util/pieConfig";
-
+import { getApiServer } from '../util/pieConfig'
 
 const SocketIOInitProvider = ({ children }: { children: ReactNode }) => {
     const socket: Socket | null = useContext(SocketIOContext)

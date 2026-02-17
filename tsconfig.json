@@ -1,48 +1,41 @@
 {
-  "compilerOptions": {
-    // Enable latest features
-    "lib": ["ESNext", "DOM"],
-    "sourceMap": true,          // создаёт .map файлы для дебага
-    "declaration": true,        // создаёт .d.ts файлы для TS
-    "declarationMap": true,
-    "inlineSources": true,      // включить исходный код в .map
-    "target": "ES2020",
-    "module": "ESNext",
-    "moduleDetection": "force",
+    "compilerOptions": {
+        // Enable latest features
+        "lib": ["ESNext", "DOM"],
+        "sourceMap": true, // создаёт .map файлы для дебага
+        "declaration": true, // создаёт .d.ts файлы для TS
+        "declarationMap": true,
+        "inlineSources": true, // включить исходный код в .map
+        "target": "ES2020",
+        "module": "ESNext",
+        "moduleDetection": "force",
 
-    "jsx": "preserve",
-    "jsxImportSource": "react",
+        "jsx": "preserve",
+        "jsxImportSource": "react",
 
-    "allowJs": true,
+        "allowJs": true,
 
-    // Library mode
-    "moduleResolution": "bundler",
-    "allowImportingTsExtensions": true,
-    "verbatimModuleSyntax": false,
-    "outDir": "dist",
-    "rootDir": "src",
+        // Library mode
+        "moduleResolution": "bundler",
+        "allowImportingTsExtensions": true,
+        "verbatimModuleSyntax": false,
+        "outDir": "dist",
+        "rootDir": "src",
 
-    // Best practices
-    "strict": true,
-    "types": ["react", "node"], // типы для React + Node (SSR)
+        // Best practices
+        "strict": true,
+        "types": ["react", "node"], // типы для React + Node (SSR)
 
-    "skipLibCheck": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true,
+        "skipLibCheck": true,
+        "noFallthroughCasesInSwitch": true,
+        "esModuleInterop": true,
+        "allowSyntheticDefaultImports": true,
 
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false
-  },
-  "include": [
-    "src/**/*"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "src/cli-schema.d.ts",
-    "src/cli.ts"
-  ]
+        // Some stricter flags (disabled by default)
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "noPropertyAccessFromIndexSignature": false
+    },
+    "include": ["src/**/*"],
+    "exclude": ["node_modules", "dist", "src/cli-schema.d.ts", "src/cli.ts"]
 }

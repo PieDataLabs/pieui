@@ -3,9 +3,8 @@ import PieCard from '../../../PieCard'
 import { sx2radium } from '../../../../util/sx2radium'
 import Radium from 'radium'
 import parse from 'html-react-parser'
-import {MouseEventHandler, useContext} from 'react'
-import NavigateContext from "../../../../util/navigate.ts";
-
+import { MouseEventHandler, useContext } from 'react'
+import NavigateContext from '../../../../util/navigate.ts'
 
 const RedirectButtonCard = ({ data }: RedirectButtonCardProps) => {
     const { name, title, url, iconUrl, iconPosition, sx } = data
@@ -27,15 +26,19 @@ const RedirectButtonCard = ({ data }: RedirectButtonCardProps) => {
         <PieCard card={'RedirectButtonCard'} data={data}>
             <button
                 id={name}
-                className='box-border flex min-h-12 w-full min-w-min cursor-pointer items-center justify-center gap-4 rounded-l border border-black bg-white text-center text-black hover:bg-neutral-300'
+                className="box-border flex min-h-12 w-full min-w-min cursor-pointer items-center justify-center gap-4 rounded-l border border-black bg-white text-center text-black hover:bg-neutral-300"
                 value={name}
                 onClick={routeChange}
                 style={sx2radium(sx)}
-                type='button'
+                type="button"
             >
-                {iconUrl && iconPosition === 'start' && <img src={iconUrl} alt='' />}
+                {iconUrl && iconPosition === 'start' && (
+                    <img src={iconUrl} alt="" />
+                )}
                 {parse(title)}
-                {iconUrl && iconPosition === 'end' && <img src={iconUrl} alt='' />}
+                {iconUrl && iconPosition === 'end' && (
+                    <img src={iconUrl} alt="" />
+                )}
             </button>
         </PieCard>
     )
