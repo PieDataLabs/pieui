@@ -15,6 +15,7 @@ import IOEventsCard from '../components/Common/IOEventsCard'
 import RedirectButtonCard from '../components/Buttons/RedirectButtonCard'
 import { OpenAIVoiceAgentCard } from '../components'
 import TableCard from '../components/Containers/TableCard'
+import BoxCard from "../components/Containers/BoxCard";
 
 let initialized = false
 
@@ -39,6 +40,15 @@ export function initializePieComponents(): void {
     registerPieComponent({
         name: 'SequenceCard',
         component: SequenceCard,
+        metadata: {
+            author: 'PieData',
+            description: 'Simple div with styles joining few components',
+        },
+    })
+
+    registerPieComponent({
+        name: 'BoxCard',
+        component: BoxCard,
         metadata: {
             author: 'PieData',
             description: 'Simple div with styles joining few components',
