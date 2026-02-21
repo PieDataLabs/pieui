@@ -3,6 +3,7 @@
 PieUI is a React component library for rendering server-driven UI "cards" with optional real-time and AJAX updates. It provides a component registry, root wrappers that set up providers, and helpers for styling and class name management.
 
 **Install**
+
 ```sh
 bun add @piedata/pieui
 npm install @piedata/pieui
@@ -11,6 +12,7 @@ npm install @piedata/pieui
 React and React DOM `>=19` are peer dependencies.
 
 **Quick Start**
+
 ```tsx
 import { PieRoot, initializePieComponents } from '@piedata/pieui'
 
@@ -30,7 +32,8 @@ export function App() {
             }}
             config={{
                 apiServer: 'https://api.example.com/',
-                centrifugeServer: 'wss://realtime.example.com/connection/websocket',
+                centrifugeServer:
+                    'wss://realtime.example.com/connection/websocket',
                 enableRenderingLog: false,
             }}
             initializePie={() => {
@@ -44,6 +47,7 @@ export function App() {
 If you are embedding PieUI inside a Telegram WebApp, use `PieTelegramRoot` instead of `PieRoot`.
 
 **Register Custom Components**
+
 ```tsx
 import { registerPieComponent } from '@piedata/pieui'
 import MyCard from './MyCard'
@@ -60,6 +64,7 @@ registerPieComponent({
 
 **Exports**
 Runtime exports:
+
 - `UI`: Renders a `UIConfigType` by looking up `uiConfig.card` in the registry. Supports lazy components via `Suspense` and passes `data`, `content`, and `setUiAjaxConfiguration` into the rendered component.
 - `PieRoot`: Fetches UI configuration from `config.apiServer + "/api/content"` using the current `location` and renders `UI` inside PieUI providers (React Query, Socket.IO, Centrifuge, Mitt, Radium). Calls `initializePieComponents()` and your `initializePie` callback once.
 - `PieTelegramRoot`: Same as `PieRoot`, but adds Telegram WebApp `initData` to the request query string via `useWebApp`. Throws if `apiServer` is missing.
@@ -74,6 +79,7 @@ Runtime exports:
 - `PIEBREAK`: String delimiter (`__piedemo__`) used internally to build form field names.
 
 Type exports:
+
 - `PieComponentProps`: Union type of the supported Pie component prop shapes.
 - `PieSimpleComponentProps`: `{ data }` props for simple components.
 - `PieComplexComponentProps`: `{ data, setUiAjaxConfiguration? }` props for components that trigger AJAX or updates.
