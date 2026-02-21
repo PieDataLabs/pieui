@@ -196,7 +196,8 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
 }
 
 const PieTelegramRoot: React.FC<PieRootProps> = (props) => {
-    const queryClient = new QueryClient()
+    const queryClient = useMemo(() => new QueryClient(), [])
+
     return (
         <NavigateContext.Provider value={props.onNavigate}>
             <PieConfigContext.Provider value={props.config}>

@@ -188,7 +188,8 @@ const PieRootContent = ({
 }
 
 const PieRoot = (props: PieRootProps) => {
-    const queryClient = new QueryClient()
+    const queryClient = useMemo(() => new QueryClient(), [])
+
     return (
         <NavigateContext.Provider value={props.onNavigate}>
             <PieConfigContext.Provider value={props.config}>

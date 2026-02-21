@@ -1,0 +1,102 @@
+import { useEffect, useMemo } from 'react'
+import {
+    QueryClient,
+    QueryClientProvider,
+} from '@tanstack/react-query'
+
+import Radium from 'radium'
+import MittContext, { emitter } from '../../util/mitt'
+import SocketIOContext, { getSocket } from '../../util/socket'
+import CentrifugeIOContext, { getCentrifuge } from '../../util/centrifuge'
+
+import SocketIOInitProvider from '../../providers/SocketIOInitProvider'
+import CentrifugeIOInitProvider from '../../providers/CentrifugeIOInitProvider'
+import FallbackContext from '../../util/fallback'
+import {
+    initializePieComponents,
+    isPieComponentsInitialized,
+} from '../../util/initializeComponents.ts'
+import {
+    getApiServer,
+    isRenderingLogEnabled,
+    getCentrifugeServer,
+    PieConfigContext,
+} from '../../util/pieConfig'
+import NavigateContext from '../../util/navigate.ts'
+import {PieBaseRootProps} from "./types";
+
+
+const PieBaseRootContent = ({
+    location,
+    fallback,
+    initializePie,
+    children,
+}: PieBaseRootProps) => {
+    const apiServer = getApiServer()
+    const centrifugeServer = getCentrifugeServer()
+    const renderingLogEnabled = isRenderingLogEnabled()
+
+    useEffect(() => {
+        if (isPieComponentsInitialized()) {
+            return
+        }
+        initializePieComponents()
+        initializePie()
+    }, [])
+
+    if (renderingLogEnabled) {
+        console.log('[PieRoot] Rendering with location:', location)
+        console.log('[PieRoot] API_SERVER:', apiServer)
+        console.log('[PieRoot] CENTRIFUGE_SERVER:', centrifugeServer)
+        console.log('[PieRoot] Fallback provided:', !!fallback)
+    }
+
+    return (
+        <MittContext.Provider value={emitter}>
+            <SocketIOContext.Provider value={getSocket(apiServer)}>
+                <CentrifugeIOContext.Provider
+                    value={getCentrifuge(apiServer, centrifugeServer)}
+                >
+                    <FallbackContext.Provider value={fallback ?? <></>}>
+                        <SocketIOInitProvider>
+                            <CentrifugeIOInitProvider>
+                                <Radium.StyleRoot
+                                    style={{ display: 'contents' }}
+                                >
+                                    <form
+                                        id="piedata_global_form"
+                                        action={
+                                            apiServer +
+                                            'api/process' +
+                                            location.pathname
+                                        }
+                                        method="post"
+                                        encType="multipart/form-data"
+                                    >
+                                        {children}
+                                    </form>
+                                </Radium.StyleRoot>
+                            </CentrifugeIOInitProvider>
+                        </SocketIOInitProvider>
+                    </FallbackContext.Provider>
+                </CentrifugeIOContext.Provider>
+            </SocketIOContext.Provider>
+        </MittContext.Provider>
+    )
+}
+
+const PieBaseRoot = (props: PieBaseRootProps) => {
+    const queryClient = useMemo(() => new QueryClient(), [])
+
+    return (
+        <NavigateContext.Provider value={props.onNavigate}>
+            <PieConfigContext.Provider value={props.config}>
+                <QueryClientProvider client={queryClient}>
+                    <PieBaseRootContent {...props} />
+                </QueryClientProvider>
+            </PieConfigContext.Provider>
+        </NavigateContext.Provider>
+    )
+}
+
+export default PieBaseRoot
