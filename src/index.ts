@@ -21,6 +21,7 @@ export type {
 } from './types'
 
 export { useAjaxSubmit } from './util/ajaxCommonUtils'
+export { default as useOpenAIWebRTC, type OpenAIEvent, type UseOpenAIWebRTCReturn } from './util/useOpenAIWebRTC'
 export { sx2radium } from './util/sx2radium'
 export { cn } from './util/tailwindCommonUtils'
 export { PIEBREAK } from './util/pieConfig'
