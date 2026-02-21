@@ -1,8 +1,5 @@
 import { useEffect, useMemo } from 'react'
-import {
-    QueryClient,
-    QueryClientProvider,
-} from '@tanstack/react-query'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 
 import Radium from 'radium'
 import MittContext, { emitter } from '../../util/mitt'
@@ -23,8 +20,7 @@ import {
     PieConfigContext,
 } from '../../util/pieConfig'
 import NavigateContext from '../../util/navigate.ts'
-import {PieBaseRootProps} from "./types";
-
+import { PieBaseRootProps } from './types'
 
 const PieBaseRootContent = ({
     location,
