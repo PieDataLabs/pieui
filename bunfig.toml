@@ -1,0 +1,14 @@
+# bunfig.toml
+[build]
+external = [
+  "react",
+  "react-dom",
+  "highlight.js",
+  "rehype-highlight",
+  "glob",
+  "typescript",
+  "typescript-json-schema",
+  "@tanstack/react-query",
+  "fsl-authorization",
+  "vm2"
+]
