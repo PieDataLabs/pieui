@@ -1,27 +1,24 @@
 import PieCard from '../../../PieCard'
-import {FSLLoginCardProps} from '../types'
+import { FSLLoginCardProps } from '../types'
 import { MouseEventHandler } from 'react'
 
-
-let fslModulePromise: Promise<any> | null = null;
-
+let fslModulePromise: Promise<any> | null = null
 
 const loadFSL = () => {
     if (!fslModulePromise) {
-        fslModulePromise = import("fsl-authorization")
+        fslModulePromise = import('fsl-authorization')
             .then((mod) => mod.default ?? mod)
             .catch((err) => {
-                fslModulePromise = null; // чтобы можно было повторить после установки/фикса
+                fslModulePromise = null // чтобы можно было повторить после установки/фикса
                 console.warn(
-                    "fsl-authorization is not installed. Please install it to use FSLLoginCard.",
+                    'fsl-authorization is not installed. Please install it to use FSLLoginCard.',
                     err
-                );
-                return null;
-            });
+                )
+                return null
+            })
     }
-    return fslModulePromise;
-};
-
+    return fslModulePromise
+}
 
 const FSLLoginCard = ({ data }: FSLLoginCardProps) => {
     const {
@@ -34,9 +31,9 @@ const FSLLoginCard = ({ data }: FSLLoginCardProps) => {
 
     const handleClick: MouseEventHandler<HTMLButtonElement> = async (event) => {
         event.preventDefault()
-        const FSLAuthorization = await loadFSL();
+        const FSLAuthorization = await loadFSL()
         if (!FSLAuthorization) {
-            return;
+            return
         }
         const fslAuthorization = await FSLAuthorization?.init({
             responseType: 'code', // 'code' or 'token'
@@ -57,13 +54,17 @@ const FSLLoginCard = ({ data }: FSLLoginCardProps) => {
                 style={sx}
                 onClick={handleClick}
             >
-                {iconUrl && iconPosition === 'start' && <img src={iconUrl} alt='fsl_icon' />}
+                {iconUrl && iconPosition === 'start' && (
+                    <img src={iconUrl} alt="fsl_icon" />
+                )}
                 {title}
-                {iconUrl && iconPosition === 'end' && <img src={iconUrl} alt='fsl_icon' />}
+                {iconUrl && iconPosition === 'end' && (
+                    <img src={iconUrl} alt="fsl_icon" />
+                )}
             </button>
 
             {errorMessage && (
-                <div className='mt-1 text-sm font-light leading-normal text-[#FD7A71]'>
+                <div className="mt-1 text-sm font-light leading-normal text-[#FD7A71]">
                     {errorMessage}
                 </div>
             )}

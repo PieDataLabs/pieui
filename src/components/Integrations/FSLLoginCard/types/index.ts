@@ -1,5 +1,5 @@
 import { CSSProperties } from 'react'
-import {PieSimpleComponentProps} from "../../../../types";
+import { PieSimpleComponentProps } from '../../../../types'
 
 export interface FSLLoginCardData {
     name: string
@@ -17,6 +17,5 @@ export interface FSLLoginCardData {
     iconPosition?: 'start' | 'end'
     sx?: CSSProperties
 }
-
 
 export interface FSLLoginCardProps extends PieSimpleComponentProps<FSLLoginCardData> {}
