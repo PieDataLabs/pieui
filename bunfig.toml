@@ -3,6 +3,9 @@
 external = [
   "react",
   "react-dom",
+  "react/jsx-runtime",
+  "react/jsx-dev-runtime",
+
   "highlight.js",
   "rehype-highlight",
   "glob",
