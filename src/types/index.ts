@@ -18,6 +18,7 @@ export type MainButtonType = {
 export type BackButtonType = {
     show: () => void
     onClick: (callback: () => void) => void
+    offClick: (callback: () => void) => void
     hide: () => void
 }
 
