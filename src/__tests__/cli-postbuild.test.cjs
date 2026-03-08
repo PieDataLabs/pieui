@@ -117,3 +117,69 @@ registerPieComponent({
     assert.ok(metaSchema?.additionalProperties)
     assert.notEqual(metaSchema?.additionalProperties, false)
 })
+
+test('cli postbuild generates shadcn registry artifacts', () => {
+    const tempDir = fs.mkdtempSync(path.join(os.tmpdir(), 'pieui-shadcn-'))
+    const srcDir = path.join(tempDir, 'src')
+    const outDir = path.join(tempDir, 'out')
+
+    writeFile(
+        path.join(tempDir, 'node_modules', '@types', 'react', 'index.d.ts'),
+        `declare module 'react' {
+    export interface CSSProperties {
+        color?: string
+        width?: string | number
+    }
+}
+`
+    )
+
+    writeFile(
+        path.join(srcDir, 'TestCard.tsx'),
+        `import { CSSProperties } from 'react'
+
+export interface TestCardData {
+    name: string
+    sx?: CSSProperties
+}
+
+const TestCard = ({ data }: { data: TestCardData }) => null
+
+const registerPieComponent = (_: any) => undefined
+
+registerPieComponent({
+    name: 'TestCard',
+    component: TestCard,
+})
+`
+    )
+
+    writeFile(
+        path.join(srcDir, 'components', 'index.ts'),
+        `export { default as TestCard } from '../TestCard'
+`
+    )
+
+    runPostbuild(tempDir, outDir)
+
+    const registryPath = path.join(outDir, 'registry.json')
+    const shadcnIndexPath = path.join(outDir, 'r', 'index.json')
+    const shadcnItemPath = path.join(outDir, 'r', 'test-card.json')
+
+    assert.ok(fs.existsSync(registryPath))
+    assert.ok(fs.existsSync(shadcnIndexPath))
+    assert.ok(fs.existsSync(shadcnItemPath))
+
+    const registry = JSON.parse(fs.readFileSync(registryPath, 'utf8'))
+    const shadcnIndex = JSON.parse(fs.readFileSync(shadcnIndexPath, 'utf8'))
+    const shadcnItem = JSON.parse(fs.readFileSync(shadcnItemPath, 'utf8'))
+
+    assert.equal(registry.name, '@piedata/pieui')
+    assert.equal(shadcnIndex[0]?.name, 'test-card')
+    assert.equal(shadcnItem.type, 'registry:component')
+    assert.equal(shadcnItem.files?.[0]?.type, 'registry:component')
+    assert.match(
+        shadcnItem.files?.[0]?.content || '',
+        /@piedata\/pieui\/components/
+    )
+})
