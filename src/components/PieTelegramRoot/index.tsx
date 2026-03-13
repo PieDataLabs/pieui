@@ -182,6 +182,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
                                         }
                                         method="post"
                                         encType="multipart/form-data"
+                                        className="contents"
                                     >
                                         <UI uiConfig={uiConfiguration} />
                                     </form>

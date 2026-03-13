@@ -68,6 +68,7 @@ const PieBaseRootContent = ({
                                         }
                                         method="post"
                                         encType="multipart/form-data"
+                                        className="contents"
                                     >
                                         {children}
                                     </form>
