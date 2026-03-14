@@ -29,7 +29,7 @@ function createSilentAudioTrack(): MediaStreamTrack {
     return track
 }
 
-export function useOpenAIWebRTC(
+export default function useOpenAIWebRTC(
     audioElement: HTMLAudioElement | null = null,
     onEvent?: (event: OpenAIEvent) => void
 ): UseOpenAIWebRTCReturn {

@@ -1,13 +1,14 @@
 import { ReactNode, useContext, useEffect, useRef, useState } from 'react'
-import { UI } from '../../../UI'
+import UI from '../../../UI'
 import { AjaxGroupCardProps } from '../types'
 import { UIConfigType, UIEventType } from '../../../../types'
-import { PieCard } from '../../../PieCard'
+import PieCard from '../../../PieCard'
 import MittContext from '../../../../util/mitt'
 import FallbackContext from '../../../../util/fallback'
+import { registerPieComponent } from '../../../../util/registry'
 import Radium from 'radium'
 
-const AjaxGroupCard = Radium(({ data, content }: AjaxGroupCardProps) => {
+const AjaxGroupCard = ({ data, content }: AjaxGroupCardProps) => {
     const {
         useLoader,
         noReturn,
@@ -91,6 +92,6 @@ const AjaxGroupCard = Radium(({ data, content }: AjaxGroupCardProps) => {
             />
         </PieCard>
     )
-})
+}
 
-export { AjaxGroupCard }
+export default Radium(AjaxGroupCard)

@@ -1,5 +1,5 @@
 #!/usr/bin/env sh
 
-set -e
+bunx tsc --noEmit
+bun run lint
 
-bun run typecheck

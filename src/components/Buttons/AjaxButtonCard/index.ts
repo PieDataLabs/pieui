@@ -1,1 +1,1 @@
-export { AjaxButtonCard } from './ui/AjaxButtonCard'
+export { default } from './ui/AjaxButtonCard'

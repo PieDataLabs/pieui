@@ -1,1 +1,1 @@
-export { FSLLoginCard } from './ui/FSLLoginCard'
+export { default } from './ui/FSLLoginCard'

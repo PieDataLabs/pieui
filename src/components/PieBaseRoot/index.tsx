@@ -68,7 +68,6 @@ const PieBaseRootContent = ({
                                         }
                                         method="post"
                                         encType="multipart/form-data"
-                                        className="contents"
                                     >
                                         {children}
                                     </form>
@@ -96,4 +95,4 @@ const PieBaseRoot = (props: PieBaseRootProps) => {
     )
 }
 
-export { PieBaseRoot }
+export default PieBaseRoot

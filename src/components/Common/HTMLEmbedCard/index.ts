@@ -1,1 +1,1 @@
-export { HTMLEmbedCard } from './ui/HTMLEmbedCard'
+export { default } from './ui/HTMLEmbedCard'

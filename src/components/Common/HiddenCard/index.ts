@@ -1,1 +1,1 @@
-export { HiddenCard } from './ui/HiddenCard'
+export { default } from './ui/HiddenCard'

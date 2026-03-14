@@ -1,11 +1,11 @@
-import { PieCard } from '../../../PieCard'
+import PieCard from '../../../PieCard'
 import { useEffect, useState } from 'react'
 import parse from 'html-react-parser'
 import { HTMLEmbedCardProps } from '../types'
 import Radium from 'radium'
-import { useOpenAIWebRTC } from '../../../../util/useOpenAIWebRTC'
+import useOpenAIWebRTC from '../../../../util/useOpenAIWebRTC'
 
-const HTMLEmbedCard = Radium(({ data }: HTMLEmbedCardProps) => {
+const HTMLEmbedCard = ({ data }: HTMLEmbedCardProps) => {
     const {
         html,
         useSocketioSupport,
@@ -73,6 +73,6 @@ const HTMLEmbedCard = Radium(({ data }: HTMLEmbedCardProps) => {
             {parse(valueCurrent)}
         </PieCard>
     )
-})
+}
 
-export { HTMLEmbedCard }
+export default Radium(HTMLEmbedCard)

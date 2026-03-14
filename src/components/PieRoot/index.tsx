@@ -17,7 +17,7 @@ import CentrifugeIOInitProvider from '../../providers/CentrifugeIOInitProvider'
 import FallbackContext from '../../util/fallback'
 import { UIConfigType } from '../../types'
 import { AxiosError } from 'axios'
-import { UI } from '../UI'
+import UI from '../UI'
 import { createAxiosDateTransformer } from 'axios-date-transformer'
 import {
     initializePieComponents,
@@ -174,7 +174,6 @@ const PieRootContent = ({
                                         }
                                         method="post"
                                         encType="multipart/form-data"
-                                        className="contents"
                                     >
                                         <UI uiConfig={uiConfiguration} />
                                     </form>
@@ -202,4 +201,4 @@ const PieRoot = (props: PieRootProps) => {
     )
 }
 
-export { PieRoot }
+export default PieRoot

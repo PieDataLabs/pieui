@@ -1,1 +1,1 @@
-export { SequenceCard } from './ui/SequenceCard'
+export { default } from './ui/SequenceCard'

@@ -18,4 +18,4 @@ const AutoRedirectCard = ({ data }: AutoRedirectCardProps) => {
     return <></>
 }
 
-export { AutoRedirectCard }
+export default AutoRedirectCard

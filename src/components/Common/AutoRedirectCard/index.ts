@@ -1,1 +1,1 @@
-export { AutoRedirectCard } from './ui/AutoRedirectCard'
+export { default } from './ui/AutoRedirectCard'

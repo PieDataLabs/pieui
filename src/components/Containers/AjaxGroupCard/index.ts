@@ -1,1 +1,1 @@
-export { AjaxGroupCard } from './ui/AjaxGroupCard'
+export { default } from './ui/AjaxGroupCard'

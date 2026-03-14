@@ -1,6 +1,6 @@
 import { useAjaxSubmit } from '../../../../util/ajaxCommonUtils'
 import { ChatCardProps } from '../types'
-import { PieCard } from '../../../PieCard'
+import PieCard from '../../../PieCard'
 import ChatCardInput, { ChatCardInputHandle } from './components/ChatCardInput'
 import MessagesBoard, { MessagesBoardHandle } from './components/MessagesBoard'
 import { useEffect, useMemo, useRef, useState } from 'react'
@@ -125,4 +125,4 @@ const ChatCard = ({ data, setUiAjaxConfiguration }: ChatCardProps) => {
     )
 }
 
-export { ChatCard }
+export default ChatCard
