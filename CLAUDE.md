@@ -27,6 +27,19 @@ diff <(node ./dist/cli.js --help | grep -E '^  [a-z]') \
 
 The hook is advisory — it never blocks tool execution. Ignore the nudge only if you are certain symmetry is preserved or intentionally diverging (document the divergence in this section if so).
 
+### Known temporary divergence: ajax input manifest
+
+`pie` exposes `pie web <module:app> ajax-manifest [--out pieui.ajax.json]` — it
+introspects each registered ajax handler's signature (including the new
+`Dep.*` / `Kwarg` source markers in `pie/types.py`) and emits a
+`pieui.ajax.json` describing each endpoint's declared inputs (`name`, `type`,
+`required`, `default`, `source`, `shape`). The symmetric pieui command
+(`pieui … ajax-manifest`, delegating to `pie` like `pageAjax.ts` does) plus the
+`pieui.ajax.json` → `pieui.ajax.d.ts` codegen are tracked as **Plan 2** of the
+ajax-extra-contract work (`docs/superpowers/plans/2026-06-30-ajax-extra-contract-plan-1-pie-markers-manifest.md`).
+Until Plan 2 lands, the CLI symmetry hook will nudge on this gap — that is
+expected and intentional.
+
 ## Project Overview
 
 PieUI is a React component library that provides a dynamic UI rendering system with real-time communication support through WebSockets (Socket.IO), Centrifuge, and event emitters (Mitt). The library enables building server-driven UIs where components can be dynamically loaded and configured based on API responses.
