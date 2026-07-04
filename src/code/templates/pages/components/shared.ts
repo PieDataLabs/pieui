@@ -3,24 +3,19 @@ import type { CardScaffoldOptions } from '../../../types'
 export const dataDestructureFor = (
     options: CardScaffoldOptions = {}
 ): string => {
-    if (!options.io && !options.ajax) {
+    // Ajax endpoints are read from `data` by `useAjaxSubmits(data, …)` (which
+    // supports multiple endpoints per card), so no ajax triple is destructured.
+    if (!options.io) {
         return 'const { name } = data'
     }
 
-    const fields = ['name']
-
-    if (options.io) {
-        fields.push(
-            'useSocketioSupport',
-            'useCentrifugeSupport',
-            'useMittSupport',
-            'centrifugeChannel'
-        )
-    }
-
-    if (options.ajax) {
-        fields.push('pathname', 'depsNames', 'kwargs')
-    }
+    const fields = [
+        'name',
+        'useSocketioSupport',
+        'useCentrifugeSupport',
+        'useMittSupport',
+        'centrifugeChannel',
+    ]
 
     return `const {
     ${fields.join(',\n    ')},
@@ -56,11 +51,8 @@ export const ajaxSubmitDeclarationFor = (
         return ''
     }
 
+    // `ajaxSubmits` is keyed by endpoint: `ajaxSubmits.default` for the primary
+    // `pathname`, `ajaxSubmits.<name>` for a `<name>Pathname` field.
     return `
-    const ajaxSubmit = useAjaxSubmit(
-        setUiAjaxConfiguration,
-        kwargs,
-        depsNames,
-        pathname
-    )`
+    const ajaxSubmits = useAjaxSubmits(data, setUiAjaxConfiguration)`
 }

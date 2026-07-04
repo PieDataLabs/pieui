@@ -607,3 +607,82 @@ export const useAjaxSubmit = (
         ]
     )
 }
+
+/** One ajax endpoint's submit config, discovered from a card's `data`. */
+export type AjaxEndpointConfig = {
+    /** `'default'` for the primary `pathname`, else the field prefix (`search`). */
+    key: string
+    pathname?: string
+    depsNames: Array<string>
+    kwargs: Record<string, any>
+}
+
+/**
+ * Discover every ajax endpoint triple in a card's `data` by convention: the
+ * primary `pathname`/`depsNames`/`kwargs`, plus any named
+ * `<x>Pathname`/`<x>DepsNames`/`<x>Kwargs` (mirrors the backend, where a card
+ * may carry several endpoints paired by field name). Keyed by the prefix, with
+ * `'default'` for the primary `pathname`.
+ */
+export const discoverAjaxEndpoints = (
+    data: Record<string, any> = {}
+): Array<AjaxEndpointConfig> => {
+    const out: Array<AjaxEndpointConfig> = []
+    for (const field of Object.keys(data ?? {})) {
+        let key: string | null = null
+        if (field === 'pathname') key = 'default'
+        else if (field.endsWith('Pathname'))
+            key = field.slice(0, -'Pathname'.length)
+        if (key === null) continue
+
+        const prefix = key === 'default' ? '' : key
+        out.push({
+            key,
+            pathname: data[field],
+            depsNames: data[prefix ? `${prefix}DepsNames` : 'depsNames'] ?? [],
+            kwargs: data[prefix ? `${prefix}Kwargs` : 'kwargs'] ?? {},
+        })
+    }
+    return out
+}
+
+/**
+ * Like {@link useAjaxSubmit} but for a whole card: discovers every endpoint in
+ * `data` ({@link discoverAjaxEndpoints}) and returns a submit function per
+ * endpoint, keyed the same way (`'default'` for the primary `pathname`). Lets a
+ * component drive a card that carries multiple ajax endpoints.
+ */
+export const useAjaxSubmits = (
+    data: Record<string, any> = {},
+    setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
+    options?: { timeout?: number; retryPolicy?: RetryPolicy }
+): Record<string, (extraKwargs?: Record<string, any>) => Promise<any>> => {
+    const { apiServer, enableRenderingLog } = usePieConfig()
+    const dataKey = JSON.stringify(data ?? {})
+    const optionsKey = JSON.stringify(options)
+    return useMemo(
+        () => {
+            const submits: Record<
+                string,
+                (extraKwargs?: Record<string, any>) => Promise<any>
+            > = {}
+            for (const ep of discoverAjaxEndpoints(data ?? {})) {
+                submits[ep.key] = getAjaxSubmit(
+                    setUiAjaxConfiguration,
+                    ep.kwargs,
+                    ep.depsNames,
+                    ep.pathname,
+                    {
+                        apiServer,
+                        renderingLogEnabled: enableRenderingLog,
+                        timeout: options?.timeout,
+                        retryPolicy: options?.retryPolicy,
+                    }
+                )
+            }
+            return submits
+        },
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+        [dataKey, setUiAjaxConfiguration, apiServer, enableRenderingLog, optionsKey]
+    )
+}

@@ -22,7 +22,7 @@ export const simpleContainerComponentTemplate = (
     setUiAjaxConfiguration,
 }`
     return `import React, { useContext } from 'react'
-import { PieCard, UI, UIRendererContext${options.ajax ? ', useAjaxSubmit' : ''} } from '@swarm.ing/pieui'
+import { PieCard, UI, UIRendererContext${options.ajax ? ', useAjaxSubmits' : ''} } from '@swarm.ing/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName} = (${propsDestructure}: ${componentName}Props) => {

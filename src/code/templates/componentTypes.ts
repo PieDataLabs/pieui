@@ -7,7 +7,10 @@ const ioFields = `    useSocketioSupport?: boolean
 
 const ajaxFields = `    pathname?: string
     depsNames: string[]
-    kwargs: Record<string, string | number | boolean>`
+    kwargs: Record<string, string | number | boolean>
+    // Additional endpoints follow the same convention, e.g.
+    //   searchPathname?: string; searchDepsNames: string[]; searchKwargs: ...
+    // and are read by useAjaxSubmits(data) as ajaxSubmits.search`
 
 const storedInterfaceFor = (componentName: string): string =>
     `export interface ${componentName}Stored {

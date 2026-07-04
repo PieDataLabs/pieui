@@ -16,7 +16,7 @@ export const simpleComponentTemplate = (
         ? `${componentName}Props & { setUiAjaxConfiguration?: SetUiAjaxConfigurationType }`
         : `${componentName}Props`
     return `import React from 'react'
-import { PieCard${options.ajax ? ', useAjaxSubmit, type SetUiAjaxConfigurationType' : ''} } from '@swarm.ing/pieui'
+import { PieCard${options.ajax ? ', useAjaxSubmits, type SetUiAjaxConfigurationType' : ''} } from '@swarm.ing/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName} = (${propsDestructure}: ${propsAnnotation}) => {

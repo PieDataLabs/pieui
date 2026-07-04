@@ -81,11 +81,13 @@ export { trackLazy } from '../util/lazy'
 // Ajax helpers (platform-routed)
 export {
     useAjaxSubmit,
+    useAjaxSubmits,
+    discoverAjaxEndpoints,
     readAjaxKey,
     readAjaxKeyAsync,
     parseDepName,
 } from '../util/ajaxCommonUtils'
-export type { RetryPolicy, DepSource } from '../util/ajaxCommonUtils'
+export type { RetryPolicy, DepSource, AjaxEndpointConfig } from '../util/ajaxCommonUtils'
 export { submitGlobalForm } from '../util/globalForm'
 
 // Real-time + config contexts

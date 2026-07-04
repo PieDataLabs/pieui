@@ -13,7 +13,7 @@ export const complexComponentTemplate = (
         ? `{ data, stored${options.ajax ? ', setUiAjaxConfiguration' : ''} }`
         : `{ data${options.ajax ? ', setUiAjaxConfiguration' : ''} }`
     return `import React from 'react'
-import { PieCard${options.ajax ? ', useAjaxSubmit' : ''} } from '@swarm.ing/pieui'
+import { PieCard${options.ajax ? ', useAjaxSubmits' : ''} } from '@swarm.ing/pieui'
 import { ${componentName}Props } from '../types'
 
 const ${componentName} = (${propsDestructure}: ${componentName}Props) => {
