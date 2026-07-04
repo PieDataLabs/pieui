@@ -633,28 +633,28 @@ export interface InputPieComplexContainerComponentProps<
     TData = unknown,
     TStored = unknown,
 > extends PieComplexContainerComponentProps<TData> {
-    stored: TStored
+    stored: TStored | (() => TStored)
 }
 
 export interface InputPieContainerComponentProps<
     TData = unknown,
     TStored = unknown,
 > extends PieContainerComponentProps<TData> {
-    stored: TStored
+    stored: TStored | (() => TStored)
 }
 
 export interface InputPieComplexComponentProps<
     TData = unknown,
     TStored = unknown,
 > extends PieComplexComponentProps<TData> {
-    stored: TStored
+    stored: TStored | (() => TStored)
 }
 
 export interface InputPieSimpleComponentProps<
     TData = unknown,
     TStored = unknown,
 > extends PieSimpleComponentProps<TData> {
-    stored: TStored
+    stored: TStored | (() => TStored)
 }
 
 export type PieComponentProps<TData = unknown> =

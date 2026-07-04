@@ -10,6 +10,10 @@ import {
     isUnrecoverableChannel,
 } from '../../util/centrifugeRecovery'
 import { getOrCreateSubscription } from '../../util/centrifugeSubscription'
+import {
+    registerStoredResolver,
+    unregisterStoredResolver,
+} from '../../util/ajaxCommonUtils'
 import type { PublicationContext, SubscribedContext } from 'centrifuge'
 import { PieCardProps } from './types'
 
@@ -48,6 +52,22 @@ const PieCard = <TStored = unknown,>({
     methodsRef.current = methods
     const onResyncRef = useRef(onResync)
     onResyncRef.current = onResync
+
+    // When `stored` is a function, register it under this card's name so an
+    // ajax submit resolves the *current* value at submit time (via
+    // `readAjaxKey`) instead of the static hidden <input> below. A ref keeps
+    // the latest function without re-registering on every render.
+    const storedRef = useRef(stored)
+    storedRef.current = stored
+    const storedIsFunction = typeof stored === 'function'
+    useEffect(() => {
+        if (!storedIsFunction) return
+        const name = data.name
+        registerStoredResolver(name, () => [
+            JSON.stringify((storedRef.current as () => TStored)()),
+        ])
+        return () => unregisterStoredResolver(name)
+    }, [storedIsFunction, data.name])
 
     // const name = data.name;
     if (renderingLogEnabled) {
@@ -268,7 +288,7 @@ const PieCard = <TStored = unknown,>({
         console.log('[PieCard] Rendering complete, returning children')
     }
 
-    if (stored !== undefined) {
+    if (stored !== undefined && !storedIsFunction) {
         return (
             <>
                 <input

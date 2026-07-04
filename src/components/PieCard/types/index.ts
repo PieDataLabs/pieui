@@ -60,11 +60,13 @@ export interface PieCardProps<TStored = unknown> {
      */
     methods?: Record<string, (data: any) => void>
     /**
-     * When provided, renders a hidden input alongside `children` with
-     * `name={data.name}` and `value={JSON.stringify(stored)}` so the value
-     * can be submitted as part of a surrounding form.
+     * When provided, exposes a value for `name={data.name}` to a surrounding
+     * ajax submit. A plain `TStored` renders a hidden input with
+     * `value={JSON.stringify(stored)}`. A `() => TStored` instead registers a
+     * resolver so the submit reads the *current* value at submit time (no
+     * static hidden input is rendered).
      */
-    stored?: TStored
+    stored?: TStored | (() => TStored)
     /**
      * Invoked when a Centrifuge subscription reconnects but cannot recover
      * the full stream of missed publications (the disconnect outlived the

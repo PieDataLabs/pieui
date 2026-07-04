@@ -67,6 +67,32 @@ const DEP_SOURCE_PREFIXES: Array<Exclude<DepSource, 'dom' | 'sid'>> = [
 const ASYNC_DEP_SOURCES = new Set<DepSource>(['telegram:cloud', 'telegram:secure'])
 
 /**
+ * A `stored` resolver produces the current submit value(s) for a card, keyed by
+ * the card's `data.name`. Populated by {@link PieCard} when its `stored` prop is
+ * a function, so an ajax submit reads the *current* stored value at submit time
+ * rather than a static hidden `<input>` snapshot. Internal wiring — the public
+ * surface is `<PieCard stored={() => …}>`.
+ */
+export type StoredResolver = () =>
+    | Array<string | File>
+    | Promise<Array<string | File>>
+
+const storedResolvers = new Map<string, StoredResolver>()
+
+/** Register a card's `stored` resolver under its `data.name`. */
+export const registerStoredResolver = (
+    name: string,
+    resolver: StoredResolver
+): void => {
+    storedResolvers.set(name, resolver)
+}
+
+/** Remove a card's `stored` resolver (on unmount / when it stops being a fn). */
+export const unregisterStoredResolver = (name: string): void => {
+    storedResolvers.delete(name)
+}
+
+/**
  * Splits a dep name into its source and bare key, following the magic-name
  * convention used by Ajax cards.
  *
@@ -182,6 +208,20 @@ export const readAjaxKey = (
         return []
     }
 
+    const storedResolver = storedResolvers.get(key)
+    if (storedResolver) {
+        const result = storedResolver()
+        if (result instanceof Promise) {
+            if (renderingLogEnabled) {
+                console.warn(
+                    `stored resolver for ${key} is async; use readAjaxKeyAsync (readAjaxKey returns [])`
+                )
+            }
+            return []
+        }
+        return result
+    }
+
     const values = clientSources.readDomInput(key)
     if (values === null) {
         if (renderingLogEnabled) {
@@ -283,6 +323,12 @@ export const readAjaxKeyAsync = async (
                 console.warn(`Failed to read ${source} key ${key}:`, err)
             }
             return []
+        }
+    }
+    if (source === 'dom') {
+        const storedResolver = storedResolvers.get(key)
+        if (storedResolver) {
+            return storedResolver()
         }
     }
     return readAjaxKey(depName, renderingLogEnabled)
