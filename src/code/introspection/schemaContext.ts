@@ -9,6 +9,7 @@
  * built-in helper types are visible to the generator.
  */
 
+import fs from 'node:fs'
 import path from 'node:path'
 import { ts, TJS } from '../ts'
 import { patchSchemaForType } from './schemaPatch'
@@ -31,6 +32,46 @@ const DEFAULT_COMPILER_OPTIONS = (): any => ({
     skipLibCheck: true,
 })
 
+/** Nearest `tsconfig.json` at or above `fromDir`, or `null`. */
+const findTsconfig = (fromDir: string): string | null => {
+    let dir = path.resolve(fromDir)
+    for (;;) {
+        const candidate = path.join(dir, 'tsconfig.json')
+        if (fs.existsSync(candidate)) return candidate
+        const parent = path.dirname(dir)
+        if (parent === dir) return null
+        dir = parent
+    }
+}
+
+/**
+ * Read the project's `baseUrl` / `paths` from the nearest tsconfig so the
+ * compiler resolves path-aliased imports (e.g. `@/foo/bar`). Without this a card
+ * whose props type imports a value object via an alias can't be resolved — the
+ * imported file never enters the program and the type degrades to `object`.
+ *
+ * RETURNS: `{ baseUrl, paths }` (baseUrl absolute; `baseUrl` defaults to the
+ * tsconfig dir when the config sets `paths` but omits `baseUrl`). `{}` when no
+ * tsconfig or no path config is found.
+ */
+const loadPathAliases = (
+    files: string[]
+): { baseUrl?: string; paths?: any } => {
+    const seed = files.find((f) => !f.endsWith('.d.ts')) ?? files[0]
+    if (!seed) return {}
+    const tsconfigPath = findTsconfig(path.dirname(path.resolve(seed)))
+    if (!tsconfigPath) return {}
+    const configDir = path.dirname(tsconfigPath)
+    const read = ts.readConfigFile(tsconfigPath, ts.sys.readFile)
+    if (read.error || !read.config) return {}
+    const parsed = ts.parseJsonConfigFileContent(read.config, ts.sys, configDir)
+    const options = parsed.options ?? {}
+    if (!options.paths && !options.baseUrl) return {}
+    // Path mapping needs an explicit base once options are passed outside a
+    // config-file context; fall back to the tsconfig dir.
+    return { baseUrl: options.baseUrl ?? configDir, paths: options.paths }
+}
+
 /**
  * Build a `SchemaContext` from a list of source files.
  *
@@ -52,10 +93,11 @@ export const createSchemaContext = (files: string[]): SchemaContext => {
         'cli-schema.d.ts'
     )
     const uniqueFiles = Array.from(new Set([cliSchemaPath, ...files]))
-    const program = TJS.getProgramFromFiles(
-        uniqueFiles,
-        DEFAULT_COMPILER_OPTIONS()
-    )
+    const compilerOptions = {
+        ...DEFAULT_COMPILER_OPTIONS(),
+        ...loadPathAliases(files),
+    }
+    const program = TJS.getProgramFromFiles(uniqueFiles, compilerOptions)
     const checker = program.getTypeChecker()
     const generator = TJS.buildGenerator(program, {
         required: true,
