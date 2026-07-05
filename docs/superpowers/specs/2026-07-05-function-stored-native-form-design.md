@@ -52,33 +52,35 @@ registered function-`stored` and write its value(s) into the target form as
 hidden inputs, replacing any inputs a previous submit injected.
 
 ```ts
-/**
- * Resolve every function-`stored` and mirror it into the global form's DOM as
- * hidden inputs, so a native form.submit() serializes them. Called once, at
- * submit — each (possibly expensive) resolver runs exactly once here.
- *
- * Async resolvers and File values are skipped: a native form.submit() cannot
- * await, and a hidden <input> cannot carry a File. The ajax submit path still
- * handles both via readAjaxKeyAsync. In practice PieCard registers a synchronous
- * resolver that yields a single JSON string, which this handles fully.
- */
 export const flushStoredResolversToForm = (
-    formId = 'piedata_global_form'
+    target: string | HTMLElement = 'piedata_global_form'
 ): void => {
-    if (typeof document === 'undefined') return
-    const form = document.getElementById(formId)
+    let form: HTMLElement | null
+    if (typeof target === 'string') {
+        if (typeof document === 'undefined') return
+        form = document.getElementById(target)
+    } else {
+        form = target
+    }
     if (!form) return
 
+    // Create inputs in the form's own document (the global document in
+    // production) so the function stays testable with an isolated form element.
+    const doc = form.ownerDocument
+
     // Remove inputs injected by a previous submit so re-submits replace rather
-    // than accumulate.
-    form.querySelectorAll('input[data-pie-stored]').forEach((el) => el.remove())
+    // than accumulate. getElementsByTagName + attribute check (not querySelector)
+    // so it needs no CSS-selector engine.
+    for (const el of Array.from(form.getElementsByTagName('input'))) {
+        if (el.getAttribute('data-pie-stored') !== null) el.remove()
+    }
 
     for (const [name, resolver] of storedResolvers) {
         const result = resolver()
         if (result instanceof Promise) continue // native submit can't await
         for (const value of result) {
             if (typeof value !== 'string') continue // hidden input can't carry a File
-            const input = document.createElement('input')
+            const input = doc.createElement('input')
             input.type = 'hidden'
             input.name = name
             input.value = value
@@ -88,6 +90,10 @@ export const flushStoredResolversToForm = (
     }
 }
 ```
+
+`target` accepts the form's element id (default `piedata_global_form`, resolved
+via the global `document`) or the form element itself — the element overload
+keeps the function testable against an isolated DOM without swapping globals.
 
 Contract:
 - **Input:** optional form id (default `piedata_global_form`); reads the module's

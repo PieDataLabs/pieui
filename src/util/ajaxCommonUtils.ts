@@ -93,6 +93,64 @@ export const unregisterStoredResolver = (name: string): void => {
 }
 
 /**
+ * Resolve every function-`stored` and mirror it into the global form's DOM as
+ * hidden inputs, so a native `form.submit()` serializes them. Called once, at
+ * submit time — each (possibly expensive) resolver runs exactly once here,
+ * which is why we don't render a live hidden input per render.
+ *
+ * `HTMLFormElement.submit()` fires no `submit`/`formdata` event, so this cannot
+ * hook browser events; it is an explicit step in {@link submitGlobalForm}.
+ *
+ * Async resolvers and File values are skipped: a native submit cannot await and
+ * a hidden `<input>` cannot carry a File. In practice `PieCard` registers a
+ * synchronous resolver that yields a single JSON string, which this handles
+ * fully; the ajax submit path still resolves async/File values via
+ * {@link readAjaxKeyAsync}. Plain-value `stored` registers no resolver and is
+ * untouched here — its own static hidden input remains the only one.
+ *
+ * `target` is the form's element id (default `piedata_global_form`, resolved via
+ * the global `document`) or the form element itself. No-op when the id is not
+ * found, or when `document` is undefined (SSR / React Native).
+ */
+export const flushStoredResolversToForm = (
+    target: string | HTMLElement = 'piedata_global_form'
+): void => {
+    let form: HTMLElement | null
+    if (typeof target === 'string') {
+        if (typeof document === 'undefined') return
+        form = document.getElementById(target)
+    } else {
+        form = target
+    }
+    if (!form) return
+
+    // Create inputs in the form's own document (the global document in
+    // production) so the function stays testable with an isolated form element.
+    const doc = form.ownerDocument
+
+    // Remove inputs injected by a previous submit so re-submits replace rather
+    // than accumulate. (getElementsByTagName + attribute check rather than a
+    // querySelector so it needs no CSS-selector engine.)
+    for (const el of Array.from(form.getElementsByTagName('input'))) {
+        if (el.getAttribute('data-pie-stored') !== null) el.remove()
+    }
+
+    for (const [name, resolver] of storedResolvers) {
+        const result = resolver()
+        if (result instanceof Promise) continue // native submit can't await
+        for (const value of result) {
+            if (typeof value !== 'string') continue // hidden input can't carry a File
+            const input = doc.createElement('input')
+            input.type = 'hidden'
+            input.name = name
+            input.value = value
+            input.setAttribute('data-pie-stored', '1')
+            form.appendChild(input)
+        }
+    }
+}
+
+/**
  * Splits a dep name into its source and bare key, following the magic-name
  * convention used by Ajax cards.
  *
