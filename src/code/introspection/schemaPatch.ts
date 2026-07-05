@@ -112,18 +112,10 @@ export const patchSchemaForType = (
         return
     }
 
-    const stringIndexType = normalizedType.getStringIndexType?.()
-    if (stringIndexType) {
-        const indexSchema = schemaForIndexType(stringIndexType, checker)
-        schema.type = 'object'
-        schema.additionalProperties = indexSchema
-
-        if (schema.properties && Object.keys(schema.properties).length === 0) {
-            delete schema.properties
-            delete schema.required
-        }
-    }
-
+    // Array and tuple types must be handled before the string-index check
+    // below: TS reports a string index type for arrays/tuples (equal to the
+    // element type), which would otherwise clobber the correct `type: 'array'`
+    // into `type: 'object'`.
     if (checker.isTupleType(normalizedType)) {
         const elementTypes = checker.getTypeArguments(normalizedType as any)
         if (schema.items && Array.isArray(schema.items)) {
@@ -149,6 +141,18 @@ export const patchSchemaForType = (
             patchSchemaForType(elementType, schema.items, checker, visited)
         }
         return
+    }
+
+    const stringIndexType = normalizedType.getStringIndexType?.()
+    if (stringIndexType) {
+        const indexSchema = schemaForIndexType(stringIndexType, checker)
+        schema.type = 'object'
+        schema.additionalProperties = indexSchema
+
+        if (schema.properties && Object.keys(schema.properties).length === 0) {
+            delete schema.properties
+            delete schema.required
+        }
     }
 
     if (normalizedType.isUnion() && Array.isArray(schema.anyOf)) {
