@@ -207,9 +207,9 @@ export default function Page() {
         : ''
     const previewTree = hasProviders
         ? `<PreviewProviders>
-        <PiePreviewRoot apiServer={apiServer} pathname="/" />
+        <PiePreviewRoot apiServer={apiServer} pathname="/" previewEvents />
       </PreviewProviders>`
-        : `<PiePreviewRoot apiServer={apiServer} pathname="/" />`
+        : `<PiePreviewRoot apiServer={apiServer} pathname="/" previewEvents />`
     writeIfChanged(
         path.join(dir, 'app', 'preview-client.tsx'),
         `'use client'
