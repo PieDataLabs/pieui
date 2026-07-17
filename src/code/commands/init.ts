@@ -5,6 +5,10 @@ import * as readline from 'readline/promises'
 import { nextConfigTemplate, REQUIRED_NEXT_CONFIG_ENV_KEYS } from '../templates'
 import { initRequirements, printRequirements } from '../printRequirements'
 import {
+    ensurePreviewProviders,
+    PREVIEW_PROVIDERS_BASENAME,
+} from '../previewProviders'
+import {
     findStorybookMainPath,
     patchStorybookMainAddons,
     patchStorybookMainStories,
@@ -47,6 +51,22 @@ export const initCommand = async (outDir: string) => {
         console.log(`[pieui] Created registry.ts: ${registryPath}`)
     } else {
         console.log(`[pieui] registry.ts already exists: ${registryPath}`)
+    }
+
+    // Provider hook for the `pieui registry` preview harness (`pie card show`
+    // / show-mcp): cards needing app context providers get them mocked here.
+    const previewProvidersPath = path.join(
+        pieComponentsDir,
+        PREVIEW_PROVIDERS_BASENAME
+    )
+    if (ensurePreviewProviders(pieComponentsDir)) {
+        console.log(
+            `[pieui] Created ${PREVIEW_PROVIDERS_BASENAME}: ${previewProvidersPath}`
+        )
+    } else {
+        console.log(
+            `[pieui] ${PREVIEW_PROVIDERS_BASENAME} already exists: ${previewProvidersPath}`
+        )
     }
 
     // Update tailwind.config.js if it exists

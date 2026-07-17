@@ -41,8 +41,19 @@ const writeIfChanged = (filePath: string, contents: string): void => {
  * (Re)generate the mini Next app under `<frontend>/.pie/registry/`.
  * `registryName` is the basename of the components dir (e.g. `piecomponents`),
  * used to import the host card registry as `@/<name>/registry`.
+ *
+ * If the host project ships `<components>/preview-providers.tsx` (default
+ * export: a component wrapping `children`), the harness wraps the previewed
+ * card with it — the injection point for app context providers or mocks
+ * (e.g. a fake TurnkeyProvider) that provider-dependent cards need to render.
+ * `hasProviders` is decided at scaffold time (every `registry dev|build` run),
+ * so adding/removing the file just needs a harness restart.
  */
-const scaffoldHarness = (frontendRoot: string, registryName: string): string => {
+const scaffoldHarness = (
+    frontendRoot: string,
+    registryName: string,
+    hasProviders: boolean
+): string => {
     const dir = path.join(frontendRoot, REGISTRY_DIR)
 
     // Minimal package.json so Next treats this dir as the project root; deps
@@ -191,19 +202,81 @@ export default function Page() {
 `
     )
 
+    const providersImport = hasProviders
+        ? `import PreviewProviders from '@/${registryName}/preview-providers'\n`
+        : ''
+    const previewTree = hasProviders
+        ? `<PreviewProviders>
+        <PiePreviewRoot apiServer={apiServer} pathname="/" />
+      </PreviewProviders>`
+        : `<PiePreviewRoot apiServer={apiServer} pathname="/" />`
     writeIfChanged(
         path.join(dir, 'app', 'preview-client.tsx'),
         `'use client'
 
+import React from 'react'
 import '@/${registryName}/registry'
 import { PiePreviewRoot } from '@swarm.ing/pieui'
+${providersImport}
+const PROVIDERS_FILE = '${registryName}/preview-providers.tsx'
+const PROVIDER_HINT =
+  '[pie] This card seems to need an app context provider. Add the provider ' +
+  '(or a lightweight mock of it) to ' + PROVIDERS_FILE + ' in the frontend ' +
+  'project, then restart the preview harness.'
+
+// Catches render-time crashes (most commonly "useX must be used within
+// XProvider") and shows them with a fix hint — so both the browser view and
+// the show-mcp screenshot are self-explanatory instead of a blank page.
+// Sits OUTSIDE PreviewProviders so a crash in the providers file itself is
+// caught too. Effect/promise errors are surfaced via the page console instead.
+class PreviewErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { error: Error | null }
+> {
+  state: { error: Error | null } = { error: null }
+
+  static getDerivedStateFromError(error: Error) {
+    return { error }
+  }
+
+  render() {
+    const { error } = this.state
+    if (!error) return this.props.children
+    const message = String(error && error.message ? error.message : error)
+    const needsProvider = /must be used within|provider|context/i.test(message)
+    return (
+      <div
+        data-pie-preview-error
+        style={{ padding: 16, fontFamily: 'monospace' }}
+      >
+        {needsProvider ? (
+          <p style={{ color: '#b45309', fontWeight: 700, whiteSpace: 'pre-wrap' }}>
+            {PROVIDER_HINT}
+          </p>
+        ) : null}
+        <pre style={{ color: 'red', whiteSpace: 'pre-wrap' }}>
+          {'[pie] card crashed while rendering:\\n' + (error.stack || message)}
+        </pre>
+        {needsProvider ? null : (
+          <p style={{ color: '#666', whiteSpace: 'pre-wrap' }}>
+            {'If the error mentions a missing context/provider: ' + PROVIDER_HINT}
+          </p>
+        )}
+      </div>
+    )
+  }
+}
 
 export default function PreviewClient() {
   // Dev: NEXT_PUBLIC_PIE_API_SERVER points at the ephemeral backend (Next
   // statically inlines NEXT_PUBLIC_* into the client bundle). Static build:
   // unset → falls back to same-origin '/' (pie serves both the SPA and API).
   const apiServer = process.env.NEXT_PUBLIC_PIE_API_SERVER || '/'
-  return <PiePreviewRoot apiServer={apiServer} pathname="/" />
+  return (
+    <PreviewErrorBoundary>
+      ${previewTree}
+    </PreviewErrorBoundary>
+  )
 }
 `
     )
@@ -232,8 +305,16 @@ export const registryCommand = (
     const frontendRoot = process.cwd()
     const settings = loadSettings(frontendRoot)
     const registryName = path.basename(settings.componentsDir)
+    const hasProviders = fs.existsSync(
+        path.join(settings.componentsDir, 'preview-providers.tsx')
+    )
+    if (hasProviders) {
+        console.log(
+            `[pieui]   preview providers: ${registryName}/preview-providers.tsx`
+        )
+    }
 
-    const dir = scaffoldHarness(frontendRoot, registryName)
+    const dir = scaffoldHarness(frontendRoot, registryName, hasProviders)
     const nextBin = resolveNextBin(frontendRoot)
 
     const env = { ...process.env }
