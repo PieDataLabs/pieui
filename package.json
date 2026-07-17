@@ -1,6 +1,6 @@
 {
     "name": "@swarm.ing/pieui",
-    "version": "3.0.5",
+    "version": "3.0.6",
     "description": "A React component library featuring PieCard component",
     "repository": {
         "type": "git",
