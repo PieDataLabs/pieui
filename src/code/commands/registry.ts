@@ -37,6 +37,162 @@ const writeIfChanged = (filePath: string, contents: string): void => {
     fs.writeFileSync(filePath, contents, 'utf8')
 }
 
+/** Major version of tailwindcss installed in the frontend project (0 if absent). */
+const tailwindMajor = (frontendRoot: string): number => {
+    try {
+        const pkg = path.join(
+            frontendRoot,
+            'node_modules',
+            'tailwindcss',
+            'package.json'
+        )
+        const { version } = JSON.parse(fs.readFileSync(pkg, 'utf8'))
+        return parseInt(String(version).split('.')[0], 10) || 0
+    } catch {
+        return 0
+    }
+}
+
+/** The project's tailwind config file, if any. */
+const findTailwindConfig = (frontendRoot: string): string | null => {
+    for (const name of [
+        'tailwind.config.js',
+        'tailwind.config.cjs',
+        'tailwind.config.mjs',
+        'tailwind.config.ts',
+    ]) {
+        const candidate = path.join(frontendRoot, name)
+        if (fs.existsSync(candidate)) return candidate
+    }
+    return null
+}
+
+const packageType = (frontendRoot: string): string => {
+    try {
+        const pkg = JSON.parse(
+            fs.readFileSync(path.join(frontendRoot, 'package.json'), 'utf8')
+        )
+        return pkg.type === 'module' ? 'module' : 'commonjs'
+    } catch {
+        return 'commonjs'
+    }
+}
+
+/**
+ * Tailwind v3 support. Two things break a v3 project in the harness:
+ *
+ *  - the harness is its own Next app with no PostCSS config, so the project's
+ *    `@tailwind` directives are never processed and the preview renders with no
+ *    styling at all. (v4 needs none of this: `@import "tailwindcss"` + `@config`
+ *    are resolved relative to the CSS file, which already works here.)
+ *  - v3 resolves `content` globs against the build CWD — the harness dir — so
+ *    the project's own `./piecomponents/**` globs match nothing and not a single
+ *    utility class is generated.
+ *
+ * Emit a harness PostCSS config plus a Tailwind config that re-exports the
+ * project's one (keeping its theme and plugins) with every relative glob
+ * rewritten to an absolute path.
+ */
+const scaffoldTailwindV3 = (frontendRoot: string, dir: string): void => {
+    if (tailwindMajor(frontendRoot) !== 3) return
+    const config = findTailwindConfig(frontendRoot)
+    if (!config) return
+
+    writeIfChanged(
+        path.join(dir, 'postcss.config.js'),
+        `// The harness is a separate Next app, so it needs its own PostCSS config —
+// without it the project's \`@tailwind\` directives are never processed and the
+// preview renders completely unstyled.
+module.exports = { plugins: { tailwindcss: {}, autoprefixer: {} } }
+`
+    )
+
+    if (config.endsWith('.ts')) {
+        console.log(
+            `[pieui]   ${path.basename(config)} cannot be re-exported from the ` +
+                `harness; if the preview renders unstyled, make its \`content\` ` +
+                `globs absolute.`
+        )
+        return
+    }
+
+    const rewrite = `const toAbsolute = (glob) =>
+  typeof glob === 'string' && !isAbsolute(glob)
+    ? join(projectRoot, glob.replace(/^\\.\\//, ''))
+    : glob
+
+const declared = Array.isArray(base.content)
+  ? base.content
+  : (base.content && base.content.files) || []
+`
+    const banner = `// Tailwind v3 resolves \`content\` globs against the build CWD, which for this
+// harness is this directory — the project's own relative globs would match
+// nothing and no utilities would be emitted. Re-export the project's config
+// (theme, plugins and all) with every relative glob made absolute.
+`
+    const asEsm = config.endsWith('.mjs') || packageType(frontendRoot) === 'module'
+    if (asEsm) {
+        writeIfChanged(
+            path.join(dir, 'tailwind.config.mjs'),
+            `${banner}import { isAbsolute, join } from 'node:path'
+import base from '../../${path.basename(config)}'
+
+const projectRoot = new URL('../../', import.meta.url).pathname
+
+${rewrite}
+export default { ...base, content: declared.map(toAbsolute) }
+`
+        )
+        return
+    }
+    writeIfChanged(
+        path.join(dir, 'tailwind.config.js'),
+        `${banner}const { isAbsolute, join, resolve } = require('node:path')
+
+const projectRoot = resolve(__dirname, '..', '..')
+const base = require(join(projectRoot, '${path.basename(config)}'))
+
+${rewrite}
+module.exports = { ...base, content: declared.map(toAbsolute) }
+`
+    )
+}
+
+/**
+ * Link the project's `public/` into the harness. Next serves static assets from
+ * the app root — here the harness dir — so a card referencing `/icons/foo.svg`
+ * or a `@font-face` under `/fonts/` 404s (broken images, fallback fonts) unless
+ * the project's public dir is reachable from it.
+ */
+const linkPublicAssets = (frontendRoot: string, dir: string): void => {
+    const source = path.join(frontendRoot, 'public')
+    if (!fs.existsSync(source)) return
+    const target = path.join(dir, 'public')
+    try {
+        let existing: fs.Stats | null = null
+        try {
+            existing = fs.lstatSync(target)
+        } catch {
+            existing = null
+        }
+        if (existing) {
+            if (
+                existing.isSymbolicLink() &&
+                path.resolve(dir, fs.readlinkSync(target)) === source
+            ) {
+                return
+            }
+            fs.rmSync(target, { recursive: true, force: true })
+        }
+        fs.symlinkSync(source, target, 'dir')
+    } catch (error) {
+        console.log(
+            `[pieui]   could not link public/ into the harness (${String(error)}); ` +
+                `static assets may 404 in the preview.`
+        )
+    }
+}
+
 /**
  * (Re)generate the mini Next app under `<frontend>/.pie/registry/`.
  * `registryName` is the basename of the components dir (e.g. `piecomponents`),
@@ -280,6 +436,11 @@ export default function PreviewClient() {
 }
 `
     )
+
+    // Tailwind v3 needs its own PostCSS + absolute content globs here; v4 works
+    // as-is. Static assets are served from the app root, so link the project's.
+    scaffoldTailwindV3(frontendRoot, dir)
+    linkPublicAssets(frontendRoot, dir)
 
     // .gitignore the generated harness by default.
     writeIfChanged(path.join(dir, '.gitignore'), '*\n')
