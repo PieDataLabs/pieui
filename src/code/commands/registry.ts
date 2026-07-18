@@ -193,6 +193,83 @@ const linkPublicAssets = (frontendRoot: string, dir: string): void => {
     }
 }
 
+/** Env files Next never loads — templates, not values. */
+const ENV_TEMPLATE_SUFFIXES = ['.example', '.sample', '.template']
+
+/**
+ * Mirror the project's `.env*` files into the harness as symlinks.
+ *
+ * The harness is its own Next app rooted at `.pie/registry/`, so Next resolves
+ * env files against THAT directory — the project's `.env.local` is invisible
+ * and every `NEXT_PUBLIC_*` a card reads comes back `undefined`. Cards that
+ * mount a credentialed provider (Turnkey, analytics, a payments kit) then
+ * initialize against a dummy config and render a permanently-"loading" state,
+ * which looks like a bug in the card.
+ *
+ * Symlinks rather than copies: the harness always reads what the project
+ * currently has, and no secrets are duplicated on disk. Next applies its own
+ * precedence (`.env.<mode>.local` → `.env.local` → `.env.<mode>` → `.env`) over
+ * the mirrored set, and `@next/env` only fills vars MISSING from the inherited
+ * process env — so what the CLI exports still wins (see `registryCommand`).
+ */
+const linkEnvFiles = (frontendRoot: string, dir: string): string[] => {
+    const isEnvFile = (name: string): boolean =>
+        (name === '.env' || name.startsWith('.env.')) &&
+        !ENV_TEMPLATE_SUFFIXES.some((suffix) => name.endsWith(suffix))
+
+    let names: string[] = []
+    try {
+        names = fs.readdirSync(frontendRoot).filter(isEnvFile).sort()
+    } catch {
+        return []
+    }
+
+    // Drop symlinks left over from an env file the project no longer has.
+    try {
+        for (const stale of fs.readdirSync(dir)) {
+            if (!isEnvFile(stale) || names.includes(stale)) continue
+            const target = path.join(dir, stale)
+            if (fs.lstatSync(target).isSymbolicLink()) fs.rmSync(target)
+        }
+    } catch {
+        // Harness dir may not exist yet on the first scaffold.
+    }
+
+    const linked: string[] = []
+    for (const name of names) {
+        const source = path.join(frontendRoot, name)
+        const target = path.join(dir, name)
+        try {
+            if (!fs.statSync(source).isFile()) continue
+            let existing: fs.Stats | null = null
+            try {
+                existing = fs.lstatSync(target)
+            } catch {
+                existing = null
+            }
+            if (existing) {
+                if (
+                    existing.isSymbolicLink() &&
+                    path.resolve(dir, fs.readlinkSync(target)) === source
+                ) {
+                    linked.push(name)
+                    continue
+                }
+                fs.rmSync(target, { recursive: true, force: true })
+            }
+            fs.mkdirSync(dir, { recursive: true })
+            fs.symlinkSync(source, target, 'file')
+            linked.push(name)
+        } catch (error) {
+            console.log(
+                `[pieui]   could not link ${name} into the harness ` +
+                    `(${String(error)}); its variables stay unset in the preview.`
+            )
+        }
+    }
+    return linked
+}
+
 /**
  * (Re)generate the mini Next app under `<frontend>/.pie/registry/`.
  * `registryName` is the basename of the components dir (e.g. `piecomponents`),
@@ -441,6 +518,10 @@ export default function PreviewClient() {
     // as-is. Static assets are served from the app root, so link the project's.
     scaffoldTailwindV3(frontendRoot, dir)
     linkPublicAssets(frontendRoot, dir)
+    const envFiles = linkEnvFiles(frontendRoot, dir)
+    if (envFiles.length) {
+        console.log(`[pieui]   env: ${envFiles.join(', ')}`)
+    }
 
     // .gitignore the generated harness by default.
     writeIfChanged(path.join(dir, '.gitignore'), '*\n')
@@ -478,17 +559,22 @@ export const registryCommand = (
     const dir = scaffoldHarness(frontendRoot, registryName, hasProviders)
     const nextBin = resolveNextBin(frontendRoot)
 
+    // The harness's card API is owned by --api-server, never by a mirrored
+    // `.env*` (a project's .env.local routinely points PIE_API_SERVER at a
+    // deployed backend — the preview must talk to the one we were handed).
+    // Exporting '' rather than leaving it unset is what makes that stick:
+    // `@next/env` only fills variables MISSING from the inherited process env,
+    // so a defined-but-empty value blocks the file. Empty → the client's
+    // `|| '/'` fallback, i.e. today's behavior when no flag is passed.
     const env = { ...process.env }
-    if (opts.apiServer) {
-        env.PIE_API_SERVER = opts.apiServer
-        env.NEXT_PUBLIC_PIE_API_SERVER = opts.apiServer
-    }
+    env.PIE_API_SERVER = opts.apiServer ?? ''
+    env.NEXT_PUBLIC_PIE_API_SERVER = opts.apiServer ?? ''
 
     if (action === 'dev') {
         const port = opts.port ?? 3210
         console.log(`[pieui] registry dev → http://localhost:${port}`)
         console.log(`[pieui]   harness: ${dir}`)
-        console.log(`[pieui]   PIE_API_SERVER=${env.PIE_API_SERVER ?? '(unset → /)'}`)
+        console.log(`[pieui]   PIE_API_SERVER=${env.PIE_API_SERVER || '(unset → /)'}`)
         const result = spawnSync(nextBin, ['dev', '-p', String(port)], {
             cwd: dir,
             stdio: 'inherit',
@@ -501,9 +587,11 @@ export const registryCommand = (
         return
     }
 
-    // build → static export. Force a same-origin client (no baked API server).
-    delete env.PIE_API_SERVER
-    delete env.NEXT_PUBLIC_PIE_API_SERVER
+    // build → static export. Force a same-origin client (no baked API server):
+    // pie serves the SPA and the card API together. '' rather than `delete` —
+    // deleting would re-open the slot for a mirrored `.env*` to fill.
+    env.PIE_API_SERVER = ''
+    env.NEXT_PUBLIC_PIE_API_SERVER = ''
     console.log(`[pieui] registry build (static export) → ${path.join(dir, OUT_DIRNAME)}`)
     const result = spawnSync(nextBin, ['build'], {
         cwd: dir,
