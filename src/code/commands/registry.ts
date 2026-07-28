@@ -529,6 +529,45 @@ export default function PreviewClient() {
     return dir
 }
 
+/**
+ * The dev server already serving `dir`, or `null` when the harness is free.
+ *
+ * Next refuses a second dev server for the same project directory — but only
+ * after it has bound the requested port and printed `✓ Ready`, and only then
+ * does it exit. Everything upstream believes that line: our own
+ * `registry dev → http://localhost:<port>` is printed before it, a launch.json
+ * preview with `autoPort` navigates straight to the port, and the show-mcp
+ * controller waits on it. Each of them gets a real, fully working Next for the
+ * second it stays up, then keeps the corpse on screen next to the live harness
+ * — which reads as the whole app rendered twice.
+ *
+ * Next records the owner in `.next/dev/lock`, so the conflict is knowable
+ * before we spawn anything. Anything unreadable, unparseable or stale (the
+ * lock outlives a crashed server) means "not running" — let Next arbitrate
+ * rather than block a legitimate start on a leftover file.
+ */
+const liveHarness = (dir: string): { pid: number; appUrl: string } | null => {
+    let lock: { pid?: unknown; appUrl?: unknown }
+    try {
+        lock = JSON.parse(
+            fs.readFileSync(path.join(dir, '.next', 'dev', 'lock'), 'utf8')
+        )
+    } catch {
+        return null
+    }
+    const { pid, appUrl } = lock
+    if (typeof pid !== 'number' || typeof appUrl !== 'string') return null
+    try {
+        // Signal 0 delivers nothing; it only asks whether the pid exists.
+        process.kill(pid, 0)
+    } catch (err) {
+        // EPERM means the process is alive and owned by someone else — still a
+        // conflict. Anything else (ESRCH) means the lock is stale.
+        if ((err as NodeJS.ErrnoException).code !== 'EPERM') return null
+    }
+    return { pid, appUrl }
+}
+
 const resolveNextBin = (frontendRoot: string): string => {
     const bin = path.join(frontendRoot, 'node_modules', '.bin', 'next')
     if (!fs.existsSync(bin)) {
@@ -571,6 +610,21 @@ export const registryCommand = (
     env.NEXT_PUBLIC_PIE_API_SERVER = opts.apiServer ?? ''
 
     if (action === 'dev') {
+        // Refuse before binding anything, so no viewer is ever handed a port
+        // that is about to die (see `liveHarness`).
+        const running = liveHarness(dir)
+        if (running) {
+            console.error(
+                `[pieui] a registry harness already serves ${dir}\n` +
+                    `[pieui]   url: ${running.appUrl}\n` +
+                    `[pieui]   pid: ${running.pid}\n` +
+                    `[pieui] point the viewer at that url, or stop it first ` +
+                    `(kill ${running.pid}).`
+            )
+            process.exitCode = 1
+            return
+        }
+
         const port = opts.port ?? 3210
         console.log(`[pieui] registry dev → http://localhost:${port}`)
         console.log(`[pieui]   harness: ${dir}`)
