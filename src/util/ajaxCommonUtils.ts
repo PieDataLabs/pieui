@@ -33,7 +33,23 @@ export type GetAjaxSubmitOptions = {
     timeout?: number
     /** Retry policy for failed requests. No retries if omitted. */
     retryPolicy?: RetryPolicy
+    /**
+     * Extra `fetch` options merged into every request the submit function
+     * makes (`headers`, `credentials`, `mode`, `cache`, a caller `signal`, …).
+     * `body` is ignored — it is always the collected FormData. See
+     * {@link buildRequestInit} for how the merge works.
+     */
+    fetchOptions?: RequestInit
 }
+
+/**
+ * Submit function returned by {@link getAjaxSubmit}. `fetchOptions` given here
+ * override the ones passed when the submit function was built.
+ */
+export type AjaxSubmitFn = (
+    extraKwargs?: Record<string, any>,
+    fetchOptions?: RequestInit
+) => Promise<any>
 
 /**
  * The origin a dep value is read from. `dom` is the default for any name
@@ -392,6 +408,105 @@ export const readAjaxKeyAsync = async (
     return readAjaxKey(depName, renderingLogEnabled)
 }
 
+/** Normalize any `HeadersInit` shape (object, array, `Headers`) to entries. */
+const toHeaderEntries = (init?: HeadersInit): Array<[string, string]> => {
+    if (!init) return []
+    if (Array.isArray(init))
+        return init.map(([key, value]) => [String(key), String(value)])
+    if (typeof (init as Headers).forEach === 'function') {
+        const out: Array<[string, string]> = []
+        ;(init as Headers).forEach((value, key) => out.push([key, value]))
+        return out
+    }
+    return Object.entries(init as Record<string, string>)
+}
+
+/**
+ * Combine several abort signals into one: the result aborts as soon as any of
+ * them does. Returns the single signal unchanged when there is nothing to
+ * combine, and `undefined` when there is none at all.
+ */
+const combineSignals = (
+    signals: Array<AbortSignal | undefined | null>
+): AbortSignal | undefined => {
+    const present = signals.filter(Boolean) as AbortSignal[]
+    if (present.length === 0) return undefined
+    if (present.length === 1) return present[0]
+
+    // `AbortSignal.any` is not available on every runtime PieUI targets
+    // (older Safari, React Native), so mirror it by hand when it is missing.
+    const anyOf = (AbortSignal as any).any
+    if (typeof anyOf === 'function') return anyOf.call(AbortSignal, present)
+
+    const controller = new AbortController()
+    for (const signal of present) {
+        if (signal.aborted) {
+            controller.abort((signal as any).reason)
+            break
+        }
+        signal.addEventListener(
+            'abort',
+            () => controller.abort((signal as any).reason),
+            { once: true }
+        )
+    }
+    return controller.signal
+}
+
+/**
+ * Build the `RequestInit` for one ajax submit: helper defaults first, then the
+ * caller's `fetchOptions` on top (registration-level, then call-level).
+ *
+ * `body` always stays the collected FormData; everything else — `method`,
+ * `credentials`, `mode`, `cache`, … — can be overridden. Headers merge
+ * key-by-key (case-insensitive) rather than replacing wholesale, and a caller
+ * `signal` is combined with the timeout signal so either can abort.
+ */
+const buildRequestInit = (
+    body: FormData,
+    timeoutSignal: AbortSignal | undefined,
+    overrides: Array<RequestInit | undefined>
+): RequestInit => {
+    const init: RequestInit = {
+        method: 'POST',
+        // Session cookies ride along, and — just as importantly —
+        // `Set-Cookie` coming back is honoured. Without this the
+        // browser silently drops both whenever the page and the API
+        // sit on different origins (app.example.com → api.example.com),
+        // which is the normal deployment shape. A login handler would
+        // then succeed server-side and still leave the user signed out.
+        // PieRoot's config request and gen_token already send
+        // credentials; ajax submits were the odd one out.
+        credentials: 'include',
+    }
+
+    const headers: Record<string, string> = {}
+    const signals: Array<AbortSignal | undefined | null> = [timeoutSignal]
+
+    for (const override of overrides) {
+        if (!override) continue
+        const {
+            headers: overrideHeaders,
+            signal,
+            body: ignoredBody,
+            ...rest
+        } = override
+        Object.assign(init, rest)
+        for (const [key, value] of toHeaderEntries(overrideHeaders)) {
+            headers[key.toLowerCase()] = value
+        }
+        signals.push(signal)
+    }
+
+    init.body = body
+    if (Object.keys(headers).length > 0) init.headers = headers
+
+    const signal = combineSignals(signals)
+    if (signal) init.signal = signal
+
+    return init
+}
+
 /**
  * Builds an async "submit" function that issues an AJAX request to
  * `api/ajax_content{pathname}` and streams (or JSON-decodes) the response
@@ -422,8 +537,12 @@ export const readAjaxKeyAsync = async (
  *                               `url:`, `telegram:cloud:` and `telegram:secure:`
  *                               prefixes read those client sources.
  * @param pathname               Path segment appended to `api/ajax_content`.
- * @param options                See {@link GetAjaxSubmitOptions}.
- * @returns An `async (extraKwargs?) => Promise<any>` submit function.
+ * @param options                See {@link GetAjaxSubmitOptions}, including
+ *                               `fetchOptions` — arbitrary `fetch` init merged
+ *                               into every request (see
+ *                               {@link buildRequestInit}).
+ * @returns An {@link AjaxSubmitFn}: `async (extraKwargs?, fetchOptions?)`,
+ *          where the call-time `fetchOptions` win over the ones given here.
  */
 export const getAjaxSubmit = (
     setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
@@ -431,7 +550,7 @@ export const getAjaxSubmit = (
     depsNames: Array<string> = [],
     pathname?: string,
     options?: GetAjaxSubmitOptions
-) => {
+): AjaxSubmitFn => {
     const renderingLogEnabled = options?.renderingLogEnabled ?? false
     const timeout = options?.timeout
     const retryPolicy = options?.retryPolicy
@@ -443,7 +562,10 @@ export const getAjaxSubmit = (
         console.log('Registering AJAX: ', pathname, kwargs, depsNames)
     }
 
-    return async (extraKwargs: Record<string, any> = {}) => {
+    return async (
+        extraKwargs: Record<string, any> = {},
+        callFetchOptions?: RequestInit
+    ) => {
         if (!clientSources.isClient()) {
             if (renderingLogEnabled) {
                 console.warn(
@@ -513,11 +635,13 @@ export const getAjaxSubmit = (
                 controller && setTimeout(() => controller.abort(), timeout)
 
             try {
-                const response = await fetch(apiEndpoint, {
-                    method: 'POST',
-                    body: data,
-                    signal: controller?.signal,
-                })
+                const response = await fetch(
+                    apiEndpoint,
+                    buildRequestInit(data, controller?.signal, [
+                        options?.fetchOptions,
+                        callFetchOptions,
+                    ])
+                )
 
                 if (timer) clearTimeout(timer)
 
@@ -628,7 +752,12 @@ export const getAjaxSubmit = (
  * @param depsNames              Names of DOM inputs whose current values should
  *                               be sent alongside the request.
  * @param pathname               Path segment appended to `api/ajax_content`.
- * @param options                Optional `timeout` (ms) and `retryPolicy`.
+ * @param options                Optional `timeout` (ms), `retryPolicy` and
+ *                               `fetchOptions`. Since memoization is keyed on
+ *                               the stringified options, pass values that
+ *                               survive `JSON.stringify` here — a per-call
+ *                               `AbortSignal` belongs in the submit call's own
+ *                               `fetchOptions` argument instead.
  * @returns A memoized submit function; see {@link getAjaxSubmit}.
  */
 export const useAjaxSubmit = (
@@ -636,8 +765,12 @@ export const useAjaxSubmit = (
     kwargs: Record<string, any> = {},
     depsNames: Array<string> = [],
     pathname?: string,
-    options?: { timeout?: number; retryPolicy?: RetryPolicy }
-) => {
+    options?: {
+        timeout?: number
+        retryPolicy?: RetryPolicy
+        fetchOptions?: RequestInit
+    }
+): AjaxSubmitFn => {
     const { apiServer, enableRenderingLog } = usePieConfig()
     // kwargs/depsNames чаще всего приходят как инлайн-литералы из серверного
     // UIConfig — ссылка меняется на каждом рендере, поэтому ключом мемоизации
@@ -652,6 +785,7 @@ export const useAjaxSubmit = (
                 renderingLogEnabled: enableRenderingLog,
                 timeout: options?.timeout,
                 retryPolicy: options?.retryPolicy,
+                fetchOptions: options?.fetchOptions,
             }),
         // eslint-disable-next-line react-hooks/exhaustive-deps
         [
@@ -713,17 +847,18 @@ export const discoverAjaxEndpoints = (
 export const useAjaxSubmits = (
     data: Record<string, any> = {},
     setUiAjaxConfiguration?: SetUiAjaxConfigurationType,
-    options?: { timeout?: number; retryPolicy?: RetryPolicy }
-): Record<string, (extraKwargs?: Record<string, any>) => Promise<any>> => {
+    options?: {
+        timeout?: number
+        retryPolicy?: RetryPolicy
+        fetchOptions?: RequestInit
+    }
+): Record<string, AjaxSubmitFn> => {
     const { apiServer, enableRenderingLog } = usePieConfig()
     const dataKey = JSON.stringify(data ?? {})
     const optionsKey = JSON.stringify(options)
     return useMemo(
         () => {
-            const submits: Record<
-                string,
-                (extraKwargs?: Record<string, any>) => Promise<any>
-            > = {}
+            const submits: Record<string, AjaxSubmitFn> = {}
             for (const ep of discoverAjaxEndpoints(data ?? {})) {
                 submits[ep.key] = getAjaxSubmit(
                     setUiAjaxConfiguration,
@@ -735,6 +870,7 @@ export const useAjaxSubmits = (
                         renderingLogEnabled: enableRenderingLog,
                         timeout: options?.timeout,
                         retryPolicy: options?.retryPolicy,
+                        fetchOptions: options?.fetchOptions,
                     }
                 )
             }

@@ -386,3 +386,107 @@ describe('getAjaxSubmit() — RetryPolicy shape', () => {
         ).not.toThrow()
     })
 })
+
+describe('getAjaxSubmit() — fetchOptions passthrough', () => {
+    const w = globalThis as any
+
+    // Captures the RequestInit the submit function hands to fetch.
+    const captureInit = () => {
+        const seen: { init?: any } = {}
+        w.fetch = mock(async (_url: string, init: any) => {
+            seen.init = init
+            return {
+                ok: true,
+                headers: { get: () => 'application/json' },
+                json: async () => ({}),
+            }
+        })
+        return seen
+    }
+
+    afterEach(() => {
+        delete w.fetch
+    })
+
+    // Without any fetchOptions the request keeps the defaults every ajax
+    // submit relies on: POST, FormData body, cross-origin cookies.
+    test('keeps the defaults when no fetchOptions are given', async () => {
+        const seen = captureInit()
+        await getAjaxSubmit(makeSetUi(), {}, [], '/path', {
+            apiServer: 'http://api.example.com/',
+        })()
+
+        expect(seen.init.method).toBe('POST')
+        expect(seen.init.credentials).toBe('include')
+        expect(seen.init.body).toBeInstanceOf(FormData)
+    })
+
+    // Registration-level fetchOptions reach every request and may override the
+    // defaults (here: credentials) as well as add new fields (headers).
+    test('applies fetchOptions passed to the factory', async () => {
+        const seen = captureInit()
+        await getAjaxSubmit(makeSetUi(), {}, [], '/path', {
+            apiServer: 'http://api.example.com/',
+            fetchOptions: {
+                credentials: 'omit',
+                cache: 'no-store',
+                headers: { 'X-Trace': 'factory' },
+            },
+        })()
+
+        expect(seen.init.credentials).toBe('omit')
+        expect(seen.init.cache).toBe('no-store')
+        expect(seen.init.headers).toEqual({ 'x-trace': 'factory' })
+    })
+
+    // Call-time options win over factory ones, and headers merge key by key
+    // instead of replacing the whole set.
+    test('merges call-time fetchOptions over factory ones', async () => {
+        const seen = captureInit()
+        const submit = getAjaxSubmit(makeSetUi(), {}, [], '/path', {
+            apiServer: 'http://api.example.com/',
+            fetchOptions: {
+                credentials: 'omit',
+                headers: { 'X-Trace': 'factory', 'X-Kept': 'yes' },
+            },
+        })
+        await submit({}, {
+            credentials: 'same-origin',
+            headers: { 'x-trace': 'call' },
+        })
+
+        expect(seen.init.credentials).toBe('same-origin')
+        expect(seen.init.headers).toEqual({
+            'x-trace': 'call',
+            'x-kept': 'yes',
+        })
+    })
+
+    // A caller `body` must never win — the FormData collected from kwargs and
+    // deps is the whole point of the submit function.
+    test('never lets fetchOptions replace the FormData body', async () => {
+        const seen = captureInit()
+        await getAjaxSubmit(makeSetUi(), { a: '1' }, [], '/path', {
+            apiServer: 'http://api.example.com/',
+        })({}, { body: 'nope' } as any)
+
+        expect(seen.init.body).toBeInstanceOf(FormData)
+        expect((seen.init.body as FormData).get('a')).toBe('1')
+    })
+
+    // A caller signal is honoured even when the helper has its own timeout
+    // controller: aborting the caller's controller aborts the request signal.
+    test('combines a caller signal with the timeout signal', async () => {
+        const seen = captureInit()
+        const controller = new AbortController()
+        await getAjaxSubmit(makeSetUi(), {}, [], '/path', {
+            apiServer: 'http://api.example.com/',
+            timeout: 5000,
+        })({}, { signal: controller.signal })
+
+        expect(seen.init.signal).toBeDefined()
+        expect(seen.init.signal.aborted).toBe(false)
+        controller.abort()
+        expect(seen.init.signal.aborted).toBe(true)
+    })
+})

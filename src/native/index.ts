@@ -87,7 +87,13 @@ export {
     readAjaxKeyAsync,
     parseDepName,
 } from '../util/ajaxCommonUtils'
-export type { RetryPolicy, DepSource, AjaxEndpointConfig } from '../util/ajaxCommonUtils'
+export type {
+    RetryPolicy,
+    DepSource,
+    AjaxEndpointConfig,
+    AjaxSubmitFn,
+    GetAjaxSubmitOptions,
+} from '../util/ajaxCommonUtils'
 export { submitGlobalForm } from '../util/globalForm'
 
 // Real-time + config contexts

@@ -60,7 +60,13 @@ export {
     readAjaxKeyAsync,
     parseDepName,
 } from './util/ajaxCommonUtils'
-export type { RetryPolicy, DepSource, AjaxEndpointConfig } from './util/ajaxCommonUtils'
+export type {
+    RetryPolicy,
+    DepSource,
+    AjaxEndpointConfig,
+    AjaxSubmitFn,
+    GetAjaxSubmitOptions,
+} from './util/ajaxCommonUtils'
 export { usePieEmit } from './util/mitt'
 export { default as MittContext, getEmitter } from './util/mitt'
 export { default as SocketIOContext } from './util/socket'
