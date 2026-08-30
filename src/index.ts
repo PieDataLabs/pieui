@@ -52,6 +52,16 @@ export type {
 
 export type { PieQueryOptions } from './components/PieRoot/types'
 
+// Ранний запрос конфига страницы. `buildContentUrl` — единственное правило
+// сборки URL: хост собирает им же тот URL, который прогревает, иначе рут не
+// узнает прогрев и сходит в сеть второй раз. См. util/contentRequest.
+export { buildContentUrl, consumeConfigPrefetch } from './util/contentRequest'
+export type {
+    PieConfigPrefetch,
+    PieRootKind,
+    ContentUrlParams,
+} from './util/contentRequest'
+
 export {
     useAjaxSubmit,
     useAjaxSubmits,

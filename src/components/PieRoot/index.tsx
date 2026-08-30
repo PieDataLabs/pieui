@@ -29,6 +29,10 @@ import {
 } from '../../util/pieConfig'
 import NavigateContext from '../../util/navigate.ts'
 import { resolvePieCacheFallback } from '../../util/piecache'
+import {
+    buildContentUrl,
+    consumeConfigPrefetch,
+} from '../../util/contentRequest'
 
 const PieRootContent = ({
     location,
@@ -36,6 +40,7 @@ const PieRootContent = ({
     piecache,
     onError,
     queryOptions,
+    configPrefetch,
     disableGlobalForm,
 }: PieRootProps) => {
     const apiServer = useApiServer()
@@ -69,23 +74,33 @@ const PieRootContent = ({
         queryKey: ['uiConfig', location.pathname + location.search, apiServer],
         enabled: !!apiServer,
         queryFn: async () => {
-            const params = new URLSearchParams(location.search)
-            params.set('__pieroot', 'web')
-            const apiEndpoint =
-                '/api/content' + location.pathname + '?' + params.toString()
-            if (renderingLogEnabled) {
-                console.log(
-                    '[PieRoot] Fetching UI configuration from:',
-                    apiEndpoint
-                )
+            const url = buildContentUrl({
+                apiServer,
+                pathname: location.pathname,
+                search: location.search,
+                root: 'web',
+            })
+
+            // Хост мог выстрелить этим же запросом до загрузки бандла —
+            // тогда забираем готовый ответ вместо второго похода в сеть.
+            const prefetched = await consumeConfigPrefetch(configPrefetch, url)
+            if (prefetched) {
+                if (renderingLogEnabled) {
+                    console.log('[PieRoot] Using prefetched UI configuration')
+                }
+                return prefetched
             }
-            const response = await axiosInstance.get(apiEndpoint, {
-                headers: {
-                    'Access-Control-Allow-Origin': '*',
-                    'Access-Control-Allow-Methods':
-                        'GET,PUT,POST,DELETE,PATCH,OPTIONS',
-                    'Content-type': 'application/json',
-                },
+
+            if (renderingLogEnabled) {
+                console.log('[PieRoot] Fetching UI configuration from:', url)
+            }
+            // Никаких `Access-Control-Allow-*` и `Content-type` здесь больше
+            // нет. Первые два — заголовки ОТВЕТА, в запросе они бессмысленны;
+            // `Content-type` на GET без тела тоже. При этом ни один из трёх не
+            // входит в CORS-safelist, поэтому браузер был обязан перед каждым
+            // запросом сходить preflight'ом OPTIONS — лишний round-trip на
+            // холодном открытии ради заголовков, которые ни на что не влияли.
+            const response = await axiosInstance.get(url, {
                 withCredentials: true,
             })
             if (renderingLogEnabled) {

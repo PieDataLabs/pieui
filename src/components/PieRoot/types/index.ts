@@ -2,6 +2,7 @@ import { ReactNode } from 'react'
 import { PieConfig, UIConfigType } from '../../../types'
 import { QueryClient, UseQueryOptions } from '@tanstack/react-query'
 import { AxiosError } from 'axios'
+import { PieConfigPrefetch } from '../../../util/contentRequest'
 
 /**
  * Extra options merged into the internal `useQuery` call that fetches the
@@ -58,6 +59,24 @@ export interface PieRootProps {
     config: PieConfig
     /** Optional react-query overrides; see {@link PieQueryOptions}. */
     queryOptions?: PieQueryOptions
+    /**
+     * Config request the host already started before the bundle finished
+     * loading. When its `url` matches the one this root would request, the
+     * root awaits that promise instead of issuing a second request.
+     *
+     * Without it the config request is serialized behind the whole client
+     * bundle: the root only asks for it from a hook, i.e. after hydration.
+     * A host can fire the same request from an inline `<head>` script — build
+     * the URL with `buildContentUrl` so both sides agree byte for byte — and
+     * hand the promise over here.
+     *
+     * Single use: a failed or already-consumed prefetch simply falls through
+     * to a normal request, so refetches never get a stale answer.
+     *
+     * @see {@link PieConfigPrefetch}
+     * @see buildContentUrl
+     */
+    configPrefetch?: PieConfigPrefetch
     /**
      * Optional host-supplied react-query `QueryClient`. Pass a stable
      * (module-singleton) client so the fetched UI-config cache survives a

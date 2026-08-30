@@ -324,10 +324,13 @@ describe('readAjaxKeyAsync() — Telegram storage', () => {
 
 describe('getAjaxSubmit() — field names sent to the backend', () => {
     const w = globalThis as any
+    // Bun runs every test file in one process, so the real fetch has to be put
+    // back — deleting it would break unrelated files that run afterwards.
+    const realFetch = w.fetch
 
     afterEach(() => {
         delete w.localStorage
-        delete w.fetch
+        w.fetch = realFetch
     })
 
     test('submits a prefixed dep under its bare key', async () => {
@@ -389,6 +392,7 @@ describe('getAjaxSubmit() — RetryPolicy shape', () => {
 
 describe('getAjaxSubmit() — fetchOptions passthrough', () => {
     const w = globalThis as any
+    const realFetch = w.fetch
 
     // Captures the RequestInit the submit function hands to fetch.
     const captureInit = () => {
@@ -405,7 +409,7 @@ describe('getAjaxSubmit() — fetchOptions passthrough', () => {
     }
 
     afterEach(() => {
-        delete w.fetch
+        w.fetch = realFetch
     })
 
     // Without any fetchOptions the request keeps the defaults every ajax
