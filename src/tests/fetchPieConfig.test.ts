@@ -96,4 +96,16 @@ describe('fetchPieConfig', () => {
         expect(calls[0].url).toContain('__pieroot=telegram')
         expect(calls[0].url).toContain('initData=q%3D1')
     })
+    test('accepts a native platform id as the root kind', async () => {
+        const { instance, calls } = stubAxios({ card: 'FromNetwork' })
+        await fetchPieConfig({
+            ...base,
+            root: 'ios',
+            axiosInstance: instance,
+            logPrefix: '[PieNativeRoot]',
+        })
+        expect(calls[0].url).toBe(
+            'https://api.example.com/api/content/chat?__pieroot=ios'
+        )
+    })
 })
