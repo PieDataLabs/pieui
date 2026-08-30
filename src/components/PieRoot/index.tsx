@@ -29,10 +29,8 @@ import {
 } from '../../util/pieConfig'
 import NavigateContext from '../../util/navigate.ts'
 import { resolvePieCacheFallback } from '../../util/piecache'
-import {
-    buildContentUrl,
-    consumeConfigPrefetch,
-} from '../../util/contentRequest'
+import { fetchPieConfig } from '../../util/fetchPieConfig'
+import { joinApiPath } from '../../util/apiPath'
 
 const PieRootContent = ({
     location,
@@ -73,44 +71,17 @@ const PieRootContent = ({
     } = useQuery<UIConfigType, AxiosError>({
         queryKey: ['uiConfig', location.pathname + location.search, apiServer],
         enabled: !!apiServer,
-        queryFn: async () => {
-            const url = buildContentUrl({
+        queryFn: () =>
+            fetchPieConfig({
+                axiosInstance,
                 apiServer,
                 pathname: location.pathname,
                 search: location.search,
                 root: 'web',
-            })
-
-            // Хост мог выстрелить этим же запросом до загрузки бандла —
-            // тогда забираем готовый ответ вместо второго похода в сеть.
-            const prefetched = await consumeConfigPrefetch(configPrefetch, url)
-            if (prefetched) {
-                if (renderingLogEnabled) {
-                    console.log('[PieRoot] Using prefetched UI configuration')
-                }
-                return prefetched
-            }
-
-            if (renderingLogEnabled) {
-                console.log('[PieRoot] Fetching UI configuration from:', url)
-            }
-            // Никаких `Access-Control-Allow-*` и `Content-type` здесь больше
-            // нет. Первые два — заголовки ОТВЕТА, в запросе они бессмысленны;
-            // `Content-type` на GET без тела тоже. При этом ни один из трёх не
-            // входит в CORS-safelist, поэтому браузер был обязан перед каждым
-            // запросом сходить preflight'ом OPTIONS — лишний round-trip на
-            // холодном открытии ради заголовков, которые ни на что не влияли.
-            const response = await axiosInstance.get(url, {
-                withCredentials: true,
-            })
-            if (renderingLogEnabled) {
-                console.log(
-                    '[PieRoot] Received UI configuration:',
-                    response.data
-                )
-            }
-            return response.data
-        },
+                configPrefetch,
+                logPrefix: '[PieRoot]',
+                renderingLogEnabled,
+            }),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,
@@ -183,9 +154,10 @@ const PieRootContent = ({
                                     <form
                                         id="piedata_global_form"
                                         action={
-                                            apiServer +
-                                            'api/process' +
-                                            location.pathname
+                                            joinApiPath(
+                                                apiServer,
+                                                'api/process'
+                                            ) + location.pathname
                                         }
                                         method="post"
                                         encType="multipart/form-data"

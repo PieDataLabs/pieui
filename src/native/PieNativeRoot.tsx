@@ -29,6 +29,7 @@ import {
     useIsRenderingLogEnabled,
 } from '../util/pieConfig'
 import { resolvePieCacheFallback } from '../util/piecache'
+import { fetchPieConfig } from '../util/fetchPieConfig'
 
 const PieNativeRootContent = ({
     location,
@@ -36,6 +37,7 @@ const PieNativeRootContent = ({
     piecache,
     onError,
     queryOptions,
+    configPrefetch,
 }: PieRootProps) => {
     const apiServer = useApiServer()
     const centrifugeServer = useCentrifugeServer()
@@ -63,31 +65,18 @@ const PieNativeRootContent = ({
     } = useQuery<UIConfigType, AxiosError>({
         queryKey: ['uiConfig', location.pathname + location.search, apiServer],
         enabled: !!apiServer,
-        queryFn: async () => {
-            const params = new URLSearchParams(location.search)
-            // Native counterpart of PieTelegramRoot's `telegram` / PieMaxRoot's
-            // `max`: identify the running mobile OS to the server.
-            params.set('__pieroot', Platform.OS)
-            const apiEndpoint =
-                '/api/content' + location.pathname + '?' + params.toString()
-            if (renderingLogEnabled) {
-                console.log(
-                    '[PieNativeRoot] Fetching UI configuration from:',
-                    apiEndpoint
-                )
-            }
-            const response = await axiosInstance.get(apiEndpoint, {
-                headers: { 'Content-type': 'application/json' },
-                withCredentials: true,
-            })
-            if (renderingLogEnabled) {
-                console.log(
-                    '[PieNativeRoot] Received UI configuration:',
-                    response.data
-                )
-            }
-            return response.data
-        },
+        queryFn: () =>
+            fetchPieConfig({
+                axiosInstance,
+                apiServer,
+                pathname: location.pathname,
+                search: location.search,
+                // Нативный аналог `telegram` / `max`: сообщаем серверу ОС.
+                root: Platform.OS,
+                configPrefetch,
+                logPrefix: '[PieNativeRoot]',
+                renderingLogEnabled,
+            }),
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

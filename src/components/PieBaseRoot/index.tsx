@@ -19,6 +19,7 @@ import {
 } from '../../util/pieConfig'
 import NavigateContext from '../../util/navigate.ts'
 import { PieBaseRootProps } from './types'
+import { joinApiPath } from '../../util/apiPath'
 
 const PieBaseRootContent = ({
     location,
@@ -60,9 +61,10 @@ const PieBaseRootContent = ({
                                     <form
                                         id="piedata_global_form"
                                         action={
-                                            apiServer +
-                                            'api/process' +
-                                            location.pathname
+                                            joinApiPath(
+                                                apiServer,
+                                                'api/process'
+                                            ) + location.pathname
                                         }
                                         method="post"
                                         encType="multipart/form-data"

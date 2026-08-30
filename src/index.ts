@@ -52,15 +52,26 @@ export type {
 
 export type { PieQueryOptions } from './components/PieRoot/types'
 
-// Ранний запрос конфига страницы. `buildContentUrl` — единственное правило
-// сборки URL: хост собирает им же тот URL, который прогревает, иначе рут не
-// узнает прогрев и сходит в сеть второй раз. См. util/contentRequest.
-export { buildContentUrl, consumeConfigPrefetch } from './util/contentRequest'
+// Ранний запрос конфига страницы. `buildConfigPrefetchScript` отдаёт готовый
+// инлайновый скрипт для `<head>`: он собирает URL тем же `buildContentUrl`,
+// что и рут, шлёт куки и не реджектится. См. util/contentRequest.
+export {
+    buildContentUrl,
+    consumeConfigPrefetch,
+    PIE_PREFETCH_TIMEOUT_MS,
+} from './util/contentRequest'
 export type {
     PieConfigPrefetch,
     PieRootKind,
     ContentUrlParams,
+    ConsumeConfigPrefetchOptions,
 } from './util/contentRequest'
+export {
+    buildConfigPrefetchScript,
+    readConfigPrefetch,
+    PIE_CONFIG_PREFETCH_GLOBAL,
+} from './util/configPrefetchScript'
+export type { ConfigPrefetchScriptParams } from './util/configPrefetchScript'
 
 export {
     useAjaxSubmit,
