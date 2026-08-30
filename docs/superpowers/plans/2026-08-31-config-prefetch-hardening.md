@@ -23,18 +23,18 @@
 
 ## Спецификация: что чиним
 
-| # | Проблема | Где | Задача |
-| - | -------- | --- | ------ |
-| 1 | `await prefetch.promise` без таймаута: зависший хостовый `fetch` навсегда вешает `queryFn`, ретраи react-query не срабатывают | `src/util/contentRequest.ts:89` | 2 |
-| 2 | Прогретое тело не проходит ревайв дат, который axios-инстанс рута делает через `createAxiosDateTransformer` | `src/components/PieRoot/index.tsx:52` vs `contentRequest.ts:89` | 1, 2 |
-| 3 | Статус ответа не проверяется: тело ошибки 500 будет принято как `UIConfigType` | контракт с хостом | 3 |
-| 4 | `withCredentials: true` у рута против дефолтного `same-origin` у `fetch`: прогрев может подменить авторизованный конфиг анонимным | контракт с хостом | 3 |
-| 5 | Промах прогрева абсолютно молчалив — логируется только попадание | `contentRequest.ts:85`, роуты | 2, 4 |
-| 6 | Реджект прогрева, который рут не забрал, остаётся необработанным (`Unhandled promise rejection`) | `contentRequest.ts:85` | 2, 3 |
-| 7 | `prefetch.used = true` мутирует объект, пришедший React-пропом | `contentRequest.ts:88` | 2 |
-| 8 | `PieNativeRoot` собирает URL мимо `buildContentUrl` и не знает про прогрев; `PieRootKind` не покрывает `Platform.OS` | `src/native/PieNativeRoot.tsx:67` | 5 |
-| 9 | `apiServer` трактуется двумя способами: `buildContentUrl` срезает хвостовой слэш, `action` формы и ajax-эндпоинт его требуют | `PieRoot/index.tsx:187`, `ajaxCommonUtils.ts:617` | 6 |
-| 10 | Для Telegram/MAX прогрев требует готовый `initData` в `<head>` — ограничение нигде не описано | `PieTelegramRoot/index.tsx:83` | 3, 7 |
+| #   | Проблема                                                                                                                          | Где                                                             | Задача |
+| --- | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- | ------ |
+| 1   | `await prefetch.promise` без таймаута: зависший хостовый `fetch` навсегда вешает `queryFn`, ретраи react-query не срабатывают     | `src/util/contentRequest.ts:89`                                 | 2      |
+| 2   | Прогретое тело не проходит ревайв дат, который axios-инстанс рута делает через `createAxiosDateTransformer`                       | `src/components/PieRoot/index.tsx:52` vs `contentRequest.ts:89` | 1, 2   |
+| 3   | Статус ответа не проверяется: тело ошибки 500 будет принято как `UIConfigType`                                                    | контракт с хостом                                               | 3      |
+| 4   | `withCredentials: true` у рута против дефолтного `same-origin` у `fetch`: прогрев может подменить авторизованный конфиг анонимным | контракт с хостом                                               | 3      |
+| 5   | Промах прогрева абсолютно молчалив — логируется только попадание                                                                  | `contentRequest.ts:85`, роуты                                   | 2, 4   |
+| 6   | Реджект прогрева, который рут не забрал, остаётся необработанным (`Unhandled promise rejection`)                                  | `contentRequest.ts:85`                                          | 2, 3   |
+| 7   | `prefetch.used = true` мутирует объект, пришедший React-пропом                                                                    | `contentRequest.ts:88`                                          | 2      |
+| 8   | `PieNativeRoot` собирает URL мимо `buildContentUrl` и не знает про прогрев; `PieRootKind` не покрывает `Platform.OS`              | `src/native/PieNativeRoot.tsx:67`                               | 5      |
+| 9   | `apiServer` трактуется двумя способами: `buildContentUrl` срезает хвостовой слэш, `action` формы и ajax-эндпоинт его требуют      | `PieRoot/index.tsx:187`, `ajaxCommonUtils.ts:617`               | 6      |
+| 10  | Для Telegram/MAX прогрев требует готовый `initData` в `<head>` — ограничение нигде не описано                                     | `PieTelegramRoot/index.tsx:83`                                  | 3, 7   |
 
 ---
 
@@ -43,7 +43,7 @@
 **Создаём:**
 
 - `src/util/reviveDates.ts` — рекурсивный ISO→`Date` по правилу `axios-date-transformer`. Одна ответственность, ноль зависимостей.
-- `src/util/configPrefetchScript.ts` — генератор инлайнового сниппета и чтение прогрева из `window`. Отделено от `contentRequest.ts`, потому что это код *для хоста*, а не для рута.
+- `src/util/configPrefetchScript.ts` — генератор инлайнового сниппета и чтение прогрева из `window`. Отделено от `contentRequest.ts`, потому что это код _для хоста_, а не для рута.
 - `src/util/fetchPieConfig.ts` — общий `queryFn` всех рутов (URL + прогрев + axios + логи).
 - `src/util/apiPath.ts` — `joinApiPath`, единая склейка `apiServer` с путём.
 - Тесты: `src/tests/reviveDates.test.ts`, `src/tests/configPrefetchScript.test.ts`, `src/tests/fetchPieConfig.test.ts`, `src/tests/apiPath.test.ts`.
@@ -64,10 +64,12 @@
 Прогретое тело приходит из хостового `fetch`, а не через axios-инстанс рута, поэтому ISO-строки в нём остаются строками. Нужен отдельный ревайвер по тому же правилу, иначе одна и та же страница отдаёт картам `Date` на холодном пути и `string` на прогретом.
 
 **Files:**
+
 - Create: `src/util/reviveDates.ts`
 - Test: `src/tests/reviveDates.test.ts`
 
 **Interfaces:**
+
 - Consumes: ничего.
 - Produces: `reviveDates<T>(data: T): T`, `isIsoDateString(value: unknown): value is string`, константа `ISO_DATE_RE: RegExp`.
 
@@ -202,17 +204,19 @@ git commit -m "feat(prefetch): add reviveDates for bodies that bypass axios"
 Гонка с таймаутом (проблема 1), нормализация и ревайв тела (2), диагностика промаха (5), одноразовость без мутации пропа (7), контракт «промис не реджектится» (6).
 
 **Files:**
+
 - Modify: `src/util/contentRequest.ts:45-96`
 - Test: `src/tests/contentRequest.test.ts` (дописать блоки)
 
 **Interfaces:**
+
 - Consumes: `reviveDates` из Task 1.
 - Produces:
-  - `type PieRootKind = 'telegram' | 'max' | 'web' | 'ios' | 'android' | (string & {})`
-  - `interface PieConfigPrefetch { url: string; promise: Promise<UIConfigType | string | null>; timeoutMs?: number; used?: boolean }`
-  - `const PIE_PREFETCH_TIMEOUT_MS = 10000`
-  - `interface ConsumeConfigPrefetchOptions { onDebug?: (message: string) => void }`
-  - `consumeConfigPrefetch(prefetch: PieConfigPrefetch | undefined, url: string, options?: ConsumeConfigPrefetchOptions): Promise<UIConfigType | null>`
+    - `type PieRootKind = 'telegram' | 'max' | 'web' | 'ios' | 'android' | (string & {})`
+    - `interface PieConfigPrefetch { url: string; promise: Promise<UIConfigType | string | null>; timeoutMs?: number; used?: boolean }`
+    - `const PIE_PREFETCH_TIMEOUT_MS = 10000`
+    - `interface ConsumeConfigPrefetchOptions { onDebug?: (message: string) => void }`
+    - `consumeConfigPrefetch(prefetch: PieConfigPrefetch | undefined, url: string, options?: ConsumeConfigPrefetchOptions): Promise<UIConfigType | null>`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -307,13 +311,13 @@ const prefetch = (url: string, body: UIConfigType | string | null) =>
 Существующие тесты передавали `Promise.resolve(CONFIG)` / `Promise.reject(...)` — переписать их на новый хелпер, а кейс с реджектом оставить с явным объектом:
 
 ```ts
-    test('a rejected prefetch yields null instead of throwing', async () => {
-        const p: PieConfigPrefetch = {
-            url,
-            promise: Promise.reject(new Error('offline')),
-        }
-        expect(await consumeConfigPrefetch(p, url)).toBeNull()
-    })
+test('a rejected prefetch yields null instead of throwing', async () => {
+    const p: PieConfigPrefetch = {
+        url,
+        promise: Promise.reject(new Error('offline')),
+    }
+    expect(await consumeConfigPrefetch(p, url)).toBeNull()
+})
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -463,17 +467,19 @@ git commit -m "fix(prefetch): add deadline, body parsing and miss diagnostics"
 Убирает словесный контракт с хостом: `credentials`, проверка статуса и «промис не реджектится» перестают быть тем, что хост должен помнить (проблемы 3, 4, 6). Заодно гарантирует побайтовое совпадение URL, потому что обе стороны зовут `buildContentUrl`.
 
 **Files:**
+
 - Create: `src/util/configPrefetchScript.ts`
 - Test: `src/tests/configPrefetchScript.test.ts`
 - Modify: `src/index.ts:55-63`
 
 **Interfaces:**
+
 - Consumes: `buildContentUrl`, `ContentUrlParams`, `PieConfigPrefetch` (Task 2).
 - Produces:
-  - `const PIE_CONFIG_PREFETCH_GLOBAL = '__pieConfigPrefetch'`
-  - `interface ConfigPrefetchScriptParams extends ContentUrlParams { globalName?: string }`
-  - `buildConfigPrefetchScript(params: ConfigPrefetchScriptParams): string`
-  - `readConfigPrefetch(globalName?: string): PieConfigPrefetch | undefined`
+    - `const PIE_CONFIG_PREFETCH_GLOBAL = '__pieConfigPrefetch'`
+    - `interface ConfigPrefetchScriptParams extends ContentUrlParams { globalName?: string }`
+    - `buildConfigPrefetchScript(params: ConfigPrefetchScriptParams): string`
+    - `readConfigPrefetch(globalName?: string): PieConfigPrefetch | undefined`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -616,7 +622,7 @@ Expected: FAIL — `Cannot find module '../util/configPrefetchScript'`.
 
 Создать `src/util/configPrefetchScript.ts`:
 
-```ts
+````ts
 import {
     buildContentUrl,
     ContentUrlParams,
@@ -698,7 +704,7 @@ export function readConfigPrefetch(
     }
     return candidate as PieConfigPrefetch
 }
-```
+````
 
 - [ ] **Step 4: Run test to verify it passes**
 
@@ -749,15 +755,17 @@ git commit -m "feat(prefetch): ship the inline warm-up snippet from the library"
 Одинаковый `queryFn` живёт в трёх файлах, и правки прогрева пришлось бы вносить трижды. Заодно подключается чтение прогрева из `window` и логи промаха (проблема 5).
 
 **Files:**
+
 - Create: `src/util/fetchPieConfig.ts`
 - Test: `src/tests/fetchPieConfig.test.ts`
 - Modify: `src/components/PieRoot/index.tsx:69-112`, `src/components/PieTelegramRoot/index.tsx:73-120`, `src/components/PieMaxRoot/index.tsx:70-118`
 
 **Interfaces:**
+
 - Consumes: `buildContentUrl`, `consumeConfigPrefetch` (Task 2), `readConfigPrefetch` (Task 3).
 - Produces:
-  - `interface FetchPieConfigParams { axiosInstance: AxiosInstance; apiServer: string; pathname: string; search: string; root: PieRootKind; initData?: string | null; configPrefetch?: PieConfigPrefetch; logPrefix: string; renderingLogEnabled?: boolean }`
-  - `fetchPieConfig(params: FetchPieConfigParams): Promise<UIConfigType>`
+    - `interface FetchPieConfigParams { axiosInstance: AxiosInstance; apiServer: string; pathname: string; search: string; root: PieRootKind; initData?: string | null; configPrefetch?: PieConfigPrefetch; logPrefix: string; renderingLogEnabled?: boolean }`
+    - `fetchPieConfig(params: FetchPieConfigParams): Promise<UIConfigType>`
 
 - [ ] **Step 1: Write the failing test**
 
@@ -959,13 +967,16 @@ Expected: PASS.
 В каждом из `src/components/{PieRoot,PieTelegramRoot,PieMaxRoot}/index.tsx`:
 
 1. Заменить импорт
-   ```ts
-   import { buildContentUrl, consumeConfigPrefetch } from '../../util/contentRequest'
-   ```
-   на
-   ```ts
-   import { fetchPieConfig } from '../../util/fetchPieConfig'
-   ```
+    ```ts
+    import {
+        buildContentUrl,
+        consumeConfigPrefetch,
+    } from '../../util/contentRequest'
+    ```
+    на
+    ```ts
+    import { fetchPieConfig } from '../../util/fetchPieConfig'
+    ```
 2. Заменить всё тело `queryFn` (от `queryFn: async () => {` до закрывающей `},` перед `staleTime`) на вызов хелпера. Для `PieRoot`:
 
 ```ts
@@ -1006,10 +1017,12 @@ git commit -m "refactor(roots): route every config request through fetchPieConfi
 Нативный рут собирает URL руками (`src/native/PieNativeRoot.tsx:67`) — ровно та копипаста, ради устранения которой заводился `buildContentUrl`.
 
 **Files:**
+
 - Modify: `src/native/PieNativeRoot.tsx:59-89`
 - Test: `src/tests/fetchPieConfig.test.ts` (дописать кейс)
 
 **Interfaces:**
+
 - Consumes: `fetchPieConfig` (Task 4), расширенный `PieRootKind` (Task 2).
 - Produces: ничего нового.
 
@@ -1018,18 +1031,18 @@ git commit -m "refactor(roots): route every config request through fetchPieConfi
 Дописать в `src/tests/fetchPieConfig.test.ts`:
 
 ```ts
-    test('accepts a native platform id as the root kind', async () => {
-        const { instance, calls } = stubAxios({ card: 'FromNetwork' })
-        await fetchPieConfig({
-            ...base,
-            root: 'ios',
-            axiosInstance: instance,
-            logPrefix: '[PieNativeRoot]',
-        })
-        expect(calls[0].url).toBe(
-            'https://api.example.com/api/content/chat?__pieroot=ios'
-        )
+test('accepts a native platform id as the root kind', async () => {
+    const { instance, calls } = stubAxios({ card: 'FromNetwork' })
+    await fetchPieConfig({
+        ...base,
+        root: 'ios',
+        axiosInstance: instance,
+        logPrefix: '[PieNativeRoot]',
     })
+    expect(calls[0].url).toBe(
+        'https://api.example.com/api/content/chat?__pieroot=ios'
+    )
+})
 ```
 
 - [ ] **Step 2: Run test to verify it fails**
@@ -1042,9 +1055,9 @@ Expected: PASS по значению, но `bun run typecheck` до Task 2 па�
 В `src/native/PieNativeRoot.tsx`:
 
 1. Добавить импорт:
-   ```ts
-   import { fetchPieConfig } from '../util/fetchPieConfig'
-   ```
+    ```ts
+    import { fetchPieConfig } from '../util/fetchPieConfig'
+    ```
 2. Заменить тело `queryFn` (строки ~65–89) на:
 
 ```ts
@@ -1085,11 +1098,13 @@ git commit -m "fix(native): build the config url through buildContentUrl"
 `buildContentUrl` срезает хвостовой слэш, а `action` глобальной формы и ajax-эндпоинт его требуют (`apiServer + 'api/process'`). Формат `apiServer` из-за этого неоднозначен — а от него зависит побайтовое совпадение прогретого URL.
 
 **Files:**
+
 - Create: `src/util/apiPath.ts`
 - Test: `src/tests/apiPath.test.ts`
 - Modify: `src/util/contentRequest.ts` (внутри `buildContentUrl`), `src/util/ajaxCommonUtils.ts:617`, `src/components/PieRoot/index.tsx:185-189`, `src/components/PieTelegramRoot/index.tsx:184-188`, `src/components/PieMaxRoot/index.tsx:182-186`, `src/components/PieBaseRoot/index.tsx:62-66`
 
 **Interfaces:**
+
 - Consumes: ничего.
 - Produces: `joinApiPath(apiServer: string, path: string): string`
 
@@ -1159,23 +1174,23 @@ Expected: PASS.
 - [ ] **Step 5: Use it everywhere**
 
 1. `src/util/contentRequest.ts` — в `buildContentUrl` заменить
-   ```ts
-   const base = apiServer.replace(/\/$/, '')
-   return `${base}/api/content${pathname}?${params.toString()}`
-   ```
-   на
-   ```ts
-   return `${joinApiPath(apiServer, 'api/content')}${pathname}?${params.toString()}`
-   ```
-   плюс импорт `import { joinApiPath } from './apiPath'`.
+    ```ts
+    const base = apiServer.replace(/\/$/, '')
+    return `${base}/api/content${pathname}?${params.toString()}`
+    ```
+    на
+    ```ts
+    return `${joinApiPath(apiServer, 'api/content')}${pathname}?${params.toString()}`
+    ```
+    плюс импорт `import { joinApiPath } from './apiPath'`.
 2. `src/util/ajaxCommonUtils.ts:617` —
-   ```ts
-   const apiEndpoint = joinApiPath(apiServer, 'api/ajax_content') + pathname
-   ```
+    ```ts
+    const apiEndpoint = joinApiPath(apiServer, 'api/ajax_content') + pathname
+    ```
 3. В четырёх рутах `action={apiServer + 'api/process' + location.pathname}` →
-   ```tsx
-   action={joinApiPath(apiServer, 'api/process') + location.pathname}
-   ```
+    ```tsx
+    action={joinApiPath(apiServer, 'api/process') + location.pathname}
+    ```
 
 - [ ] **Step 6: Run the whole suite**
 
@@ -1196,10 +1211,12 @@ git commit -m "refactor: join apiServer with api paths through one helper"
 Механизм, который либо экономит секунды, либо не делает ничего, обязан быть описан с рабочим примером и честным списком ограничений (проблема 10).
 
 **Files:**
+
 - Modify: `src/components/PieRoot/types/index.ts:63-79`
 - Modify: `README.md` (новый раздел после `## Root components`, строка ~176; плюс строка в `### Runtime exports`, ~668)
 
 **Interfaces:**
+
 - Consumes: всё из задач 2–5.
 - Produces: ничего исполняемого.
 
@@ -1208,30 +1225,30 @@ git commit -m "refactor: join apiServer with api paths through one helper"
 В `src/components/PieRoot/types/index.ts` заменить JSDoc над `configPrefetch` на:
 
 ```ts
-    /**
-     * Config request the host already started before the bundle finished
-     * loading, so the request overlaps bundle download instead of queueing
-     * behind it. Build it with `buildConfigPrefetchScript` and inline the
-     * result in `<head>`; the root then picks the prefetch up from `window`
-     * on its own, and this prop is only needed for a custom `globalName` or
-     * a hand-rolled prefetch.
-     *
-     * A hand-rolled prefetch must match `buildContentUrl` byte for byte, send
-     * `credentials: 'include'`, resolve to `null` on a non-2xx response, and
-     * never reject. Any mismatch is a silent no-op — enable
-     * `enableRenderingLog` to see the reason.
-     *
-     * Single use, and never load-bearing: a stale, failed, slow (see
-     * `PIE_PREFETCH_TIMEOUT_MS`) or malformed prefetch falls through to a
-     * normal request.
-     *
-     * Telegram and MAX roots include `initData` in the URL and only fire once
-     * the mini-app SDK has produced it, so a `<head>` prefetch there requires
-     * the SDK to be loaded first and the exact same `initData` string.
-     *
-     * @see {@link PieConfigPrefetch}
-     * @see buildConfigPrefetchScript
-     */
+/**
+ * Config request the host already started before the bundle finished
+ * loading, so the request overlaps bundle download instead of queueing
+ * behind it. Build it with `buildConfigPrefetchScript` and inline the
+ * result in `<head>`; the root then picks the prefetch up from `window`
+ * on its own, and this prop is only needed for a custom `globalName` or
+ * a hand-rolled prefetch.
+ *
+ * A hand-rolled prefetch must match `buildContentUrl` byte for byte, send
+ * `credentials: 'include'`, resolve to `null` on a non-2xx response, and
+ * never reject. Any mismatch is a silent no-op — enable
+ * `enableRenderingLog` to see the reason.
+ *
+ * Single use, and never load-bearing: a stale, failed, slow (see
+ * `PIE_PREFETCH_TIMEOUT_MS`) or malformed prefetch falls through to a
+ * normal request.
+ *
+ * Telegram and MAX roots include `initData` in the URL and only fire once
+ * the mini-app SDK has produced it, so a `<head>` prefetch there requires
+ * the SDK to be loaded first and the exact same `initData` string.
+ *
+ * @see {@link PieConfigPrefetch}
+ * @see buildConfigPrefetchScript
+ */
 ```
 
 - [ ] **Step 2: Add the README section**
@@ -1248,7 +1265,7 @@ Inline the warm-up snippet in `<head>` and the two overlap:
 ```tsx
 import { buildConfigPrefetchScript } from '@swarm.ing/pieui'
 
-<script
+;<script
     dangerouslySetInnerHTML={{
         __html: buildConfigPrefetchScript({
             apiServer: process.env.NEXT_PUBLIC_PIE_API_SERVER!,
@@ -1264,21 +1281,21 @@ The snippet stores `{ url, promise }` on `window.__pieConfigPrefetch`; the root
 picks it up automatically. It sends cookies, treats a non-2xx as a miss and
 never rejects, so a failed warm-up can only cost you a normal request.
 
-| Behaviour | Detail |
-| --------- | ------ |
-| Matching | Exact URL string, built by `buildContentUrl` on both sides. A mismatch is a silent no-op — turn on `enableRenderingLog` to see it. |
-| Single use | Refetches (route change, `refetchOnMount`, retries) always go to the network. |
-| Deadline | `PIE_PREFETCH_TIMEOUT_MS` (10 s), overridable per prefetch via `timeoutMs`. |
-| Scope | One URL, one page load. Use a module-singleton `queryClient` to keep configs across remounts. |
-| Telegram / MAX | The URL carries `initData`, so the snippet only works once the mini-app SDK has produced the same string. |
+| Behaviour      | Detail                                                                                                                             |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Matching       | Exact URL string, built by `buildContentUrl` on both sides. A mismatch is a silent no-op — turn on `enableRenderingLog` to see it. |
+| Single use     | Refetches (route change, `refetchOnMount`, retries) always go to the network.                                                      |
+| Deadline       | `PIE_PREFETCH_TIMEOUT_MS` (10 s), overridable per prefetch via `timeoutMs`.                                                        |
+| Scope          | One URL, one page load. Use a module-singleton `queryClient` to keep configs across remounts.                                      |
+| Telegram / MAX | The URL carries `initData`, so the snippet only works once the mini-app SDK has produced the same string.                          |
 ````
 
 В `### Runtime exports` добавить строки таблицы:
 
 ```markdown
-| `buildConfigPrefetchScript()`    | Inline `<head>` snippet that warms the page-config request.                     |
-| `buildContentUrl()`              | The single rule for assembling the page-config URL.                             |
-| `readConfigPrefetch()`           | Reads a warmed prefetch off `window`.                                           |
+| `buildConfigPrefetchScript()` | Inline `<head>` snippet that warms the page-config request. |
+| `buildContentUrl()` | The single rule for assembling the page-config URL. |
+| `readConfigPrefetch()` | Reads a warmed prefetch off `window`. |
 ```
 
 - [ ] **Step 3: Verify**

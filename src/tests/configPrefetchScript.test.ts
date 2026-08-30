@@ -47,7 +47,9 @@ describe('buildConfigPrefetchScript', () => {
         const { win } = runSnippet(script, () =>
             Promise.resolve(response(true, '{}'))
         )
-        expect(win[PIE_CONFIG_PREFETCH_GLOBAL].url).toBe(buildContentUrl(params))
+        expect(win[PIE_CONFIG_PREFETCH_GLOBAL].url).toBe(
+            buildContentUrl(params)
+        )
     })
 
     test('sends cookies, or the warmed config is an anonymous one', () => {
