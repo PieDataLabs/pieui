@@ -6,6 +6,7 @@ import waitForSidAvailable from './waitForSidAvailable'
 import { usePieConfig } from './pieConfig.ts'
 import { useMemo } from 'react'
 import clientSources from '../platform/clientSources'
+import { joinApiPath } from './apiPath'
 
 /**
  * Retry policy configuration for AJAX requests.
@@ -80,7 +81,10 @@ const DEP_SOURCE_PREFIXES: Array<Exclude<DepSource, 'dom' | 'sid'>> = [
  * {@link readAjaxKeyAsync}; the synchronous {@link readAjaxKey} cannot serve
  * them and returns `[]`.
  */
-const ASYNC_DEP_SOURCES = new Set<DepSource>(['telegram:cloud', 'telegram:secure'])
+const ASYNC_DEP_SOURCES = new Set<DepSource>([
+    'telegram:cloud',
+    'telegram:secure',
+])
 
 /**
  * A `stored` resolver produces the current submit value(s) for a card, keyed by
@@ -337,7 +341,10 @@ const readTelegramStorage = (
             store.getItem(key, (error, value) => {
                 if (error) {
                     if (renderingLogEnabled) {
-                        console.warn(`Failed to read ${label} key ${key}:`, error)
+                        console.warn(
+                            `Failed to read ${label} key ${key}:`,
+                            error
+                        )
                     }
                     resolve([])
                     return
@@ -614,7 +621,8 @@ export const getAjaxSubmit = (
             }
         }
 
-        const apiEndpoint = apiServer + 'api/ajax_content' + pathname
+        const apiEndpoint =
+            joinApiPath(apiServer, 'api/ajax_content') + pathname
 
         setUiAjaxConfiguration(null)
 
@@ -877,6 +885,12 @@ export const useAjaxSubmits = (
             return submits
         },
         // eslint-disable-next-line react-hooks/exhaustive-deps
-        [dataKey, setUiAjaxConfiguration, apiServer, enableRenderingLog, optionsKey]
+        [
+            dataKey,
+            setUiAjaxConfiguration,
+            apiServer,
+            enableRenderingLog,
+            optionsKey,
+        ]
     )
 }

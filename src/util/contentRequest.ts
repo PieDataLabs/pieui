@@ -1,5 +1,6 @@
 import { UIConfigType } from '../types'
 import { reviveDates } from './reviveDates'
+import { joinApiPath } from './apiPath'
 
 /**
  * Единый источник правды для запроса конфига страницы (`/api/content`).
@@ -51,8 +52,8 @@ export function buildContentUrl({
     if (initData) {
         params.set('initData', initData)
     }
-    const base = apiServer.replace(/\/$/, '')
-    return `${base}/api/content${pathname}?${params.toString()}`
+    const base = joinApiPath(apiServer, 'api/content')
+    return `${base}${pathname}?${params.toString()}`
 }
 
 /**

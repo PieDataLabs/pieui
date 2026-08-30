@@ -31,6 +31,7 @@ import { useMaxWebApp } from '../../util/useMaxWebApp.ts'
 import NavigateContext from '../../util/navigate.ts'
 import { resolvePieCacheFallback } from '../../util/piecache'
 import { fetchPieConfig } from '../../util/fetchPieConfig'
+import { joinApiPath } from '../../util/apiPath'
 
 const PieMaxRootContent: React.FC<PieRootProps> = ({
     location,
@@ -149,9 +150,10 @@ const PieMaxRootContent: React.FC<PieRootProps> = ({
                                     <form
                                         id="piedata_global_form"
                                         action={
-                                            apiServer +
-                                            'api/process' +
-                                            location.pathname
+                                            joinApiPath(
+                                                apiServer,
+                                                'api/process'
+                                            ) + location.pathname
                                         }
                                         method="post"
                                         encType="multipart/form-data"
