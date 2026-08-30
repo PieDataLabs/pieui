@@ -61,20 +61,27 @@ export interface PieRootProps {
     queryOptions?: PieQueryOptions
     /**
      * Config request the host already started before the bundle finished
-     * loading. When its `url` matches the one this root would request, the
-     * root awaits that promise instead of issuing a second request.
+     * loading, so the request overlaps bundle download instead of queueing
+     * behind it. Build it with `buildConfigPrefetchScript` and inline the
+     * result in `<head>`; the root then picks the prefetch up from `window`
+     * on its own, and this prop is only needed for a custom `globalName` or
+     * a hand-rolled prefetch.
      *
-     * Without it the config request is serialized behind the whole client
-     * bundle: the root only asks for it from a hook, i.e. after hydration.
-     * A host can fire the same request from an inline `<head>` script — build
-     * the URL with `buildContentUrl` so both sides agree byte for byte — and
-     * hand the promise over here.
+     * A hand-rolled prefetch must match `buildContentUrl` byte for byte, send
+     * `credentials: 'include'`, resolve to `null` on a non-2xx response, and
+     * never reject. Any mismatch is a silent no-op — enable
+     * `enableRenderingLog` to see the reason.
      *
-     * Single use: a failed or already-consumed prefetch simply falls through
-     * to a normal request, so refetches never get a stale answer.
+     * Single use, and never load-bearing: a stale, failed, slow (see
+     * `PIE_PREFETCH_TIMEOUT_MS`) or malformed prefetch falls through to a
+     * normal request.
+     *
+     * Telegram and MAX roots include `initData` in the URL and only fire once
+     * the mini-app SDK has produced it, so a `<head>` prefetch there requires
+     * the SDK to be loaded first and the exact same `initData` string.
      *
      * @see {@link PieConfigPrefetch}
-     * @see buildContentUrl
+     * @see buildConfigPrefetchScript
      */
     configPrefetch?: PieConfigPrefetch
     /**

@@ -19,6 +19,7 @@
 - [Quick start](#quick-start)
 - [Package entry points](#package-entry-points)
 - [Root components](#root-components)
+  - [Warming the config request](#warming-the-config-request)
 - [Registering components](#registering-components)
 - [Component prop shapes](#component-prop-shapes)
 - [Built-in cards](#built-in-cards)
@@ -172,6 +173,37 @@ A root tailored to the CLI preview harness (`pieui registry dev`/`build`) for pr
 - **`PieTelegramRoot`** (`/telegram`) — like `PieRoot`, but appends Telegram WebApp `initData` to the request query string via `useWebApp`. Throws if `apiServer` is missing.
 - **`PieMaxRoot`** (`/max`) — MAX (VK) equivalent.
 - **`PieNativeRoot`** (`/native`) — `PieBaseRoot` for React Native (no HTML form).
+
+### Warming the config request
+
+The root asks for its `UIConfig` from a hook — that is, after hydration — so on
+a slow connection the bundle download and the API round trip are serialised.
+Inline the warm-up snippet in `<head>` and the two overlap:
+
+```tsx
+import { buildConfigPrefetchScript } from '@swarm.ing/pieui'
+
+<script
+    dangerouslySetInnerHTML={{
+        __html: buildConfigPrefetchScript({
+            apiServer: process.env.NEXT_PUBLIC_PIE_API_SERVER!,
+            pathname,
+            search,
+            root: 'web',
+        }),
+    }}
+/>
+```
+
+The snippet stores `{ url, promise }` on `window.__pieConfigPrefetch`; the root picks it up automatically. It sends cookies, treats a non-2xx as a miss and never rejects, so a failed warm-up can only cost you a normal request.
+
+| Behaviour | Detail |
+| --- | --- |
+| Matching | Exact URL string, built by `buildContentUrl` on both sides. A mismatch is a silent no-op — turn on `enableRenderingLog` to see it. |
+| Single use | Refetches (route change, `refetchOnMount`, retries) always go to the network. |
+| Deadline | `PIE_PREFETCH_TIMEOUT_MS` (10 s), overridable per prefetch via `timeoutMs`. |
+| Scope | One URL, one page load. Use a module-singleton `queryClient` to keep configs across remounts. |
+| Telegram / MAX | The URL carries `initData`, so the snippet only works once the mini-app SDK has produced the same string. |
 
 ---
 
@@ -679,6 +711,8 @@ pieui registry build [--out <dir>]                     # static-export the harne
 | `useAjaxSubmit` / `readAjaxKey` / `readAjaxKeyAsync` / `parseDepName` | AJAX submit + dep-name resolution. |
 | `usePieEmit` / `getEmitter` / `MittContext` | Mitt event emission. |
 | `SocketIOContext` / `CentrifugeIOContext` / `FallbackContext` / `PieConfigContext` | PieUI contexts. |
+| `buildConfigPrefetchScript` / `readConfigPrefetch` | Inline `<head>` snippet that warms the page-config request, and its reader (see [Warming the config request](#warming-the-config-request)). |
+| `buildContentUrl` / `consumeConfigPrefetch` | The single rule for assembling the page-config URL, and the guarded prefetch hand-over. |
 | `cn` / `sx2radium` / `pieName` / `submitGlobalForm` / `PIEBREAK` | Utilities. |
 
 ### Type exports
