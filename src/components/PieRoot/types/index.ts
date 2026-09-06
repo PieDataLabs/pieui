@@ -57,6 +57,20 @@ export interface PieRootProps {
     onNavigate?: (url: string) => void
     /** Runtime configuration (API URLs, logging, page processor, …). */
     config: PieConfig
+    /**
+     * Config fetched on the server, so the first HTML already contains the
+     * page instead of a fallback.
+     *
+     * Pass the result of `loadPieConfig` from a server component. The root
+     * seeds react-query with it, renders the tree in the same pass and skips
+     * the client request entirely — which is what makes the page indexable:
+     * a crawler sees the markup, not an empty container.
+     *
+     * Only meaningful for pages that are the same for everyone. A mini-app
+     * screen depends on `initData`, which exists only inside the client, so
+     * there is nothing to render on the server.
+     */
+    initialConfig?: UIConfigType
     /** Optional react-query overrides; see {@link PieQueryOptions}. */
     queryOptions?: PieQueryOptions
     /**

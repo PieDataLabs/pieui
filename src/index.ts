@@ -33,6 +33,8 @@ export {
     prefetchLazyComponents,
 } from './util/registry'
 export { trackLazy } from './util/lazy'
+export { loadPieConfig } from './util/loadPieConfig'
+export type { LoadPieConfigParams } from './util/loadPieConfig'
 
 export type {
     PieComponentProps,

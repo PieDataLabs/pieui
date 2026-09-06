@@ -37,6 +37,7 @@ const PieRootContent = ({
     fallback,
     piecache,
     onError,
+    initialConfig,
     queryOptions,
     configPrefetch,
     disableGlobalForm,
@@ -82,6 +83,9 @@ const PieRootContent = ({
                 logPrefix: '[PieRoot]',
                 renderingLogEnabled,
             }),
+        // Конфиг с сервера: дерево рисуется в том же проходе, а клиентский
+        // запрос не нужен вовсе — HTML уже содержит страницу.
+        initialData: initialConfig,
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

@@ -38,6 +38,7 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
     fallback,
     piecache,
     onError,
+    initialConfig,
     queryOptions,
     configPrefetch,
     disableGlobalForm,
@@ -78,7 +79,9 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
             location.pathname + location.search,
             webApp?.initData,
         ],
-        enabled: !!webApp?.initData,
+        // С серверным конфигом ждать `initData` незачем: страница уже
+        // отрисована, и запрос от имени пользователя ей ничего не добавит.
+        enabled: !!webApp?.initData && !initialConfig,
         queryFn: () =>
             fetchPieConfig({
                 axiosInstance,
@@ -91,6 +94,9 @@ const PieTelegramRootContent: React.FC<PieRootProps> = ({
                 logPrefix: '[PieTelegramRoot]',
                 renderingLogEnabled,
             }),
+        // Конфиг с сервера: дерево рисуется в том же проходе, а клиентский
+        // запрос не нужен вовсе — HTML уже содержит страницу.
+        initialData: initialConfig,
         staleTime: Infinity,
         gcTime: Infinity,
         refetchOnWindowFocus: false,

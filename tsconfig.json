@@ -21,8 +21,13 @@
         "verbatimModuleSyntax": false,
         "outDir": "dist",
         "rootDir": "src",
+        // Самоимпорт по имени пакета — так `src/ssr` берёт клиентские руты,
+        // не втягивая их код в серверный вход (см. docs/ssr.md). Для TS путь
+        // указывает в исходники, для сборки импорт остаётся внешним.
         "paths": {
-            "@swarm.ing/pieui": ["./src/index.ts"]
+            "@swarm.ing/pieui": ["./src/index.ts"],
+            "@swarm.ing/pieui/telegram": ["./src/telegram/index.ts"],
+            "@swarm.ing/pieui/max": ["./src/max/index.ts"]
         },
 
         // Best practices
